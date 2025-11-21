@@ -1,223 +1,148 @@
 
 <template>
-  <div class="tiptap-editor">
-    <div class="menu-bar" v-if="editor">
-      <button
-        @click="editor.chain().focus().toggleBold().run()"
-        :class="{ 'is-active': editor.isActive('bold') }"
-        type="button"
-      >
-        Bold
-      </button>
-      <button
-        @click="editor.chain().focus().toggleItalic().run()"
-        :class="{ 'is-active': editor.isActive('italic') }"
-        type="button"
-      >
-        Italic
-      </button>
-      <button
-        @click="editor.chain().focus().toggleStrike().run()"
-        :class="{ 'is-active': editor.isActive('strike') }"
-        type="button"
-      >
-        Strike
-      </button>
-      <button
-        @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
-        :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
-        type="button"
-      >
-        H1
-      </button>
-      <button
-        @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
-        :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
-        type="button"
-      >
-        H2
-      </button>
-      <button
-        @click="editor.chain().focus().toggleBulletList().run()"
-        :class="{ 'is-active': editor.isActive('bulletList') }"
-        type="button"
-      >
-        Bullet List
-      </button>
-      <button
-        @click="editor.chain().focus().toggleOrderedList().run()"
-        :class="{ 'is-active': editor.isActive('orderedList') }"
-        type="button"
-      >
-        Ordered List
-      </button>
-      <button
-        @click="editor.chain().focus().toggleBlockquote().run()"
-        :class="{ 'is-active': editor.isActive('blockquote') }"
-        type="button"
-      >
-        Blockquote
-      </button>
-      <button
-        @click="editor.chain().focus().setHorizontalRule().run()"
-        type="button"
-      >
-        Horizontal Rule
-      </button>
-      <button
-        @click="editor.chain().focus().undo().run()"
-        :disabled="!editor.can().undo()"
-        type="button"
-      >
-        Undo
-      </button>
-      <button
-        @click="editor.chain().focus().redo().run()"
-        :disabled="!editor.can().redo()"
-        type="button"
-      >
-        Redo
-      </button>
-    </div>
-    <editor-content :editor="editor" class="editor-content" />
+  <div class="tiptap-editor" v-if="editor">
+    <EditorMenuBar :editor="editor" />
+    <EditorContent :editor="editor" class="editor-content" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { onBeforeUnmount } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import { onMounted, onBeforeUnmount } from 'vue'
+import Link from '@tiptap/extension-link'
+import Image from '@tiptap/extension-image'
+import TextAlign from '@tiptap/extension-text-align'
+import Subscript from '@tiptap/extension-subscript'
+import Superscript from '@tiptap/extension-superscript'
+import Highlight from '@tiptap/extension-highlight'
+import EditorMenuBar from './EditorMenuBar.vue'
 
 const editor = useEditor({
-  content: '<h1>Добро пожаловать в Tiptap редактор!</h1><p>Это <strong>мощный</strong> и <em>гибкий</em> редактор для Vue 3.</p><p>Попробуйте использовать кнопки выше для форматирования текста или просто начните печатать!</p>',
-  extensions: [StarterKit],
+  extensions: [
+    StarterKit,
+    Link.configure({
+      openOnClick: false,
+      HTMLAttributes: {
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      },
+    }),
+    Image.configure({
+      inline: true,
+    }),
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+      alignments: ['left', 'center', 'right', 'justify'],
+    }),
+    Subscript,
+    Superscript,
+    Highlight.configure({
+      multicolor: false,
+    }),
+  ],
+  content: `
+    <h1>Добро пожаловать в TipTap редактор!</h1>
+  `,
   editorProps: {
     attributes: {
       class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
     },
   },
-  onUpdate: ({ editor }) => {
-    // Отправляем JSON контент в родительское окно при каждом изменении
-    const html = editor.getHTML();
 
-    window.parent.postMessage({
-      type: 'tiptap-content-change',
-      content: html
-    }, '*')
-  },
-})
-
-// Обработчик сообщений от родительского окна
-const handleParentMessage = (event: MessageEvent) => {
-  if (!editor.value) return
-
-  // Устанавливаем контент из родительского окна
-  if (event.data.type === 'set-tiptap-content') {
-    editor.value.commands.setContent(event.data.content)
-  }
-}
-
-onMounted(() => {
-  // Добавляем слушатель сообщений от родительского окна
-  window.addEventListener('message', handleParentMessage)
-
-  // Отправляем сообщение о готовности редактора
-  window.parent.postMessage({
-    type: 'tiptap-ready'
-  }, '*')
 })
 
 onBeforeUnmount(() => {
-  // Удаляем слушатель при размонтировании компонента
-  window.removeEventListener('message', handleParentMessage)
+  editor.value?.destroy()
+})
+
+const getHTML = () => {
+  return editor.value?.getHTML()
+}
+
+defineExpose({
+  getHTML,
+  editor
 })
 </script>
 
 <style scoped>
 .tiptap-editor {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  background: white;
   overflow: hidden;
-  background: white;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-}
-
-.menu-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 12px;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.menu-bar button {
-  padding: 6px 12px;
-  background: white;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: #334155;
-  transition: all 0.2s;
-}
-
-.menu-bar button:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
-}
-
-.menu-bar button.is-active {
-  background: #3b82f6;
-  color: white;
-  border-color: #3b82f6;
-}
-
-.menu-bar button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  width: 910px;
 }
 
 .editor-content {
-  padding: 16px;
-  min-height: 400px;
+  padding: 20px;
+  min-height: 300px;
 }
 
 .editor-content :deep(.ProseMirror) {
   outline: none;
 }
 
-.editor-content :deep(.ProseMirror > * + *) {
-  margin-top: 0.75em;
+.editor-content :deep(.ProseMirror p) {
+  margin: 0.75em 0;
 }
 
 .editor-content :deep(.ProseMirror h1) {
   font-size: 2em;
   font-weight: bold;
-  line-height: 1.2;
+  margin: 0.67em 0;
 }
 
 .editor-content :deep(.ProseMirror h2) {
   font-size: 1.5em;
   font-weight: bold;
-  line-height: 1.3;
+  margin: 0.75em 0;
 }
 
-.editor-content :deep(.ProseMirror p) {
-  line-height: 1.6;
+.editor-content :deep(.ProseMirror h3) {
+  font-size: 1.17em;
+  font-weight: bold;
+  margin: 0.83em 0;
 }
 
 .editor-content :deep(.ProseMirror ul),
 .editor-content :deep(.ProseMirror ol) {
   padding-left: 1.5em;
+  margin: 0.75em 0;
+}
+
+.editor-content :deep(.ProseMirror li) {
+  margin: 0.25em 0;
+}
+
+.editor-content :deep(.ProseMirror code) {
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.editor-content :deep(.ProseMirror pre) {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.editor-content :deep(.ProseMirror pre code) {
+  background: transparent;
+  padding: 0;
+  color: inherit;
 }
 
 .editor-content :deep(.ProseMirror blockquote) {
+  border-left: 3px solid #3b82f6;
   padding-left: 1em;
-  border-left: 3px solid #cbd5e1;
-  font-style: italic;
+  margin: 1em 0;
   color: #64748b;
+  font-style: italic;
 }
 
 .editor-content :deep(.ProseMirror hr) {
@@ -226,24 +151,69 @@ onBeforeUnmount(() => {
   margin: 2em 0;
 }
 
-.editor-content :deep(.ProseMirror code) {
-  background: #f1f5f9;
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
-  font-size: 0.9em;
+.editor-content :deep(.ProseMirror strong) {
+  font-weight: bold;
 }
 
-.editor-content :deep(.ProseMirror pre) {
-  background: #1e293b;
-  color: #e2e8f0;
-  padding: 1em;
-  border-radius: 6px;
-  overflow-x: auto;
+.editor-content :deep(.ProseMirror em) {
+  font-style: italic;
 }
 
-.editor-content :deep(.ProseMirror pre code) {
-  background: none;
-  padding: 0;
-  color: inherit;
+.editor-content :deep(.ProseMirror s) {
+  text-decoration: line-through;
+}
+
+/* Стили для ссылок */
+.editor-content :deep(.ProseMirror a) {
+  color: #3b82f6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.editor-content :deep(.ProseMirror a:hover) {
+  color: #2563eb;
+}
+
+/* Стили для изображений */
+.editor-content :deep(.ProseMirror img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 1em 0;
+}
+
+/* Стили для выравнивания текста */
+.editor-content :deep(.ProseMirror [style*="text-align: left"]) {
+  text-align: left;
+}
+
+.editor-content :deep(.ProseMirror [style*="text-align: center"]) {
+  text-align: center;
+}
+
+.editor-content :deep(.ProseMirror [style*="text-align: right"]) {
+  text-align: right;
+}
+
+.editor-content :deep(.ProseMirror [style*="text-align: justify"]) {
+  text-align: justify;
+}
+
+/* Стили для highlight */
+.editor-content :deep(.ProseMirror mark) {
+  background-color: #fef08a;
+  padding: 2px 0;
+  border-radius: 2px;
+}
+
+/* Стили для подстрочного и надстрочного текста */
+.editor-content :deep(.ProseMirror sub) {
+  vertical-align: sub;
+  font-size: 0.75em;
+}
+
+.editor-content :deep(.ProseMirror sup) {
+  vertical-align: super;
+  font-size: 0.75em;
 }
 </style>
