@@ -49,7 +49,13 @@ const editor = useEditor({
       class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
     },
   },
-
+  onUpdate: ({ editor }) => {
+    // Отправляем обновленный HTML контент в родительское окно
+    window.parent.postMessage({
+      type: 'editor-update',
+      content: editor.getHTML()
+    }, '*')
+  }
 })
 
 onBeforeUnmount(() => {
