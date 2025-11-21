@@ -98,11 +98,11 @@ const editor = useEditor({
   },
   onUpdate: ({ editor }) => {
     // Отправляем JSON контент в родительское окно при каждом изменении
-    const json = editor.getJSON()
+    const html = editor.getHTML();
 
     window.parent.postMessage({
       type: 'tiptap-content-change',
-      content: json
+      content: html
     }, '*')
   },
 })
