@@ -350,8 +350,8 @@ onUnmounted(() => {
   gap: 4px;
   padding: 12px;
   border-radius: 8px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--menu-bg);
+  border: 1px solid var(--menu-border);
   align-items: center;
 }
 
@@ -363,19 +363,19 @@ onUnmounted(() => {
 .divider {
   width: 1px;
   height: 24px;
-  background: #e2e8f0;
+  background: var(--divider-bg);
   margin: 0 4px;
 }
 
 button {
   padding: 6px 10px;
-  border: 1px solid #e2e8f0;
-  background: white;
+  border: 1px solid var(--button-border);
+  background: var(--button-bg);
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #334155;
+  color: var(--button-text);
   transition: all 0.15s ease;
   min-width: 36px;
   height: 36px;
@@ -389,18 +389,18 @@ button svg {
 }
 
 button:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: var(--button-hover-bg);
+  border-color: var(--button-hover-border);
 }
 
 button:active:not(:disabled) {
-  background: #e2e8f0;
+  background: var(--button-active-bg);
 }
 
 button.is-active {
-  background: #3b82f6;
-  color: white;
-  border-color: #3b82f6;
+  background: var(--button-is-active-bg);
+  color: var(--button-is-active-text);
+  border-color: var(--button-is-active-border);
 }
 
 button:disabled {
@@ -431,10 +431,10 @@ button:disabled {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--button-bg);
+  border: 1px solid var(--button-border);
   border-radius: 4px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--dropdown-shadow);
   z-index: 1000;
   min-width: 180px;
   overflow: hidden;
@@ -453,12 +453,12 @@ button:disabled {
 }
 
 .dropdown-item:hover {
-  background: #f1f5f9;
+  background: var(--dropdown-item-hover-bg);
 }
 
 .dropdown-item.is-active {
-  background: #eff6ff;
-  color: #3b82f6;
+  background: var(--dropdown-item-active-bg);
+  color: var(--dropdown-item-active-text);
   border-color: transparent;
 }
 

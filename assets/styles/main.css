@@ -1,0 +1,41 @@
+:root {
+  /* Editor background colors */
+  --editor-bg: white;
+  --code-inline-bg: #f1f5f9;
+  --code-block-bg: #1e293b;
+  --highlight-bg: #fef08a;
+
+  /* Editor text colors */
+  --code-block-text: #e2e8f0;
+  --blockquote-text: #64748b;
+  --link-color: #3b82f6;
+  --link-hover-color: #2563eb;
+
+  /* Editor border colors */
+  --blockquote-border: #3b82f6;
+  --hr-border: #e2e8f0;
+
+  /* Menu bar background colors */
+  --menu-bg: #f8fafc;
+  --button-bg: white;
+  --button-hover-bg: #f1f5f9;
+  --button-active-bg: #e2e8f0;
+  --button-is-active-bg: #3b82f6;
+  --dropdown-item-hover-bg: #f1f5f9;
+  --dropdown-item-active-bg: #eff6ff;
+
+  /* Menu bar border colors */
+  --menu-border: #e2e8f0;
+  --button-border: #e2e8f0;
+  --button-hover-border: #cbd5e1;
+  --button-is-active-border: #3b82f6;
+  --divider-bg: #e2e8f0;
+
+  /* Menu bar text colors */
+  --button-text: #334155;
+  --button-is-active-text: white;
+  --dropdown-item-active-text: #3b82f6;
+
+  /* Shadows */
+  --dropdown-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
