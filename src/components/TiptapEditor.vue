@@ -105,7 +105,6 @@ defineExpose({
   font-family: "Wix Madefor Text", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
-  font-style: normal;
   width: 641px;
   overflow: hidden;
 }
@@ -113,6 +112,7 @@ defineExpose({
 .editor-content {
   padding: 24px 24px 0 24px;
   overflow-x: auto;
+  overflow-y: hidden;
   font-size: 17px;
   line-height: 22px;
   height: 295px;

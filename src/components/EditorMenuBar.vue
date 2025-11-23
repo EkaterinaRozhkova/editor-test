@@ -348,7 +348,7 @@ onUnmounted(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  padding: 12px;
+  padding: 8px;
   border-radius: 8px;
   background: var(--menu-bg);
   border: 1px solid var(--menu-border);
@@ -368,17 +368,17 @@ onUnmounted(() => {
 }
 
 button {
-  padding: 6px 10px;
+  padding: 3px 5px;
   border: 1px solid var(--button-border);
   background: var(--button-bg);
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 500;
   color: var(--button-text);
   transition: all 0.15s ease;
-  min-width: 36px;
-  height: 36px;
+  min-width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
