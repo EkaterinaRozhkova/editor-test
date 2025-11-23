@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
@@ -18,11 +18,15 @@ import Superscript from '@tiptap/extension-superscript'
 import Highlight from '@tiptap/extension-highlight'
 import EditorMenuBar from './EditorMenuBar.vue'
 
+const isContentInitialized = ref(false)
+
 const sendContentUpdate = useDebounceFn((content: string) => {
-  window.parent.postMessage({
-    type: 'editor-update',
-    content
-  }, '*')
+  if (isContentInitialized.value) {
+    window.parent.postMessage({
+      type: 'content-update',
+      content
+    }, '*')
+  }
 }, 500)
 
 const editor = useEditor({
@@ -48,9 +52,7 @@ const editor = useEditor({
       multicolor: false,
     }),
   ],
-  content: `
-    <h1>Добро пожаловать в TipTap редактор!</h1>
-  `,
+  content: '',
   editorProps: {
     attributes: {
       class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
@@ -59,11 +61,30 @@ const editor = useEditor({
   onUpdate: ({ editor }) => {
     const currentContent = editor.getHTML()
     sendContentUpdate(currentContent)
-
   }
 })
 
+// Обработчик сообщений от родителя
+const handleMessage = (event: MessageEvent) => {
+
+  if (event.data.type === 'init-content' && editor.value) {
+    editor.value.commands.setContent(event.data.content || '')
+
+    setTimeout(() => {
+      isContentInitialized.value = true
+    }, 100)
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('message', handleMessage)
+  window.parent.postMessage({
+    type: 'editor-ready'
+  }, '*')
+})
+
 onBeforeUnmount(() => {
+  window.removeEventListener('message', handleMessage)
   editor.value?.destroy()
 })
 
@@ -87,15 +108,11 @@ defineExpose({
   font-style: normal;
   overflow: hidden;
   width: 910px;
+  height: 600px;
 }
 
 .editor-content {
   padding: 20px;
-  min-height: 300px;
   background-color: #fcfcfd;
-}
-
-.editor-content :deep(.ProseMirror) {
-  outline: none;
 }
 </style>
