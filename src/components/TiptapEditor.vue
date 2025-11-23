@@ -106,16 +106,14 @@ defineExpose({
   font-optical-sizing: auto;
   font-weight: 400;
   width: 641px;
-  overflow: hidden;
 }
 
 .editor-content {
   padding: 24px 24px 0 24px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: auto;
   font-size: 17px;
   line-height: 22px;
-  height: 295px;
+  height: 320px;
   background-color: #fcfcfd;
 }
 </style>
