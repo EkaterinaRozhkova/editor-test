@@ -129,10 +129,18 @@ defineExpose({
   line-height: 22px;
   height: 320px;
   background-color: #fcfcfd;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #fcfcfd;
+}
 
-  &::-webkit-scrollbar:vertical {
-    width: 4px;
-  }
+/* Custom scrollbar for Webkit browsers */
+.editor-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+
+.editor-content::-webkit-scrollbar-thumb {
+  border-radius: 2px;
 }
 
 /* Стили для математических формул */
