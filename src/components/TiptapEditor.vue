@@ -19,6 +19,7 @@ import Highlight from '@tiptap/extension-highlight'
 import Mathematics from '@tiptap/extension-mathematics'
 import EditorMenuBar from './EditorMenuBar.vue'
 import 'katex/dist/katex.min.css'
+import { convertMathMLToLatex } from "../../utils/mathmlConverter.ts";
 
 const isContentInitialized = ref(false)
 
@@ -69,9 +70,10 @@ const editor = useEditor({
 
 // Обработчик сообщений от родителя
 const handleMessage = (event: MessageEvent) => {
-
   if (event.data.type === 'init-content' && editor.value) {
-    editor.value.commands.setContent(event.data.content || '')
+    // Конвертируем MathML в LaTeX перед установкой контента
+    const contentWithLatex = convertMathMLToLatex(event.data.content || '')
+    editor.value.commands.setContent(contentWithLatex)
 
     setTimeout(() => {
       isContentInitialized.value = true
