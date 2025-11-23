@@ -1,4 +1,12 @@
 <template>
+  <MathLiveModal
+    :is-open="isMathModalOpen"
+    :initial-latex="initialLatex"
+    :is-block-formula="isBlockFormula"
+    @confirm="handleMathConfirm"
+    @close="closeMathModal"
+  />
+
   <div class="menu-bar" v-if="editor">
     <!-- Дропдаун для типа блока -->
     <div class="button-group">
@@ -33,6 +41,26 @@
           </button>
         </div>
       </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Математические формулы -->
+    <div class="button-group">
+      <button
+        @click="insertInlineFormula"
+        :class="{ 'is-active': editor.isActive('inlineMath') }"
+        title="Вставить строчную формулу"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 14-6 6h9v-3"/><path d="M18 6h-4a4 4 0 1 0 0 8h4"/><path d="M4 6h9a4 4 0 1 1 0 8H4"/></svg>
+      </button>
+      <button
+        @click="insertBlockFormula"
+        :class="{ 'is-active': editor.isActive('mathBlock') }"
+        title="Вставить блочную формулу"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m8 10 2 2-2 2"/><path d="m16 10-2 2 2 2"/><path d="M8 16h8"/></svg>
+      </button>
     </div>
 
     <div class="divider"></div>
@@ -222,6 +250,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
+import MathLiveModal from './MathLiveModal.vue'
 
 const props = defineProps<{
   editor: Editor | null
@@ -230,6 +259,11 @@ const props = defineProps<{
 // Состояния для дропдаунов
 const isBlockTypeDropdownOpen = ref(false)
 const isAlignmentDropdownOpen = ref(false)
+
+// Состояния для модального окна с формулами
+const isMathModalOpen = ref(false)
+const initialLatex = ref('')
+const isBlockFormula = ref(false)
 
 // Определяем текущий тип блока
 const currentBlockType = computed(() => {
@@ -323,6 +357,46 @@ const addImage = () => {
   if (url) {
     props.editor.chain().focus().setImage({ src: url }).run()
   }
+}
+
+// Функция для добавления строчной формулы
+const insertInlineFormula = () => {
+  if (!props.editor) return
+
+  initialLatex.value = 'E = mc^2'
+  isBlockFormula.value = false
+  isMathModalOpen.value = true
+}
+
+// Функция для добавления блочной формулы
+const insertBlockFormula = () => {
+  if (!props.editor) return
+
+  initialLatex.value = '\\int_{a}^{b} f(x) dx'
+  isBlockFormula.value = true
+  isMathModalOpen.value = true
+}
+
+// Обработчик подтверждения формулы
+const handleMathConfirm = (latex: string) => {
+  if (!props.editor || !latex) return
+
+  if (isBlockFormula.value) {
+    props.editor.chain().focus().insertContent({
+      type: 'mathBlock',
+      attrs: { latex }
+    }).run()
+  } else {
+    props.editor.chain().focus().insertInlineMath({ latex }).run()
+  }
+
+  closeMathModal()
+}
+
+// Закрытие модального окна с формулами
+const closeMathModal = () => {
+  isMathModalOpen.value = false
+  initialLatex.value = ''
 }
 
 // Закрытие дропдаунов при клике вне их

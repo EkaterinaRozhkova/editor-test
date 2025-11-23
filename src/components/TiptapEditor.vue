@@ -16,7 +16,9 @@ import TextAlign from '@tiptap/extension-text-align'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import Highlight from '@tiptap/extension-highlight'
+import Mathematics from '@tiptap/extension-mathematics'
 import EditorMenuBar from './EditorMenuBar.vue'
+import 'katex/dist/katex.min.css'
 
 const isContentInitialized = ref(false)
 
@@ -51,6 +53,7 @@ const editor = useEditor({
     Highlight.configure({
       multicolor: false,
     }),
+    Mathematics,
   ],
   content: '',
   editorProps: {
