@@ -112,6 +112,7 @@ defineExpose({
 
 .editor-content {
   padding: 24px 24px 0 24px;
+  overflow-x: auto;
   height: 598px;
   background-color: #fcfcfd;
 }
