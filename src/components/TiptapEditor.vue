@@ -19,7 +19,7 @@ import Highlight from '@tiptap/extension-highlight'
 import Mathematics from '@tiptap/extension-mathematics'
 import EditorMenuBar from './EditorMenuBar.vue'
 import 'katex/dist/katex.min.css'
-import { convertMathMLToLatex } from "../../utils/mathmlConverter.ts";
+import { convertMathMLToLatex } from "../../utils/mathmlConverter.ts"
 
 const isContentInitialized = ref(false)
 
@@ -54,7 +54,15 @@ const editor = useEditor({
     Highlight.configure({
       multicolor: false,
     }),
-    Mathematics,
+    Mathematics.configure({
+      katexOptions: {
+        throwOnError: false,
+        displayMode: false,
+        output: 'html',
+        trust: false,
+        strict: false,
+      },
+    }),
   ],
   content: '',
   editorProps: {
@@ -73,6 +81,7 @@ const handleMessage = (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
     // Конвертируем MathML в LaTeX перед установкой контента
     const contentWithLatex = convertMathMLToLatex(event.data.content || '')
+    console.log('Converted content:', contentWithLatex) // Для отладки
     editor.value.commands.setContent(contentWithLatex)
 
     setTimeout(() => {
@@ -120,5 +129,27 @@ defineExpose({
   line-height: 22px;
   height: 320px;
   background-color: #fcfcfd;
+}
+
+/* Стили для математических формул */
+:deep(.math-node) {
+  display: inline-block;
+  margin: 0 2px;
+  padding: 2px 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+:deep(.math-node:hover) {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+:deep(.katex) {
+  font-size: inherit;
+}
+
+:deep(.katex-display) {
+  margin: 0.5em 0;
 }
 </style>

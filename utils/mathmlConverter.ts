@@ -8,23 +8,29 @@ export function convertMathMLToLatex(html: string): string {
 
   mathElements.forEach((mathElement) => {
     try {
-      // Конвертируем MathML в LaTeX через статический метод класса
       const mathml = mathElement.outerHTML
-      const latex = MathMLToLaTeX.convert(mathml)
+      let latex = MathMLToLaTeX.convert(mathml)
 
-      // Создаем span с data-type="math" для TipTap Mathematics extension
-      const mathSpan = doc.createElement('span')
-      mathSpan.setAttribute('data-type', 'math')
-      mathSpan.setAttribute('data-latex', latex)
-      mathSpan.textContent = `$${latex}$` // KaTeX синтаксис
+      // Очистка HTML entities
+      latex = latex.replace(/&nbsp;/g, ' ')
+        .replace(/&thinsp;/g, '\\,')
+        .replace(/&#x([0-9A-F]+);/gi, (match, hex) => {
+          return String.fromCharCode(parseInt(hex, 16))
+        })
+        .trim()
 
-      // Заменяем MathML элемент на span
-      mathElement.parentNode?.replaceChild(mathSpan, mathElement)
+      // Создаем простой span с атрибутом для LaTeX
+      const latexSpan = doc.createElement('span')
+      latexSpan.className = 'math-inline'
+      latexSpan.setAttribute('data-latex', latex)
+      // Сохраняем LaTeX без $ для отображения
+      latexSpan.textContent = latex
+
+      mathElement.parentNode?.replaceChild(latexSpan, mathElement)
     } catch (error) {
-      console.error('Error converting MathML to LaTeX:', error, mathElement.outerHTML)
-      // Оставляем текстовое представление в случае ошибки
+      console.error('Error converting MathML to LaTeX:', error)
       const textSpan = doc.createElement('span')
-      textSpan.textContent = mathElement.textContent || '[Math Formula]'
+      textSpan.textContent = mathElement.textContent || '[Formula]'
       mathElement.parentNode?.replaceChild(textSpan, mathElement)
     }
   })
