@@ -107,12 +107,12 @@ defineExpose({
   font-weight: 400;
   font-style: normal;
   overflow: hidden;
-  width: 910px;
   height: 600px;
 }
 
 .editor-content {
-  padding: 20px;
+  padding: 0;
+  height: 598px;
   background-color: #fcfcfd;
 }
 </style>
