@@ -7,7 +7,14 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    vue(),
+    vue({
+      template: {
+        compilerOptions: {
+          // Treat math-field as a custom element
+          isCustomElement: (tag) => tag === 'math-field'
+        }
+      }
+    }),
     vueDevTools(),
   ],
   resolve: {
