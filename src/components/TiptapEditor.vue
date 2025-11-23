@@ -129,6 +129,10 @@ defineExpose({
   line-height: 22px;
   height: 320px;
   background-color: #fcfcfd;
+
+  &::-webkit-scrollbar:vertical {
+    width: 4px;
+  }
 }
 
 /* Стили для математических формул */
