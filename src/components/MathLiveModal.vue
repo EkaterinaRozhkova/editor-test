@@ -32,16 +32,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, computed, onMounted } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import 'mathlive/static.css'
 import katex from 'katex'
-
-// Declare the custom element
-declare global {
-  interface Window {
-    MathfieldElement: any
-  }
-}
 
 const props = defineProps<{
   isOpen: boolean
