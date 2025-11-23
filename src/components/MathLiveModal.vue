@@ -15,11 +15,6 @@
               {{ latex }}
             </math-field>
           </div>
-
-          <div class="preview-container" v-if="latex">
-            <div class="preview-label">Предварительный просмотр:</div>
-            <div class="preview-content" v-html="renderedLatex"></div>
-          </div>
         </div>
       </div>
 
@@ -115,13 +110,15 @@ watch(() => props.isOpen, async (newValue) => {
 })
 </script>
 
-<style scoped>
+<style>
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.95);
   display: flex;
   align-items: center;
@@ -130,11 +127,13 @@ watch(() => props.isOpen, async (newValue) => {
 }
 
 .modal-content {
-  background: #ffffff;
+  background: white;
   border-radius: 0;
   box-shadow: none;
   width: 100%;
   height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -191,18 +190,20 @@ watch(() => props.isOpen, async (newValue) => {
 }
 
 .mathfield-container {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  max-width: 578px;
 }
 
 .mathfield-container math-field {
   display: block;
-  width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
   padding: 12px;
   border: 2px solid #d1d5db;
   border-radius: 8px;
-  font-size: 24px;
-  min-height: 80px;
-  background: #ffffff;
+  font-size: 15px;
+  min-height: 30px;
+  background: white;
   transition: border-color 0.15s ease;
 }
 
@@ -211,36 +212,11 @@ watch(() => props.isOpen, async (newValue) => {
   border-color: #3b82f6;
 }
 
-.preview-container {
-  padding: 16px;
-  background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-}
-
-.preview-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #6b7280;
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.preview-content {
-  font-size: 20px;
-  color: #1f2937;
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding: 16px 24px;
+  padding: 5px 10px;
   border-top: 1px solid #e5e7eb;
   background: #f9fafb;
 }
@@ -256,7 +232,7 @@ watch(() => props.isOpen, async (newValue) => {
 }
 
 .button-secondary {
-  background: #ffffff;
+  background: white;
   color: #374151;
   border: 1px solid #d1d5db;
 }
@@ -268,16 +244,13 @@ watch(() => props.isOpen, async (newValue) => {
 
 .button-primary {
   background: #3b82f6;
-  color: #ffffff;
+  color: white;
 }
 
 .button-primary:hover {
   background: #2563eb;
 }
-</style>
 
-<style>
-/* Global styles for MathLive virtual keyboard */
 .ML__keyboard {
   z-index: 10001 !important;
   position: fixed !important;
