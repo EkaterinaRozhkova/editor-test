@@ -19,10 +19,11 @@ import Mathematics from '@tiptap/extension-mathematics'
 import { all, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { CustomOrderedList } from '../extensions/CustomOrderedList'
+import { MathMLNode } from '../extensions/MathMLNode'
 import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
 import 'katex/dist/katex.min.css'
-import { MathMLNode } from '../extensions/MathMLNode'
+import { convertMathMLInHTML } from '../utils/mathConverter'
 
 const lowlight = createLowlight(all)
 
@@ -90,7 +91,14 @@ const handleMessage = (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
     try {
       // Декомпрессия данных
-      const html = LZString.decompressFromEncodedURIComponent(event.data.data)
+      let html = LZString.decompressFromEncodedURIComponent(event.data.data)
+
+      // Конвертируем MathML в LaTeX для обратной совместимости
+      // с CKEditor/MathType контентом
+      if (html.includes('<math')) {
+        console.log('Обнаружен MathML контент, конвертирую в LaTeX...')
+        html = convertMathMLInHTML(html)
+      }
 
       editor.value.commands.setContent(html)
 
@@ -102,7 +110,15 @@ const handleMessage = (event: MessageEvent) => {
 
       // Fallback на старый формат без сжатия (для обратной совместимости)
       if (event.data.content) {
-        editor.value.commands.setContent(event.data.content)
+        let content = event.data.content
+
+        // Конвертируем MathML в LaTeX
+        if (content.includes('<math')) {
+          console.log('Обнаружен MathML контент, конвертирую в LaTeX...')
+          content = convertMathMLInHTML(content)
+        }
+
+        editor.value.commands.setContent(content)
 
         setTimeout(() => {
           isContentInitialized.value = true
@@ -128,6 +144,38 @@ const getHTML = () => {
   return editor.value?.getHTML()
 }
 
+/**
+ * Возвращает HTML в формате совместимом с MathJax preview
+ * Конвертирует KaTeX элементы обратно в $...$ или $$...$$ для MathJax
+ */
+const getHTMLForPreview = () => {
+  if (!editor.value) return ''
+
+  let html = editor.value.getHTML()
+
+  // Заменяем элементы inline-math на простой LaTeX в $...$
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+
+  // Обрабатываем inline-math элементы
+  const inlineMathElements = doc.querySelectorAll('[data-type="inline-math"]')
+  inlineMathElements.forEach((element) => {
+    const latex = element.getAttribute('data-content') || element.textContent || ''
+    const textNode = doc.createTextNode(`$${latex}$`)
+    element.replaceWith(textNode)
+  })
+
+  // Обрабатываем block-math элементы
+  const blockMathElements = doc.querySelectorAll('[data-type="block-math"]')
+  blockMathElements.forEach((element) => {
+    const latex = element.getAttribute('data-content') || element.textContent || ''
+    const textNode = doc.createTextNode(`$$${latex}$$`)
+    element.replaceWith(textNode)
+  })
+
+  return doc.body.innerHTML
+}
+
 const getCompressed = () => {
   if (!editor.value) return null
 
@@ -135,9 +183,21 @@ const getCompressed = () => {
   return LZString.compressToEncodedURIComponent(html)
 }
 
+/**
+ * Возвращает сжатый HTML в формате совместимом с MathJax preview
+ */
+const getCompressedForPreview = () => {
+  if (!editor.value) return null
+
+  const html = getHTMLForPreview()
+  return LZString.compressToEncodedURIComponent(html)
+}
+
 defineExpose({
   getHTML,
+  getHTMLForPreview,
   getCompressed,
+  getCompressedForPreview,
   editor
 })
 </script>
