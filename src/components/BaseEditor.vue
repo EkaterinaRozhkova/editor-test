@@ -22,8 +22,7 @@ import { CustomOrderedList } from '../extensions/CustomOrderedList'
 import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
 import 'katex/dist/katex.min.css'
-import { convertMathMLToLatex } from "@/utils/mathConverter.ts";
-import { migrateMathStrings } from '@tiptap/extension-mathematics'
+import { convertMathMLToLatex, convertLatexToMathML } from "@/utils/mathConverter.ts"
 
 const lowlight = createLowlight(all)
 
@@ -33,7 +32,10 @@ const sendContentUpdate = useDebounceFn(() => {
   if (isContentInitialized.value && editor.value) {
     const html = editor.value.getHTML()
 
-    const compressed = LZString.compressToEncodedURIComponent(html)
+    // Конвертируем LaTeX в MathML перед отправкой родителю
+    const htmlWithMathML = convertLatexToMathML(html)
+
+    const compressed = LZString.compressToEncodedURIComponent(htmlWithMathML)
 
     window.parent.postMessage({
       type: 'content-update',
@@ -88,15 +90,14 @@ const editor = useEditor({
 // Обработчик сообщений от родителя
 const handleMessage = (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
+
     try {
       // Декомпрессия данных
       const html = LZString.decompressFromEncodedURIComponent(event.data.data)
       const contentWithLatex = convertMathMLToLatex(html)
 
+      // Устанавливаем контент с LaTeX текстом (без конвертации в math nodes)
       editor.value.commands.setContent(contentWithLatex)
-
-      // Конвертируем $latex$ текст в math nodes
-      migrateMathStrings(editor.value)
 
       setTimeout(() => {
         isContentInitialized.value = true
@@ -120,7 +121,11 @@ onBeforeUnmount(() => {
 })
 
 const getHTML = () => {
-  return editor.value?.getHTML()
+  if (!editor.value) return undefined
+
+  const html = editor.value.getHTML()
+  // Конвертируем LaTeX в MathML перед возвратом
+  return convertLatexToMathML(html)
 }
 
 
@@ -128,7 +133,9 @@ const getCompressed = () => {
   if (!editor.value) return null
 
   const html = editor.value.getHTML()
-  return LZString.compressToEncodedURIComponent(html)
+  // Конвертируем LaTeX в MathML перед сжатием
+  const htmlWithMathML = convertLatexToMathML(html)
+  return LZString.compressToEncodedURIComponent(htmlWithMathML)
 }
 
 

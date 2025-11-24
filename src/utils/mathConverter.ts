@@ -1,5 +1,6 @@
 // utils/mathmlConverter.ts
 import { MathMLToLaTeX } from 'mathml-to-latex'
+import katex from 'katex'
 
 export function convertMathMLToLatex(html: string): string {
   const parser = new DOMParser()
@@ -37,4 +38,29 @@ export function convertMathMLToLatex(html: string): string {
   })
 
   return doc.body.innerHTML
+}
+
+export function convertLatexToMathML(html: string): string {
+  // Регулярное выражение для поиска $latex$ паттернов
+  const latexPattern = /\$([^$]+)\$/g
+
+  // Заменяем каждый $latex$ на MathML
+  const result = html.replace(latexPattern, (match, latex) => {
+    try {
+      // Конвертируем LaTeX в MathML используя KaTeX
+      const mathml = katex.renderToString(latex, {
+        output: 'mathml',
+        throwOnError: false,
+        displayMode: false
+      })
+
+      return mathml
+    } catch (error) {
+      console.error('Error converting LaTeX to MathML:', error, 'LaTeX:', latex)
+      // Оставляем исходный текст в случае ошибки
+      return match
+    }
+  })
+
+  return result
 }
