@@ -42,12 +42,21 @@ export const MathMLNode = Node.create({
           ({ tr, dispatch }) => {
 
             // ---------- SANITIZE MATHML ----------
-            const clean = mathml
-              .replace(/&nbsp;/g, ' ')               // убрать &nbsp;
-              .replace(/<\/math>.*$/, '</math>')    // убрать хвосты типа ;&nbsp;<math>
-              .replace(/&lt;/g, '<')                // HTML → XML
+            let clean = mathml
+              // HTML entities
+              .replace(/&nbsp;/g, ' ')
+              .replace(/&lt;/g, '<')
               .replace(/&gt;/g, '>')
               .replace(/&amp;/g, '&')
+
+              // Unicode NBSP (&#xA0; → U+00A0)
+              .replace(/\u00A0/g, ' ')
+
+              // Middle dot normalizer (&#xB7; — реальный символ)
+              .replace(/\u00B7/g, '·')
+
+              // удалить хвосты после </math>
+              .replace(/<\/math>.*$/, '</math>')
 
             // --------------------------------------
 
@@ -63,5 +72,6 @@ export const MathMLNode = Node.create({
     }
   },
 })
+
 
 
