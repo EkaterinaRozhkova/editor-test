@@ -64,26 +64,3 @@ export function convertLatexToMathML(html: string): string {
 
   return result
 }
-
-export function convertMathNodesToLatexStrings(html: string): string {
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(html, 'text/html')
-
-  // Обрабатываем inline math nodes
-  const inlineMathElements = doc.querySelectorAll('[data-type="inline-math"]')
-  inlineMathElements.forEach((mathElement) => {
-    const latex = mathElement.getAttribute('data-latex') || ''
-    const textNode = doc.createTextNode(`$${latex}$`)
-    mathElement.parentNode?.replaceChild(textNode, mathElement)
-  })
-
-  // Обрабатываем block math nodes
-  const blockMathElements = doc.querySelectorAll('[data-type="block-math"]')
-  blockMathElements.forEach((mathElement) => {
-    const latex = mathElement.getAttribute('data-latex') || ''
-    const textNode = doc.createTextNode(`$$${latex}$$`)
-    mathElement.parentNode?.replaceChild(textNode, mathElement)
-  })
-
-  return doc.body.innerHTML
-}

@@ -16,17 +16,64 @@ import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import Highlight from '@tiptap/extension-highlight'
 import Mathematics from '@tiptap/extension-mathematics'
+import { migrateMathStrings } from '@tiptap/extension-mathematics'
 import { all, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { CustomOrderedList } from '../extensions/CustomOrderedList'
 import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
 import 'katex/dist/katex.min.css'
-import { convertMathMLToLatex, convertMathNodesToLatexStrings, convertLatexToMathML } from "@/utils/mathConverter.ts"
 
 const lowlight = createLowlight(all)
 
 const isContentInitialized = ref(false)
+
+// Функция конвертации math узлов в LaTeX строки для vue-mathjax
+function convertMathNodesToLatexStrings(html: string): string {
+  let result = html
+
+  // Логирование для отладки
+  console.log('Original HTML:', html)
+
+  // Конвертируем inline math: <math-inline data-latex="..."> → $...$
+  result = result.replace(
+    /<math-inline[^>]*data-latex="([^"]*)"[^>]*>[\s\S]*?<\/math-inline>/g,
+    (match, latex) => {
+      console.log('Found inline math:', latex)
+      return `$${latex}$`
+    }
+  )
+
+  // Конвертируем display math: <math-display data-latex="..."> → $$...$$
+  result = result.replace(
+    /<math-display[^>]*data-latex="([^"]*)"[^>]*>[\s\S]*?<\/math-display>/g,
+    (match, latex) => {
+      console.log('Found display math:', latex)
+      return `$$${latex}$$`
+    }
+  )
+
+  // Альтернативный формат с data-type
+  result = result.replace(
+    /<span[^>]*data-type="mathInline"[^>]*data-latex="([^"]*)"[^>]*>[\s\S]*?<\/span>/g,
+    (match, latex) => {
+      console.log('Found inline math (alt format):', latex)
+      return `$${latex}$`
+    }
+  )
+
+  result = result.replace(
+    /<div[^>]*data-type="mathDisplay"[^>]*data-latex="([^"]*)"[^>]*>[\s\S]*?<\/div>/g,
+    (match, latex) => {
+      console.log('Found display math (alt format):', latex)
+      return `$$${latex}$$`
+    }
+  )
+
+  console.log('Converted HTML:', result)
+
+  return result
+}
 
 const sendContentUpdate = useDebounceFn(() => {
   if (isContentInitialized.value && editor.value) {
@@ -87,20 +134,19 @@ const editor = useEditor({
   }
 })
 
-// Обработчик сообщений от родителя
 const handleMessage = (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
-
     try {
       // Декомпрессия данных
-      const html = LZString.decompressFromEncodedURIComponent(event.data.data)
-      const contentWithLatex = convertMathMLToLatex(html)
+      let html = LZString.decompressFromEncodedURIComponent(event.data.data)
 
-      // Конвертируем LaTeX строки обратно в MathML для редактора
-      const contentWithMathML = convertLatexToMathML(contentWithLatex)
+      // Конвертируем LaTeX строки ($...$, $...$) в math узлы вручную
+      // migrateMathStrings изменяет строку напрямую, поэтому используем замену
+      html = html.replace(/\$\$([^\$]+)\$\$/g, '<math-display data-latex="$1"></math-display>')
+      html = html.replace(/\$([^\$]+)\$/g, '<math-inline data-latex="$1"></math-inline>')
 
-      // Устанавливаем контент с MathML
-      editor.value.commands.setContent(contentWithMathML)
+      // Устанавливаем контент
+      editor.value.commands.setContent(html)
 
       setTimeout(() => {
         isContentInitialized.value = true
@@ -131,7 +177,6 @@ const getHTML = () => {
   return convertMathNodesToLatexStrings(html)
 }
 
-
 const getCompressed = () => {
   if (!editor.value) return null
 
@@ -140,7 +185,6 @@ const getCompressed = () => {
   const htmlWithLatexStrings = convertMathNodesToLatexStrings(html)
   return LZString.compressToEncodedURIComponent(htmlWithLatexStrings)
 }
-
 
 defineExpose({
   getHTML,
