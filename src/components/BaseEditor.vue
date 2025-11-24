@@ -22,7 +22,7 @@ import { CustomOrderedList } from '../extensions/CustomOrderedList'
 import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
 import 'katex/dist/katex.min.css'
-import { convertMathMLToLatex, convertLatexToMathML } from "@/utils/mathConverter.ts"
+import { convertMathMLToLatex, convertMathNodesToLatexStrings } from "@/utils/mathConverter.ts"
 
 const lowlight = createLowlight(all)
 
@@ -32,10 +32,10 @@ const sendContentUpdate = useDebounceFn(() => {
   if (isContentInitialized.value && editor.value) {
     const html = editor.value.getHTML()
 
-    // Конвертируем LaTeX в MathML перед отправкой родителю
-    const htmlWithMathML = convertLatexToMathML(html)
+    // Конвертируем math nodes в LaTeX строки перед отправкой родителю
+    const htmlWithLatexStrings = convertMathNodesToLatexStrings(html)
 
-    const compressed = LZString.compressToEncodedURIComponent(htmlWithMathML)
+    const compressed = LZString.compressToEncodedURIComponent(htmlWithLatexStrings)
 
     window.parent.postMessage({
       type: 'content-update',
@@ -124,8 +124,8 @@ const getHTML = () => {
   if (!editor.value) return undefined
 
   const html = editor.value.getHTML()
-  // Конвертируем LaTeX в MathML перед возвратом
-  return convertLatexToMathML(html)
+  // Конвертируем math nodes в LaTeX строки перед возвратом
+  return convertMathNodesToLatexStrings(html)
 }
 
 
@@ -133,9 +133,9 @@ const getCompressed = () => {
   if (!editor.value) return null
 
   const html = editor.value.getHTML()
-  // Конвертируем LaTeX в MathML перед сжатием
-  const htmlWithMathML = convertLatexToMathML(html)
-  return LZString.compressToEncodedURIComponent(htmlWithMathML)
+  // Конвертируем math nodes в LaTeX строки перед сжатием
+  const htmlWithLatexStrings = convertMathNodesToLatexStrings(html)
+  return LZString.compressToEncodedURIComponent(htmlWithLatexStrings)
 }
 
 
