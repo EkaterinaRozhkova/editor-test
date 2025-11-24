@@ -135,7 +135,7 @@ defineExpose({
 }
 
 .editor-content {
-  padding: 24px 24px 0 24px;
+  padding: 10px 24px 5px 24px;
   overflow: auto;
   font-size: 17px;
   line-height: 22px;
