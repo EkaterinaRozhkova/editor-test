@@ -23,6 +23,7 @@ import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
 import 'katex/dist/katex.min.css'
 import { convertMathMLToLatex } from "@/utils/mathConverter.ts";
+import { migrateMathStrings } from '@tiptap/extension-mathematics'
 
 const lowlight = createLowlight(all)
 
@@ -93,6 +94,9 @@ const handleMessage = (event: MessageEvent) => {
       const contentWithLatex = convertMathMLToLatex(html)
 
       editor.value.commands.setContent(contentWithLatex)
+
+      // Конвертируем $latex$ текст в math nodes
+      migrateMathStrings(editor.value)
 
       setTimeout(() => {
         isContentInitialized.value = true
