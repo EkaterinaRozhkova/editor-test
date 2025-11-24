@@ -22,7 +22,7 @@ import { CustomOrderedList } from '../extensions/CustomOrderedList'
 import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
 import 'katex/dist/katex.min.css'
-import { convertMathMLToLatex, convertMathNodesToLatexStrings } from "@/utils/mathConverter.ts"
+import { convertMathMLToLatex, convertMathNodesToLatexStrings, convertLatexToMathML } from "@/utils/mathConverter.ts"
 
 const lowlight = createLowlight(all)
 
@@ -96,8 +96,11 @@ const handleMessage = (event: MessageEvent) => {
       const html = LZString.decompressFromEncodedURIComponent(event.data.data)
       const contentWithLatex = convertMathMLToLatex(html)
 
-      // Устанавливаем контент с LaTeX текстом (без конвертации в math nodes)
-      editor.value.commands.setContent(contentWithLatex)
+      // Конвертируем LaTeX строки обратно в MathML для редактора
+      const contentWithMathML = convertLatexToMathML(contentWithLatex)
+
+      // Устанавливаем контент с MathML
+      editor.value.commands.setContent(contentWithMathML)
 
       setTimeout(() => {
         isContentInitialized.value = true
