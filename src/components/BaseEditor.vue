@@ -10,7 +10,6 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 import TextAlign from '@tiptap/extension-text-align'
 import Subscript from '@tiptap/extension-subscript'
@@ -18,10 +17,10 @@ import Superscript from '@tiptap/extension-superscript'
 import Highlight from '@tiptap/extension-highlight'
 import Mathematics from '@tiptap/extension-mathematics'
 import { all, createLowlight } from 'lowlight'
-import Underline from '@tiptap/extension-underline'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { CustomOrderedList } from '../extensions/CustomOrderedList'
 import EditorMenuBar from './EditorMenuBar.vue'
+import LZString from 'lz-string'
 import 'katex/dist/katex.min.css'
 import { convertMathMLToLatex } from "../../utils/mathMlConverter.ts"
 
@@ -29,11 +28,15 @@ const lowlight = createLowlight(all)
 
 const isContentInitialized = ref(false)
 
-const sendContentUpdate = useDebounceFn((content: string) => {
-  if (isContentInitialized.value) {
+const sendContentUpdate = useDebounceFn(() => {
+  if (isContentInitialized.value && editor.value) {
+    const html = editor.value.getHTML()
+
+    const compressed = LZString.compressToEncodedURIComponent(html)
+
     window.parent.postMessage({
       type: 'content-update',
-      content
+      data: compressed
     }, '*')
   }
 }, 500)
@@ -48,13 +51,6 @@ const editor = useEditor({
     CodeBlockLowlight.configure({
       lowlight,
     }),
-    Link.configure({
-      openOnClick: false,
-      HTMLAttributes: {
-        target: '_blank',
-        rel: 'noopener noreferrer',
-      },
-    }),
     Image.configure({
       inline: true,
     }),
@@ -62,7 +58,6 @@ const editor = useEditor({
       types: ['heading', 'paragraph'],
       alignments: ['left', 'center', 'right', 'justify'],
     }),
-    Underline,
     Subscript,
     Superscript,
     Highlight.configure({
@@ -84,22 +79,38 @@ const editor = useEditor({
       class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
     },
   },
-  onUpdate: ({ editor }) => {
-    const currentContent = editor.getHTML()
-    sendContentUpdate(currentContent)
+  onUpdate: () => {
+    sendContentUpdate()
   }
 })
 
 // Обработчик сообщений от родителя
 const handleMessage = (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
-    // Конвертируем MathML в LaTeX перед установкой контента
-    const contentWithLatex = convertMathMLToLatex(event.data.content || '')
-    editor.value.commands.setContent(contentWithLatex)
+    try {
+      // Декомпрессия данных
+      const html = LZString.decompressFromEncodedURIComponent(event.data.data)
 
-    setTimeout(() => {
-      isContentInitialized.value = true
-    }, 100)
+      // Конвертируем MathML в LaTeX перед установкой
+      const contentWithLatex = convertMathMLToLatex(html)
+      editor.value.commands.setContent(contentWithLatex)
+
+      setTimeout(() => {
+        isContentInitialized.value = true
+      }, 100)
+    } catch (error) {
+      console.error('Ошибка декомпрессии контента:', error)
+
+      // Fallback на старый формат без сжатия (для обратной совместимости)
+      if (event.data.content) {
+        const contentWithLatex = convertMathMLToLatex(event.data.content)
+        editor.value.commands.setContent(contentWithLatex)
+
+        setTimeout(() => {
+          isContentInitialized.value = true
+        }, 100)
+      }
+    }
   }
 }
 
@@ -119,8 +130,16 @@ const getHTML = () => {
   return editor.value?.getHTML()
 }
 
+const getCompressed = () => {
+  if (!editor.value) return null
+
+  const html = editor.value.getHTML()
+  return LZString.compressToEncodedURIComponent(html)
+}
+
 defineExpose({
   getHTML,
+  getCompressed,
   editor
 })
 </script>

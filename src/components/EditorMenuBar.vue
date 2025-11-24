@@ -2,7 +2,7 @@
   <div class="menu-bar" v-if="editor">
     <!-- Дропдаун для типа блока -->
     <div class="button-group">
-      <div class="dropdown" :class="{ 'is-open': isBlockTypeDropdownOpen }">
+      <div ref="blockTypeDropdownRef" class="dropdown" :class="{ 'is-open': isBlockTypeDropdownOpen }">
         <button
           @click="toggleBlockTypeDropdown"
           class="dropdown-button"
@@ -120,7 +120,7 @@
 
     <!-- Дропдаун для выравнивания -->
     <div class="button-group">
-      <div class="dropdown" :class="{ 'is-open': isAlignmentDropdownOpen }">
+      <div ref="alignmentDropdownRef" class="dropdown" :class="{ 'is-open': isAlignmentDropdownOpen }">
         <button
           @click="toggleAlignmentDropdown"
           class="dropdown-button"
@@ -158,7 +158,7 @@
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
       </button>
-      <div class="dropdown" :class="{ 'is-open': isOrderedListDropdownOpen }">
+      <div ref="orderedListDropdownRef" class="dropdown" :class="{ 'is-open': isOrderedListDropdownOpen }">
         <button
           @click="toggleOrderedListDropdown"
           :class="{ 'is-active': editor.isActive('orderedList') }"
@@ -266,7 +266,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
+import { onClickOutside } from '@vueuse/core'
 import type { Editor } from '@tiptap/vue-3'
 
 const props = defineProps<{
@@ -278,6 +279,11 @@ const isBlockTypeDropdownOpen = ref(false)
 const isAlignmentDropdownOpen = ref(false)
 const isOrderedListDropdownOpen = ref(false)
 const currentListType = ref<'1' | 'A' | 'a' | 'I' | 'i'>('1')
+
+// Refs для дропдаунов
+const blockTypeDropdownRef = ref<HTMLElement | null>(null)
+const alignmentDropdownRef = ref<HTMLElement | null>(null)
+const orderedListDropdownRef = ref<HTMLElement | null>(null)
 
 // Определяем текущий тип блока
 const currentBlockType = computed(() => {
@@ -384,17 +390,6 @@ const setLink = () => {
   props.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
 }
 
-// Функция для добавления изображения
-const addImage = () => {
-  if (!props.editor) return
-
-  const url = window.prompt('URL изображения:')
-
-  if (url) {
-    props.editor.chain().focus().setImage({ src: url }).run()
-  }
-}
-
 // Функция для добавления строчной формулы
 // const insertInlineFormula = () => {
 //   if (!props.editor) return
@@ -429,21 +424,16 @@ const addImage = () => {
 // }
 
 // Закрытие дропдаунов при клике вне их
-const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement
-  if (!target.closest('.dropdown')) {
-    isBlockTypeDropdownOpen.value = false
-    isAlignmentDropdownOpen.value = false
-    isOrderedListDropdownOpen.value = false
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
+onClickOutside(blockTypeDropdownRef, () => {
+  isBlockTypeDropdownOpen.value = false
 })
 
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
+onClickOutside(alignmentDropdownRef, () => {
+  isAlignmentDropdownOpen.value = false
+})
+
+onClickOutside(orderedListDropdownRef, () => {
+  isOrderedListDropdownOpen.value = false
 })
 </script>
 
