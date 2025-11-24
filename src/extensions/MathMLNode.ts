@@ -40,8 +40,19 @@ export const MathMLNode = Node.create({
       insertMathML:
         (mathml: string) =>
           ({ tr, dispatch }) => {
+
+            // ---------- SANITIZE MATHML ----------
+            const clean = mathml
+              .replace(/&nbsp;/g, ' ')               // убрать &nbsp;
+              .replace(/<\/math>.*$/, '</math>')    // убрать хвосты типа ;&nbsp;<math>
+              .replace(/&lt;/g, '<')                // HTML → XML
+              .replace(/&gt;/g, '>')
+              .replace(/&amp;/g, '&')
+
+            // --------------------------------------
+
             const node = this.type.create({
-              content: mathml,
+              content: clean,
             })
 
             if (dispatch) {
@@ -52,4 +63,5 @@ export const MathMLNode = Node.create({
     }
   },
 })
+
 
