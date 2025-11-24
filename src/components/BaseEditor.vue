@@ -1,5 +1,5 @@
 <template>
-  <div class="tiptap-editor" v-if="editor">
+  <div class="base-editor" v-if="editor">
     <EditorMenuBar :editor="editor" />
     <EditorContent :editor="editor" class="editor-content" />
   </div>
@@ -17,9 +17,15 @@ import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import Highlight from '@tiptap/extension-highlight'
 import Mathematics from '@tiptap/extension-mathematics'
+import { all, createLowlight } from 'lowlight'
+import Underline from '@tiptap/extension-underline'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { CustomOrderedList } from '../extensions/CustomOrderedList'
 import EditorMenuBar from './EditorMenuBar.vue'
 import 'katex/dist/katex.min.css'
-import { convertMathMLToLatex } from "../../utils/mathmlConverter.ts"
+import { convertMathMLToLatex } from "../../utils/mathMlConverter.ts"
+
+const lowlight = createLowlight(all)
 
 const isContentInitialized = ref(false)
 
@@ -34,7 +40,14 @@ const sendContentUpdate = useDebounceFn((content: string) => {
 
 const editor = useEditor({
   extensions: [
-    StarterKit,
+    StarterKit.configure({
+      codeBlock: false,
+      orderedList: false,
+    }),
+    CustomOrderedList,
+    CodeBlockLowlight.configure({
+      lowlight,
+    }),
     Link.configure({
       openOnClick: false,
       HTMLAttributes: {
@@ -49,6 +62,7 @@ const editor = useEditor({
       types: ['heading', 'paragraph'],
       alignments: ['left', 'center', 'right', 'justify'],
     }),
+    Underline,
     Subscript,
     Superscript,
     Highlight.configure({
@@ -81,7 +95,6 @@ const handleMessage = (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
     // Конвертируем MathML в LaTeX перед установкой контента
     const contentWithLatex = convertMathMLToLatex(event.data.content || '')
-    console.log('Converted content:', contentWithLatex) // Для отладки
     editor.value.commands.setContent(contentWithLatex)
 
     setTimeout(() => {
@@ -112,14 +125,13 @@ defineExpose({
 })
 </script>
 
-<style scoped>
-.tiptap-editor {
-  background: var(--editor-bg);
-  @import url('https://fonts.googleapis.com/css2?family=Wix+Madefor+Text:ital,wght@0,400..800;1,400..800&display=swap');
-  font-family: "Wix Madefor Text", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
+<style>
+.base-editor {
   width: 641px;
+
+  :focus {
+    outline: none;
+  }
 }
 
 .editor-content {
@@ -128,40 +140,66 @@ defineExpose({
   font-size: 17px;
   line-height: 22px;
   height: 320px;
-  background-color: #fcfcfd;
+  background-color: var(--editor-content);
   scrollbar-width: thin;
-  scrollbar-color: #d1d5db #fcfcfd;
+  scrollbar-color: var(--scrollbar-bg) var(--scrollbar-color);
 }
 
-/* Custom scrollbar for Webkit browsers */
 .editor-content::-webkit-scrollbar {
   width: 4px;
 }
 
-
-.editor-content::-webkit-scrollbar-thumb {
-  border-radius: 2px;
+.ProseMirror code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--menu-bg);
+  border: 1px solid var(--menu-border);
 }
 
-/* Стили для математических формул */
-:deep(.math-node) {
-  display: inline-block;
-  margin: 0 2px;
-  padding: 2px 4px;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 3px;
-  cursor: pointer;
+
+/* Стили для списков */
+.ProseMirror ol {
+  padding-left: 24px;
+  margin: 12px 0;
 }
 
-:deep(.math-node:hover) {
-  background-color: rgba(0, 0, 0, 0.1);
+.ProseMirror blockquote {
+  border-left: 3px solid var(--menu-border);
+  margin: 1.5rem 0;
+  padding-left: 1rem;
 }
 
-:deep(.katex) {
-  font-size: inherit;
+.ProseMirror h1 {
+  font-size: 28px;
+  line-height: 28px;
+  font-weight: 600;
+  margin-bottom: 16px;
 }
 
-:deep(.katex-display) {
-  margin: 0.5em 0;
+.ProseMirror h2 {
+  font-size: 21px;
+  line-height: 25px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.ProseMirror h3 {
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.ProseMirror ol li {
+  margin: 4px 0;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+  padding-left: 24px;
+  margin: 12px 0;
+}
+
+.ProseMirror ul li {
+  margin: 4px 0;
 }
 </style>

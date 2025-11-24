@@ -1,4 +1,3 @@
-// utils/mathmlConverter.ts
 import { MathMLToLaTeX } from 'mathml-to-latex'
 
 export function convertMathMLToLatex(html: string): string {
@@ -22,7 +21,6 @@ export function convertMathMLToLatex(html: string): string {
         })
         .trim()
 
-      console.log('Converted LaTeX:', latex)
 
       // Создаем текстовый узел с $ для MathJax
       const textNode = doc.createTextNode(`$${latex}$`)

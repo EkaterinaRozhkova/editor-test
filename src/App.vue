@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import TiptapEditor from './components/TiptapEditor.vue'
+import BaseEditor from '@/components/BaseEditor.vue'
 </script>
 
 <template>
-    <main class="app-main">
-      <TiptapEditor />
+    <main>
+      <BaseEditor />
     </main>
 </template>
 
