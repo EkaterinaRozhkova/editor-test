@@ -62,7 +62,7 @@ const editor = useEditor({
     }),
     MathInline, // ← ДОБАВИТЬ СЮДА
   ],
-  content: '',
+  content: `<div><p><math xmlns="http://www.w3.org/1998/Math/MathML"><msup><mfrac><mn>7</mn><mn>8</mn></mfrac><mrow><mo>\\</mo><mn>3</mn></mrow></msup><mo>+</mo><msup><mfrac><mn>5</mn><mn>6</mn></mfrac><mrow><mo>\\</mo><mn>4</mn></mrow></msup><mo>=</mo><mfrac><mn>21</mn><mn>24</mn></mfrac><mo>+</mo><mfrac><mn>20</mn><mn>24</mn></mfrac><mo>=</mo><mfrac><mn>41</mn><mn>24</mn></mfrac><mo>=</mo><mn>1</mn><mfrac><mn>17</mn><mn>24</mn></mfrac><mo>.</mo></math></p></div>`,
   editorProps: {
     attributes: {
       class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
