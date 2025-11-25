@@ -1,7 +1,7 @@
 <template>
   <NodeViewWrapper :class="isBlock ? 'math-block-wrapper' : 'inline-math-wrapper'">
     <div
-      v-html="mathmlContent"
+      v-html="renderedContent"
       :class="isBlock ? 'math-block-content' : 'inline-math-content'"
       @click="selectNode"
     />
@@ -10,23 +10,33 @@
 
 <script setup lang="ts">
 import { NodeViewWrapper } from '@tiptap/vue-3'
-import { computed } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import type { NodeViewProps } from '@tiptap/core'
+import { renderMathML } from '../utils/mathjaxRenderer'
 
 const props = defineProps<NodeViewProps>()
 
 const isBlock = computed(() => props.node.type.name === 'mathBlock')
+const renderedContent = ref('')
 
-const mathmlContent = computed(() => {
+// Рендерим MathML через MathJax при изменении
+watchEffect(async () => {
   const mathml = props.node.attrs.mathml
 
-  // Если это уже MathML элемент, возвращаем как есть
-  if (mathml && mathml.trim().startsWith('<math')) {
-    return mathml
+  if (!mathml) {
+    renderedContent.value = ''
+    return
   }
 
-  // Если это просто текст, оборачиваем в math
-  return `<math xmlns="http://www.w3.org/1998/Math/MathML"${isBlock.value ? ' display="block"' : ''}>${mathml || ''}</math>`
+  try {
+    // Используем MathJax для красивого рендеринга
+    const rendered = await renderMathML(mathml, isBlock.value)
+    renderedContent.value = rendered
+  } catch (error) {
+    console.error('Error rendering MathML:', error)
+    // Fallback: показываем оригинальный MathML
+    renderedContent.value = mathml
+  }
 })
 
 const selectNode = () => {
@@ -57,14 +67,27 @@ const selectNode = () => {
 
 .inline-math-content:hover,
 .math-block-content:hover {
-  background-color: var(--math-hover-bg, rgba(0, 0, 0, 0.05));
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .math-block-content {
   padding: 8px 12px;
 }
 
-/* Улучшаем отображение MathML */
+/* Стили для SVG, генерируемых MathJax */
+:deep(svg) {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 100%;
+  height: auto;
+}
+
+:deep(.math-block-content svg) {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Улучшаем отображение MathML (fallback если MathJax не сработал) */
 :deep(math) {
   font-size: 1.1em;
   line-height: 1.4;
@@ -74,37 +97,5 @@ const selectNode = () => {
   display: block;
   margin: 0.5em auto;
   font-size: 1.2em;
-}
-
-/* Стили для дробей */
-:deep(mfrac) {
-  display: inline-block;
-  vertical-align: middle;
-  text-align: center;
-}
-
-:deep(mfrac > *) {
-  display: block;
-}
-
-/* Стили для индексов */
-:deep(msub),
-:deep(msup),
-:deep(msubsup) {
-  display: inline-block;
-  vertical-align: baseline;
-}
-
-:deep(msub > *:last-child),
-:deep(msup > *:last-child),
-:deep(msubsup > *:not(:first-child)) {
-  font-size: 0.7em;
-}
-
-/* Стили для корней */
-:deep(msqrt),
-:deep(mroot) {
-  display: inline-block;
-  padding: 2px;
 }
 </style>

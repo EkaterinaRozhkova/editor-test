@@ -191,7 +191,15 @@ defineExpose({
   margin: 4px 0;
 }
 
-/* Стили для MathML формул */
+/* Стили для математических формул (MathJax SVG) */
+.ProseMirror .inline-math-wrapper svg,
+.ProseMirror .math-block-wrapper svg {
+  vertical-align: middle;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Стили для MathML формул (fallback) */
 .ProseMirror math {
   font-size: 1.1em;
   line-height: 1.4;
