@@ -18,10 +18,20 @@ import Highlight from '@tiptap/extension-highlight'
 import { all, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { CustomOrderedList } from '../extensions/CustomOrderedList'
-import { MathInline } from '../extensions/MathInline'
-import { convertMathMLToLatex } from '../utils/mathml-converter'
 import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
+
+// Загрузка MathJax через CDN
+const loadMathJax = () => {
+  return new Promise<void>((resolve, reject) => {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@2.7.7/MathJax.js?config=TeX-MML-AM_CHTML';
+    script.onload = () => resolve();
+    script.onerror = (err) => reject(err);
+    document.head.appendChild(script);
+  });
+};
 
 const lowlight = createLowlight(all)
 const isContentInitialized = ref(false)
@@ -59,60 +69,76 @@ const editor = useEditor({
     Superscript,
     Highlight.configure({
       multicolor: false,
-    }),
-    MathInline, // ← ДОБАВИТЬ СЮДА
+    })
   ],
   content: '',
   editorProps: {
     attributes: {
       class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
-    },
-    // Конвертировать MathML при вставке из буфера обмена
-    transformPastedHTML(html) {
-      return convertMathMLToLatex(html)
-    },
+    }
   },
   onUpdate: () => {
     sendContentUpdate()
   }
 })
 
-const handleMessage = (event: MessageEvent) => {
-  if (event.data.type === 'init-content' && editor.value) {
-    try {
-      const html = LZString.decompressFromEncodedURIComponent(event.data.data)
+const convertMathMLToLatex = async (htmlContent: string): Promise<string> => {
+  // Дожидаемся загрузки MathJax
+  await loadMathJax();
 
-      // ← КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: конвертировать MathML перед загрузкой
-      const convertedHtml = convertMathMLToLatex(html)
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlContent, 'text/html');
 
-      editor.value.commands.setContent(convertedHtml)
-      isContentInitialized.value = true
+  const mathmlElements = doc.querySelectorAll('math'); // Ищем все элементы <math> в HTML контенте
+  mathmlElements.forEach((mathml) => {
+    // Используем MathJax для конвертации MathML в LaTeX
+    MathJax.Hub.Queue(['Typeset', MathJax.Hub, mathml]);
 
-    } catch (error) {
-      console.error('Ошибка декомпрессии контента:', error)
-    }
-  }
+    // После завершения обработки MathJax получаем LaTeX
+    const latex = mathml.textContent;  // Получаем LaTeX после обработки MathJax
+    mathml.replaceWith(`\\(${latex}\\)`);  // Заменяем MathML на LaTeX
+  });
+
+  return doc.body.innerHTML; // Возвращаем обновленный HTML с LaTeX
 }
 
+const handleMessage = async (event: MessageEvent) => {
+  if (event.data.type === 'init-content' && editor.value) {
+    try {
+      const html = LZString.decompressFromEncodedURIComponent(event.data.data);
+
+      // Конвертируем MathML в LaTeX
+      const updatedHtml = await convertMathMLToLatex(html);
+
+      editor.value.commands.setContent(updatedHtml ?? '');
+      isContentInitialized.value = true;
+
+    } catch (error) {
+      console.error('Ошибка декомпрессии контента:', error);
+    }
+  }
+};
+
 onMounted(() => {
-  window.addEventListener('message', handleMessage)
-  window.parent.postMessage({ type: 'editor-ready' }, '*')
-})
+  window.addEventListener('message', handleMessage);
+  window.parent.postMessage({ type: 'editor-ready' }, '*');
+});
 
 onBeforeUnmount(() => {
-  window.removeEventListener('message', handleMessage)
-  editor.value?.destroy()
-})
+  window.removeEventListener('message', handleMessage);
+  editor.value?.destroy();
+});
 
 defineExpose({
   getHTML: () => editor.value?.getHTML(),
   getCompressed: () => {
-    const html = editor.value?.getHTML()
-    return html ? LZString.compressToEncodedURIComponent(html) : null
+    const html = editor.value?.getHTML();
+    return html ? LZString.compressToEncodedURIComponent(html) : null;
   },
   editor
-})
+});
 </script>
+
 
 <style>
 .base-editor {
