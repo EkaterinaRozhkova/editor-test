@@ -15,24 +15,20 @@ import TextAlign from '@tiptap/extension-text-align'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import Highlight from '@tiptap/extension-highlight'
-import Mathematics from '@tiptap/extension-mathematics'
 import { all, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { CustomOrderedList } from '../extensions/CustomOrderedList'
 import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
-import 'katex/dist/katex.min.css'
-import { convertMathMLToLatex, convertLatexToMathML } from "@/utils/mathConverter.ts"
 
 const lowlight = createLowlight(all)
 const isContentInitialized = ref(false)
 
 const sendContentUpdate = useDebounceFn(() => {
   if (isContentInitialized.value && editor.value) {
-    // При отправке конвертируем LaTeX обратно в MathML
-    const html = getHTML()
-    const htmlWithMathML = convertLatexToMathML(html ?? '')
-    const compressed = LZString.compressToEncodedURIComponent(htmlWithMathML)
+    // Отправляем HTML как есть - с MathML внутри
+    const html = editor.value.getHTML()
+    const compressed = LZString.compressToEncodedURIComponent(html)
 
     window.parent.postMessage({
       type: 'content-update',
@@ -63,15 +59,6 @@ const editor = useEditor({
     Highlight.configure({
       multicolor: false,
     }),
-    Mathematics.configure({
-      katexOptions: {
-        throwOnError: false,
-        displayMode: false,
-        output: 'html',
-        trust: false,
-        strict: false,
-      },
-    }),
   ],
   content: '',
   editorProps: {
@@ -87,16 +74,11 @@ const editor = useEditor({
 const handleMessage = (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
     try {
-      // Декомпрессия данных
+      // Декомпрессия и установка контента КАК ЕСТЬ
       const html = LZString.decompressFromEncodedURIComponent(event.data.data)
 
-      // Конвертируем MathML → LaTeX для редактора
-      const htmlInLatex = convertMathMLToLatex(html)
+      editor.value.commands.setContent(html)
 
-      // Устанавливаем контент
-      editor.value.commands.setContent(htmlInLatex)
-
-      // Ждем, пока TipTap обработает контент
       nextTick(() => {
         setTimeout(() => {
           isContentInitialized.value = true
@@ -118,48 +100,12 @@ onBeforeUnmount(() => {
   editor.value?.destroy()
 })
 
-/**
- * Получить HTML с LaTeX формулами (для отображения в редакторе)
- */
-const getHTML = () => {
-  if (!editor.value) return undefined
-  return editor.value.getHTML()
-}
-
-/**
- * Получить HTML с MathML формулами (для сохранения)
- */
-const getHTMLWithMathML = () => {
-  if (!editor.value) return undefined
-  const html = editor.value.getHTML()
-  return convertLatexToMathML(html)
-}
-
-/**
- * Получить сжатый контент с MathML
- */
-const getCompressed = () => {
-  if (!editor.value) return null
-  const htmlWithMathML = getHTMLWithMathML() || ''
-  return LZString.compressToEncodedURIComponent(htmlWithMathML)
-}
-
-/**
- * Установить контент с автоматической конвертацией
- */
-const setContent = (html: string) => {
-  if (!editor.value) return
-
-  // Если приходит MathML - конвертируем в LaTeX
-  const htmlInLatex = convertMathMLToLatex(html)
-  editor.value.commands.setContent(htmlInLatex)
-}
-
 defineExpose({
-  getHTML,
-  getHTMLWithMathML,
-  getCompressed,
-  setContent,
+  getHTML: () => editor.value?.getHTML(),
+  getCompressed: () => {
+    const html = editor.value?.getHTML()
+    return html ? LZString.compressToEncodedURIComponent(html) : null
+  },
   editor
 })
 </script>

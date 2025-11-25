@@ -19,7 +19,6 @@
     "@tiptap/extension-highlight": "^3.11.0",
     "@tiptap/extension-image": "^3.11.0",
     "@tiptap/extension-link": "^3.11.0",
-    "@tiptap/extension-mathematics": "^3.11.0",
     "@tiptap/extension-subscript": "^3.11.0",
     "@tiptap/extension-superscript": "^3.11.0",
     "@tiptap/extension-text-align": "^3.11.0",
