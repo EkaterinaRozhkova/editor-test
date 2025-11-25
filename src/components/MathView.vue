@@ -56,12 +56,14 @@ const selectNode = () => {
   display: inline-block;
   vertical-align: middle;
   margin: 0 2px;
+  max-width: 100%;
 }
 
 .math-block-wrapper {
   display: block;
   margin: 1rem 0;
   text-align: center;
+  overflow-x: auto;
 }
 
 .inline-math-content,
@@ -70,6 +72,7 @@ const selectNode = () => {
   padding: 2px 4px;
   border-radius: 3px;
   transition: background-color 0.2s;
+  max-width: 100%;
 }
 
 .inline-math-content:hover,
@@ -87,22 +90,43 @@ const selectNode = () => {
   vertical-align: middle;
   max-width: 100%;
   height: auto;
+  /* Ограничиваем максимальную высоту */
+  max-height: 3em;
 }
 
 :deep(.math-block-content svg) {
   display: block;
   margin: 0 auto;
+  /* Для блочных формул разрешаем большую высоту */
+  max-height: 8em;
 }
 
 /* Улучшаем отображение MathML (fallback если MathJax не сработал) */
 :deep(math) {
-  font-size: 1.1em;
+  font-size: 1em;
   line-height: 1.4;
 }
 
 :deep(math[display="block"]) {
   display: block;
   margin: 0.5em auto;
-  font-size: 1.2em;
+  font-size: 1em;
+}
+
+/* Исправляем позиционирование MathJax элементов */
+:deep(.MathJax) {
+  display: inline-block !important;
+  vertical-align: middle;
+}
+
+:deep(mjx-container) {
+  display: inline-block !important;
+  margin: 0 !important;
+}
+
+:deep(mjx-container[display="block"]) {
+  display: block !important;
+  margin: 0.5em 0 !important;
+  text-align: center;
 }
 </style>

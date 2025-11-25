@@ -31,7 +31,7 @@ async function loadMathJax(): Promise<void> {
       },
       svg: {
         fontCache: 'local',
-        scale: 1,
+        scale: 0.85, // Уменьшаем масштаб для более компактного отображения
         minScale: 0.5
       }
     }
