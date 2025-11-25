@@ -18,6 +18,7 @@ import Highlight from '@tiptap/extension-highlight'
 import { all, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { CustomOrderedList } from '../extensions/CustomOrderedList'
+import { InlineMath, MathBlock } from '../extensions/MathExtension'
 import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
 
@@ -59,6 +60,8 @@ const editor = useEditor({
     Highlight.configure({
       multicolor: false,
     }),
+    InlineMath,
+    MathBlock,
   ],
   content: '',
   editorProps: {
@@ -186,5 +189,94 @@ defineExpose({
 
 .ProseMirror ul li {
   margin: 4px 0;
+}
+
+/* Стили для MathML формул */
+.ProseMirror math {
+  font-size: 1.1em;
+  line-height: 1.4;
+  font-family: 'Latin Modern Math', 'STIX Two Math', 'Cambria Math', serif;
+}
+
+.ProseMirror math[display="block"] {
+  display: block;
+  margin: 1em auto;
+  text-align: center;
+  font-size: 1.2em;
+}
+
+/* Улучшаем отображение операторов */
+.ProseMirror mo {
+  padding: 0 0.2em;
+}
+
+/* Стили для дробей */
+.ProseMirror mfrac {
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.ProseMirror mfrac > * {
+  display: block;
+}
+
+.ProseMirror mfrac > *:first-child {
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.2em;
+  margin-bottom: 0.2em;
+}
+
+/* Стили для индексов */
+.ProseMirror msub,
+.ProseMirror msup,
+.ProseMirror msubsup {
+  display: inline-block;
+  vertical-align: baseline;
+}
+
+.ProseMirror msub > *:last-child,
+.ProseMirror msup > *:last-child {
+  font-size: 0.7em;
+  vertical-align: sub;
+}
+
+.ProseMirror msup > *:last-child {
+  vertical-align: super;
+}
+
+/* Стили для корней */
+.ProseMirror msqrt,
+.ProseMirror mroot {
+  display: inline-block;
+  padding: 2px 4px;
+}
+
+.ProseMirror msqrt::before {
+  content: '√';
+  font-size: 1.2em;
+}
+
+/* Стили для скобок */
+.ProseMirror mfenced,
+.ProseMirror mrow {
+  display: inline;
+}
+
+/* Матрицы и таблицы */
+.ProseMirror mtable {
+  display: inline-table;
+  vertical-align: middle;
+  margin: 0 0.5em;
+}
+
+.ProseMirror mtr {
+  display: table-row;
+}
+
+.ProseMirror mtd {
+  display: table-cell;
+  padding: 0.3em 0.5em;
+  text-align: center;
 }
 </style>
