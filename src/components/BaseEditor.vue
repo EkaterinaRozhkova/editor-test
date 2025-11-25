@@ -15,6 +15,7 @@ import TextAlign from '@tiptap/extension-text-align'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import Highlight from '@tiptap/extension-highlight'
+import Mathematics from '@tiptap/extension-mathematics'
 import { all, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { CustomOrderedList } from '../extensions/CustomOrderedList'
@@ -29,8 +30,8 @@ const isContentInitialized = ref(false)
 const sendContentUpdate = useDebounceFn(() => {
   if (isContentInitialized.value && editor.value) {
     // При отправке конвертируем LaTeX обратно в MathML
-    const html = getHTML() ?? ''
-    const htmlWithMathML = convertLatexToMathML(html)
+    const html = getHTML()
+    const htmlWithMathML = convertLatexToMathML(html ?? '')
     const compressed = LZString.compressToEncodedURIComponent(htmlWithMathML)
 
     window.parent.postMessage({
@@ -61,7 +62,16 @@ const editor = useEditor({
     Superscript,
     Highlight.configure({
       multicolor: false,
-    })
+    }),
+    Mathematics.configure({
+      katexOptions: {
+        throwOnError: false,
+        displayMode: false,
+        output: 'html',
+        trust: false,
+        strict: false,
+      },
+    }),
   ],
   content: '',
   editorProps: {
