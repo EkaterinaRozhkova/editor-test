@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, nextTick } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
@@ -22,17 +22,17 @@ import { CustomOrderedList } from '../extensions/CustomOrderedList'
 import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
 import 'katex/dist/katex.min.css'
-import { convertMathMLToLatex } from "@/utils/mathConverter.ts";
+import { convertMathMLToLatex, convertLatexToMathML } from "@/utils/mathConverter.ts"
 
 const lowlight = createLowlight(all)
-
 const isContentInitialized = ref(false)
 
 const sendContentUpdate = useDebounceFn(() => {
   if (isContentInitialized.value && editor.value) {
-    const html = editor.value.getHTML()
-
-    const compressed = LZString.compressToEncodedURIComponent(html)
+    // При отправке конвертируем LaTeX обратно в MathML
+    const html = getHTML()
+    const htmlWithMathML = convertLatexToMathML(html)
+    const compressed = LZString.compressToEncodedURIComponent(htmlWithMathML)
 
     window.parent.postMessage({
       type: 'content-update',
@@ -89,13 +89,19 @@ const handleMessage = (event: MessageEvent) => {
     try {
       // Декомпрессия данных
       const html = LZString.decompressFromEncodedURIComponent(event.data.data)
+
+      // Конвертируем MathML → LaTeX для редактора
       const htmlInLatex = convertMathMLToLatex(html)
 
+      // Устанавливаем контент
       editor.value.commands.setContent(htmlInLatex)
 
-      setTimeout(() => {
-        isContentInitialized.value = true
-      }, 100)
+      // Ждем, пока TipTap обработает контент
+      nextTick(() => {
+        setTimeout(() => {
+          isContentInitialized.value = true
+        }, 100)
+      })
     } catch (error) {
       console.error('Ошибка декомпрессии контента:', error)
     }
@@ -104,9 +110,7 @@ const handleMessage = (event: MessageEvent) => {
 
 onMounted(() => {
   window.addEventListener('message', handleMessage)
-  window.parent.postMessage({
-    type: 'editor-ready'
-  }, '*')
+  window.parent.postMessage({ type: 'editor-ready' }, '*')
 })
 
 onBeforeUnmount(() => {
@@ -114,22 +118,48 @@ onBeforeUnmount(() => {
   editor.value?.destroy()
 })
 
+/**
+ * Получить HTML с LaTeX формулами (для отображения в редакторе)
+ */
 const getHTML = () => {
   if (!editor.value) return undefined
-
   return editor.value.getHTML()
 }
 
+/**
+ * Получить HTML с MathML формулами (для сохранения)
+ */
+const getHTMLWithMathML = () => {
+  if (!editor.value) return undefined
+  const html = editor.value.getHTML()
+  return convertLatexToMathML(html)
+}
+
+/**
+ * Получить сжатый контент с MathML
+ */
 const getCompressed = () => {
   if (!editor.value) return null
+  const htmlWithMathML = getHTMLWithMathML() || ''
+  return LZString.compressToEncodedURIComponent(htmlWithMathML)
+}
 
-  const html = editor.value.getHTML()
-  return LZString.compressToEncodedURIComponent(html)
+/**
+ * Установить контент с автоматической конвертацией
+ */
+const setContent = (html: string) => {
+  if (!editor.value) return
+
+  // Если приходит MathML - конвертируем в LaTeX
+  const htmlInLatex = convertMathMLToLatex(html)
+  editor.value.commands.setContent(htmlInLatex)
 }
 
 defineExpose({
   getHTML,
+  getHTMLWithMathML,
   getCompressed,
+  setContent,
   editor
 })
 </script>

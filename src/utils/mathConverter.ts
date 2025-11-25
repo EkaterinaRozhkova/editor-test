@@ -228,28 +228,46 @@ export function convertMathMLToLatex(html: string): string {
 
   return doc.body.innerHTML
 }
-//
-// export function convertLatexToMathML(html: string): string {
-//   // Регулярное выражение для поиска $latex$ паттернов
-//   const latexPattern = /\$([^$]+)\$/g
-//
-//   // Заменяем каждый $latex$ на MathML
-//   const result = html.replace(latexPattern, (match, latex) => {
-//     try {
-//       // Конвертируем LaTeX в MathML используя KaTeX
-//       const mathml = katex.renderToString(latex, {
-//         output: 'mathml',
-//         throwOnError: false,
-//         displayMode: false
-//       })
-//
-//       return mathml
-//     } catch (error) {
-//       console.error('Error converting LaTeX to MathML:', error, 'LaTeX:', latex)
-//       // Оставляем исходный текст в случае ошибки
-//       return match
-//     }
-//   })
-//
-//   return result
-// }
+
+
+export function convertLatexToMathML(html: string): string {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+
+  // КРИТИЧНО: Удаляем все элементы, созданные MathJax
+  const mathjaxElements = doc.querySelectorAll(
+    '.MathJax, .MathJax_Display, .MathJax_Preview, .MathJax_SVG, .MathJax_SVG_Display, script[type="math/tex"]'
+  )
+  mathjaxElements.forEach(el => el.remove())
+
+  // Находим наши span с формулами
+  const formulaSpans = doc.querySelectorAll('span.math-formula[data-latex]')
+
+  formulaSpans.forEach((span) => {
+    try {
+      const latex = span.getAttribute('data-latex')
+      if (!latex) return
+
+      // Конвертируем LaTeX обратно в MathML
+      const mathml = katex.renderToString(latex, {
+        output: 'mathml',
+        throwOnError: false,
+        displayMode: false
+      })
+
+      // Создаем временный контейнер для парсинга MathML
+      const tempDiv = doc.createElement('div')
+      tempDiv.innerHTML = mathml
+      const mathElement = tempDiv.querySelector('math')
+
+      if (mathElement) {
+        span.parentNode?.replaceChild(mathElement, span)
+      }
+    } catch (error) {
+      console.error('Error converting LaTeX to MathML:', error)
+      // Оставляем исходный span в случае ошибки
+    }
+  })
+
+  return doc.body.innerHTML
+}
