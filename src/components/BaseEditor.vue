@@ -22,6 +22,7 @@ import { CustomOrderedList } from '../extensions/CustomOrderedList'
 import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
 import 'katex/dist/katex.min.css'
+import { convertMathMLToLatex } from "@/utils/mathConverter.ts";
 
 const lowlight = createLowlight(all)
 
@@ -88,8 +89,9 @@ const handleMessage = (event: MessageEvent) => {
     try {
       // Декомпрессия данных
       const html = LZString.decompressFromEncodedURIComponent(event.data.data)
+      const htmlInLatex = convertMathMLToLatex(html)
 
-      editor.value.commands.setContent(html)
+      editor.value.commands.setContent(htmlInLatex)
 
       setTimeout(() => {
         isContentInitialized.value = true
