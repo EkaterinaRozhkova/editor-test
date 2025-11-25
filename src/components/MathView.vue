@@ -1,6 +1,6 @@
 <template>
   <NodeViewWrapper :class="isBlock ? 'math-block-wrapper' : 'inline-math-wrapper'">
-    <div
+    <span
       v-html="renderedContent"
       :class="isBlock ? 'math-block-content' : 'inline-math-content'"
       @click="selectNode"
@@ -24,7 +24,7 @@ watchEffect(async () => {
   const mathml = props.node.attrs.mathml
 
   console.log('[MathView] Rendering math:', {
-    mathml,
+    mathml: mathml ? mathml.substring(0, 50) : 'empty',
     isBlock: isBlock.value,
     nodeType: props.node.type.name
   })
@@ -53,15 +53,15 @@ const selectNode = () => {
 
 <style scoped>
 .inline-math-wrapper {
-  display: inline;
-  cursor: pointer;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 2px;
 }
 
 .math-block-wrapper {
   display: block;
   margin: 1rem 0;
   text-align: center;
-  cursor: pointer;
 }
 
 .inline-math-content,

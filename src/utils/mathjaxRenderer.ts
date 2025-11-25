@@ -65,6 +65,11 @@ export async function renderMathML(mathml: string, display: boolean = false): Pr
       processedMathml = `<math xmlns="http://www.w3.org/1998/Math/MathML"${display ? ' display="block"' : ''}>${processedMathml}</math>`
     }
 
+    // Добавляем display атрибут если нужно
+    if (display && !processedMathml.includes('display=')) {
+      processedMathml = processedMathml.replace('<math', '<math display="block"')
+    }
+
     // Создаем временный контейнер
     const container = document.createElement('div')
     container.innerHTML = processedMathml
@@ -75,8 +80,8 @@ export async function renderMathML(mathml: string, display: boolean = false): Pr
     // Возвращаем результат
     return container.innerHTML
   } catch (error) {
-    console.error('MathJax rendering error:', error)
-    // В случае ошибки возвращаем оригинальный MathML
-    return mathml
+    console.error('[MathJax] Rendering error:', error)
+    // В случае ошибки возвращаем оригинальный MathML с обёрткой для стилей
+    return `<span class="mathml-fallback">${mathml}</span>`
   }
 }

@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, nextTick } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
@@ -18,17 +18,16 @@ import Highlight from '@tiptap/extension-highlight'
 import { all, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { CustomOrderedList } from '../extensions/CustomOrderedList'
-import { InlineMath, MathBlock } from '../extensions/MathExtension'
+import { MathInline } from '../extensions/MathInline'
+import { convertMathMLToLatex } from '../utils/mathml-converter'
 import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
-import { migrateMathMLStrings } from '../utils/migrateMathML'
 
 const lowlight = createLowlight(all)
 const isContentInitialized = ref(false)
 
 const sendContentUpdate = useDebounceFn(() => {
   if (isContentInitialized.value && editor.value) {
-    // Отправляем HTML как есть - с MathML внутри
     const html = editor.value.getHTML()
     const compressed = LZString.compressToEncodedURIComponent(html)
 
@@ -61,13 +60,16 @@ const editor = useEditor({
     Highlight.configure({
       multicolor: false,
     }),
-    InlineMath,
-    MathBlock,
+    MathInline, // ← ДОБАВИТЬ СЮДА
   ],
   content: '',
   editorProps: {
     attributes: {
       class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
+    },
+    // Конвертировать MathML при вставке из буфера обмена
+    transformPastedHTML(html) {
+      return convertMathMLToLatex(html)
     },
   },
   onUpdate: () => {
@@ -78,22 +80,14 @@ const editor = useEditor({
 const handleMessage = (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
     try {
-      // Декомпрессия и установка контента КАК ЕСТЬ
       const html = LZString.decompressFromEncodedURIComponent(event.data.data)
 
-      editor.value.commands.setContent(html)
+      // ← КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: конвертировать MathML перед загрузкой
+      const convertedHtml = convertMathMLToLatex(html)
 
-      // Мигрируем MathML строки в math ноды
-      nextTick(() => {
-        if (editor.value) {
-          console.log('[BaseEditor] Running MathML migration...')
-          migrateMathMLStrings(editor.value)
+      editor.value.commands.setContent(convertedHtml)
+      isContentInitialized.value = true
 
-          setTimeout(() => {
-            isContentInitialized.value = true
-          }, 100)
-        }
-      })
     } catch (error) {
       console.error('Ошибка декомпрессии контента:', error)
     }
@@ -196,102 +190,5 @@ defineExpose({
 
 .ProseMirror ul li {
   margin: 4px 0;
-}
-
-/* Стили для математических формул (MathJax SVG) */
-.ProseMirror .inline-math-wrapper svg,
-.ProseMirror .math-block-wrapper svg {
-  vertical-align: middle;
-  max-width: 100%;
-  height: auto;
-}
-
-/* Стили для MathML формул (fallback) */
-.ProseMirror math {
-  font-size: 1.1em;
-  line-height: 1.4;
-  font-family: 'Latin Modern Math', 'STIX Two Math', 'Cambria Math', serif;
-}
-
-.ProseMirror math[display="block"] {
-  display: block;
-  margin: 1em auto;
-  text-align: center;
-  font-size: 1.2em;
-}
-
-/* Улучшаем отображение операторов */
-.ProseMirror mo {
-  padding: 0 0.2em;
-}
-
-/* Стили для дробей */
-.ProseMirror mfrac {
-  display: inline-block;
-  vertical-align: middle;
-  text-align: center;
-}
-
-.ProseMirror mfrac > * {
-  display: block;
-}
-
-.ProseMirror mfrac > *:first-child {
-  border-bottom: 1px solid currentColor;
-  padding-bottom: 0.2em;
-  margin-bottom: 0.2em;
-}
-
-/* Стили для индексов */
-.ProseMirror msub,
-.ProseMirror msup,
-.ProseMirror msubsup {
-  display: inline-block;
-  vertical-align: baseline;
-}
-
-.ProseMirror msub > *:last-child,
-.ProseMirror msup > *:last-child {
-  font-size: 0.7em;
-  vertical-align: sub;
-}
-
-.ProseMirror msup > *:last-child {
-  vertical-align: super;
-}
-
-/* Стили для корней */
-.ProseMirror msqrt,
-.ProseMirror mroot {
-  display: inline-block;
-  padding: 2px 4px;
-}
-
-.ProseMirror msqrt::before {
-  content: '√';
-  font-size: 1.2em;
-}
-
-/* Стили для скобок */
-.ProseMirror mfenced,
-.ProseMirror mrow {
-  display: inline;
-}
-
-/* Матрицы и таблицы */
-.ProseMirror mtable {
-  display: inline-table;
-  vertical-align: middle;
-  margin: 0 0.5em;
-}
-
-.ProseMirror mtr {
-  display: table-row;
-}
-
-.ProseMirror mtd {
-  display: table-cell;
-  padding: 0.3em 0.5em;
-  text-align: center;
 }
 </style>
