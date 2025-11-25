@@ -21,6 +21,7 @@ import { CustomOrderedList } from '../extensions/CustomOrderedList'
 import { InlineMath, MathBlock } from '../extensions/MathExtension'
 import EditorMenuBar from './EditorMenuBar.vue'
 import LZString from 'lz-string'
+import { migrateMathMLStrings } from '../utils/migrateMathML'
 
 const lowlight = createLowlight(all)
 const isContentInitialized = ref(false)
@@ -82,10 +83,16 @@ const handleMessage = (event: MessageEvent) => {
 
       editor.value.commands.setContent(html)
 
+      // Мигрируем MathML строки в math ноды
       nextTick(() => {
-        setTimeout(() => {
-          isContentInitialized.value = true
-        }, 100)
+        if (editor.value) {
+          console.log('[BaseEditor] Running MathML migration...')
+          migrateMathMLStrings(editor.value)
+
+          setTimeout(() => {
+            isContentInitialized.value = true
+          }, 100)
+        }
       })
     } catch (error) {
       console.error('Ошибка декомпрессии контента:', error)
