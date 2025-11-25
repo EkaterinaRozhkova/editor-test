@@ -38,24 +38,24 @@
     <div class="divider"></div>
 
     <!-- Математические формулы -->
-<!--     <div class="button-group"> -->
-<!--       <button -->
-<!--         @click="insertInlineFormula" -->
-<!--         :class="{ 'is-active': editor.isActive('inlineMath') }" -->
-<!--         title="Вставить строчную формулу" -->
-<!--       > -->
-<!--         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 14-6 6h9v-3"/><path d="M18 6h-4a4 4 0 1 0 0 8h4"/><path d="M4 6h9a4 4 0 1 1 0 8H4"/></svg> -->
-<!--       </button> -->
-<!--       <button -->
-<!--         @click="insertBlockFormula" -->
-<!--         :class="{ 'is-active': editor.isActive('mathBlock') }" -->
-<!--         title="Вставить блочную формулу" -->
-<!--       > -->
-<!--         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m8 10 2 2-2 2"/><path d="m16 10-2 2 2 2"/><path d="M8 16h8"/></svg> -->
-<!--       </button> -->
-<!--     </div> -->
+    <!--     <div class="button-group"> -->
+    <!--       <button -->
+    <!--         @click="insertInlineFormula" -->
+    <!--         :class="{ 'is-active': editor.isActive('inlineMath') }" -->
+    <!--         title="Вставить строчную формулу" -->
+    <!--       > -->
+    <!--         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 14-6 6h9v-3"/><path d="M18 6h-4a4 4 0 1 0 0 8h4"/><path d="M4 6h9a4 4 0 1 1 0 8H4"/></svg> -->
+    <!--       </button> -->
+    <!--       <button -->
+    <!--         @click="insertBlockFormula" -->
+    <!--         :class="{ 'is-active': editor.isActive('mathBlock') }" -->
+    <!--         title="Вставить блочную формулу" -->
+    <!--       > -->
+    <!--         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m8 10 2 2-2 2"/><path d="m16 10-2 2 2 2"/><path d="M8 16h8"/></svg> -->
+    <!--       </button> -->
+    <!--     </div> -->
 
-<!--     <div class="divider"></div> -->
+    <!--     <div class="divider"></div> -->
 
     <!-- Форматирование текста -->
     <div class="button-group">
@@ -223,12 +223,12 @@
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
       </button>
-<!--       <button -->
-<!--         @click="addImage" -->
-<!--         title="Вставить изображение" -->
-<!--       > -->
-<!--         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> -->
-<!--       </button> -->
+      <!--       <button -->
+      <!--         @click="addImage" -->
+      <!--         title="Вставить изображение" -->
+      <!--       > -->
+      <!--         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> -->
+      <!--       </button> -->
     </div>
 
     <div class="divider"></div>

@@ -10,6 +10,12 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import { Mathematics, migrateMathStrings } from '@tiptap/extension-mathematics';
+import Underline from '@tiptap/extension-underline';
+import Subscript from '@tiptap/extension-subscript';
+import Superscript from '@tiptap/extension-superscript';
+import Highlight from '@tiptap/extension-highlight';
+import TextAlign from '@tiptap/extension-text-align';
+import Link from '@tiptap/extension-link';
 import LZString from 'lz-string';
 import { useDebounceFn } from "@vueuse/core";
 import EditorMenuBar from "@/components/EditorMenuBar.vue";
@@ -34,6 +40,16 @@ const editor = useEditor({
       katexOptions: {
         throwOnError: true
       },
+    }),
+    Underline,
+    Subscript,
+    Superscript,
+    Highlight,
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+    }),
+    Link.configure({
+      openOnClick: false,
     }),
   ],
   content: '',  // Изначально пустое содержимое
