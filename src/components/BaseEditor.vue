@@ -29,7 +29,7 @@ const isContentInitialized = ref(false)
 const sendContentUpdate = useDebounceFn(() => {
   if (isContentInitialized.value && editor.value) {
     // При отправке конвертируем LaTeX обратно в MathML
-    const html = getHTML()
+    const html = getHTML() ?? ''
     const htmlWithMathML = convertLatexToMathML(html)
     const compressed = LZString.compressToEncodedURIComponent(htmlWithMathML)
 
