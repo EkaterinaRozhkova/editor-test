@@ -23,6 +23,12 @@ const renderedContent = ref('')
 watchEffect(async () => {
   const mathml = props.node.attrs.mathml
 
+  console.log('[MathView] Rendering math:', {
+    mathml,
+    isBlock: isBlock.value,
+    nodeType: props.node.type.name
+  })
+
   if (!mathml) {
     renderedContent.value = ''
     return
@@ -31,9 +37,10 @@ watchEffect(async () => {
   try {
     // Используем MathJax для красивого рендеринга
     const rendered = await renderMathML(mathml, isBlock.value)
+    console.log('[MathView] Rendered:', rendered.substring(0, 100))
     renderedContent.value = rendered
   } catch (error) {
-    console.error('Error rendering MathML:', error)
+    console.error('[MathView] Error rendering MathML:', error)
     // Fallback: показываем оригинальный MathML
     renderedContent.value = mathml
   }

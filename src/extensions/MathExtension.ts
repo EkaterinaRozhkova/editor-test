@@ -1,5 +1,6 @@
 import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
+import { Plugin, PluginKey } from '@tiptap/pm/state'
 import MathView from '../components/MathView.vue'
 
 declare module '@tiptap/core' {
@@ -9,6 +10,73 @@ declare module '@tiptap/core' {
       insertMathBlock: (mathml: string) => ReturnType
     }
   }
+}
+
+// Плагин для обработки вставки MathML
+const mathPastePluginKey = new PluginKey('mathPaste')
+
+function createMathPastePlugin() {
+  return new Plugin({
+    key: mathPastePluginKey,
+    props: {
+      handlePaste(view, event, slice) {
+        // Получаем HTML из буфера обмена
+        const html = event.clipboardData?.getData('text/html') || event.clipboardData?.getData('text/plain')
+
+        if (!html) return false
+
+        console.log('[MathPaste] Clipboard content:', html)
+
+        // Проверяем, есть ли MathML в тексте
+        if (html.includes('<math')) {
+          // Создаем временный div для парсинга
+          const tempDiv = document.createElement('div')
+          tempDiv.innerHTML = html
+
+          // Ищем все <math> элементы
+          const mathElements = tempDiv.querySelectorAll('math')
+
+          if (mathElements.length > 0) {
+            console.log('[MathPaste] Found math elements:', mathElements.length)
+
+            const { state, dispatch } = view
+            const { tr } = state
+
+            // Для каждого math элемента создаем соответствующую ноду
+            mathElements.forEach((mathElement, index) => {
+              const mathml = mathElement.outerHTML
+              const isBlock = mathElement.getAttribute('display') === 'block'
+
+              console.log('[MathPaste] Inserting math:', { mathml: mathml.substring(0, 100), isBlock })
+
+              // Создаем ноду
+              const nodeType = isBlock ? state.schema.nodes.mathBlock : state.schema.nodes.inlineMath
+
+              if (nodeType) {
+                const node = nodeType.create({ mathml })
+
+                // Вставляем в позицию курсора
+                if (index === 0) {
+                  tr.replaceSelectionWith(node)
+                } else {
+                  // Добавляем пробел между формулами
+                  const pos = tr.selection.to
+                  tr.insert(pos, node)
+                }
+              }
+            })
+
+            if (tr.docChanged) {
+              dispatch(tr)
+              return true
+            }
+          }
+        }
+
+        return false
+      },
+    },
+  })
 }
 
 export const InlineMath = Node.create({
@@ -48,11 +116,17 @@ export const InlineMath = Node.create({
     return [
       {
         tag: 'span.inline-math',
+        priority: 100,
       },
       {
-        tag: 'math:not([display="block"])',
+        tag: 'math',
+        priority: 51,
         getAttrs: (node) => {
           if (node instanceof HTMLElement) {
+            // Проверяем, что это не блочная формула
+            const display = node.getAttribute('display')
+            if (display === 'block') return false
+
             return { mathml: node.outerHTML }
           }
           return false
@@ -67,6 +141,10 @@ export const InlineMath = Node.create({
 
   addNodeView() {
     return VueNodeViewRenderer(MathView)
+  },
+
+  addProseMirrorPlugins() {
+    return [createMathPastePlugin()]
   },
 
   addCommands() {
@@ -116,9 +194,11 @@ export const MathBlock = Node.create({
     return [
       {
         tag: 'div.math-block',
+        priority: 100,
       },
       {
         tag: 'math[display="block"]',
+        priority: 52,
         getAttrs: (node) => {
           if (node instanceof HTMLElement) {
             return { mathml: node.outerHTML }
