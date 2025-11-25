@@ -12,37 +12,37 @@
 import { NodeViewWrapper } from '@tiptap/vue-3'
 import { computed, ref, watchEffect } from 'vue'
 import type { NodeViewProps } from '@tiptap/core'
-import { renderMathML } from '../utils/mathjaxRenderer'
+import { renderLatex } from '../utils/mathjaxRenderer'
 
 const props = defineProps<NodeViewProps>()
 
 const isBlock = computed(() => props.node.type.name === 'mathBlock')
 const renderedContent = ref('')
 
-// Рендерим MathML через MathJax при изменении
+// Рендерим LaTeX через MathJax при изменении
 watchEffect(async () => {
-  const mathml = props.node.attrs.mathml
+  const latex = props.node.attrs.latex
 
   console.log('[MathView] Rendering math:', {
-    mathml: mathml ? mathml.substring(0, 50) : 'empty',
+    latex: latex ? latex.substring(0, 50) : 'empty',
     isBlock: isBlock.value,
     nodeType: props.node.type.name
   })
 
-  if (!mathml) {
+  if (!latex) {
     renderedContent.value = ''
     return
   }
 
   try {
     // Используем MathJax для красивого рендеринга
-    const rendered = await renderMathML(mathml, isBlock.value)
+    const rendered = await renderLatex(latex, isBlock.value)
     console.log('[MathView] Rendered:', rendered.substring(0, 100))
     renderedContent.value = rendered
   } catch (error) {
-    console.error('[MathView] Error rendering MathML:', error)
-    // Fallback: показываем оригинальный MathML
-    renderedContent.value = mathml
+    console.error('[MathView] Error rendering LaTeX:', error)
+    // Fallback: показываем оригинальный LaTeX в code блоке
+    renderedContent.value = `<code>${latex}</code>`
   }
 })
 

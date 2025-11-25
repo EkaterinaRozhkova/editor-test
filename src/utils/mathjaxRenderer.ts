@@ -36,9 +36,9 @@ async function loadMathJax(): Promise<void> {
       }
     }
 
-    // Загружаем скрипт
+    // Загружаем скрипт (tex-mml-svg поддерживает и LaTeX и MathML)
     const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/mml-svg.js'
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js'
     script.async = true
     script.onerror = () => reject(new Error('Failed to load MathJax'))
     document.head.appendChild(script)
@@ -83,5 +83,35 @@ export async function renderMathML(mathml: string, display: boolean = false): Pr
     console.error('[MathJax] Rendering error:', error)
     // В случае ошибки возвращаем оригинальный MathML с обёрткой для стилей
     return `<span class="mathml-fallback">${mathml}</span>`
+  }
+}
+
+/**
+ * Рендерит LaTeX в SVG используя MathJax
+ * @param latex - LaTeX строка для рендеринга
+ * @param display - true для display mode (блочная формула), false для inline
+ * @returns HTML строка с SVG
+ */
+export async function renderLatex(latex: string, display: boolean = false): Promise<string> {
+  try {
+    // Загружаем MathJax если еще не загружен
+    await loadMathJax()
+
+    // Оборачиваем LaTeX в delimiters
+    const wrappedLatex = display ? `\\[${latex}\\]` : `\\(${latex}\\)`
+
+    // Создаем временный контейнер
+    const container = document.createElement('div')
+    container.textContent = wrappedLatex
+
+    // Конвертируем через MathJax
+    await window.MathJax.typesetPromise([container])
+
+    // Возвращаем результат
+    return container.innerHTML
+  } catch (error) {
+    console.error('[MathJax] LaTeX rendering error:', error)
+    // В случае ошибки возвращаем оригинальный LaTeX
+    return `<code class="latex-fallback">${latex}</code>`
   }
 }
