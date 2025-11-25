@@ -202,72 +202,86 @@ export function cleanLatexEntities(latex: string): string {
 }
 
 export function convertMathMLToLatex(html: string): string {
+  if (!html) return ''
+
   const parser = new DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
   const mathElements = doc.querySelectorAll('math')
 
-  mathElements.forEach((mathElement) => {
+  console.log(`🔍 Found ${mathElements.length} math elements`)
+
+  mathElements.forEach((mathElement, index) => {
     try {
       const mathml = mathElement.outerHTML
       let latex = MathMLToLaTeX.convert(mathml)
-
-      // Очистка HTML entities
       latex = cleanLatexEntities(latex)
 
-      // Создаем текстовый узел с $ для MathJax
-      const textNode = doc.createTextNode(`$${latex}$`)
 
+      // ПРОСТО заменяем на текстовый узел с $ $ — БЕЗ span обёрток!
+      const textNode = doc.createTextNode(`$${latex}$`)
       mathElement.parentNode?.replaceChild(textNode, mathElement)
+
     } catch (error) {
-      console.error('Error converting MathML:', error)
       const textSpan = doc.createElement('span')
+      textSpan.className = 'math-error'
       textSpan.textContent = mathElement.textContent || '[Formula Error]'
       mathElement.parentNode?.replaceChild(textSpan, mathElement)
     }
   })
 
-  return doc.body.innerHTML
+  const result = doc.body.innerHTML
+
+  return result
 }
 
-
 export function convertLatexToMathML(html: string): string {
+  if (!html) return ''
+
   const parser = new DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
 
-  // КРИТИЧНО: Удаляем все элементы, созданные MathJax
-  const mathjaxElements = doc.querySelectorAll(
-    '.MathJax, .MathJax_Display, .MathJax_Preview, .MathJax_SVG, .MathJax_SVG_Display, script[type="math/tex"]'
+  // КРИТИЧНО: Удаляем ВСЕ элементы MathJax/KaTeX
+  const renderedElements = doc.querySelectorAll(
+    '.MathJax, .MathJax_Display, .MathJax_Preview, .MathJax_SVG, .MathJax_SVG_Display, ' +
+    '.MathJax_CHTML, .MathJax_CHTML_Display, ' +
+    '.katex, .katex-display, .katex-html, .katex-mathml, ' +
+    'script[type="math/tex"], script[type="math/tex; mode=display"], ' +
+    'nobr, span.MathJax_Preview'
   )
-  mathjaxElements.forEach(el => el.remove())
 
-  // Находим наши span с формулами
-  const formulaSpans = doc.querySelectorAll('span.math-formula[data-latex]')
+  console.log(`🗑️ Removing ${renderedElements.length} rendered math elements`)
+  renderedElements.forEach(el => el.remove())
 
-  formulaSpans.forEach((span) => {
+  // Получаем чистый HTML
+  let cleanHtml = doc.body.innerHTML
+
+  // Паттерн для поиска $...$ формул
+  const latexPattern = /\$([^$]+)\$/g
+  const matches = cleanHtml.match(latexPattern)
+
+  cleanHtml = cleanHtml.replace(latexPattern, (match, latex) => {
     try {
-      const latex = span.getAttribute('data-latex')
-      if (!latex) return
+      const trimmedLatex = latex.trim()
+      console.log(`🔄 Converting: ${trimmedLatex}`)
 
-      // Конвертируем LaTeX обратно в MathML
-      const mathml = katex.renderToString(latex, {
+      // Конвертируем через KaTeX
+      const mathml = katex.renderToString(trimmedLatex, {
         output: 'mathml',
         throwOnError: false,
         displayMode: false
       })
 
-      // Создаем временный контейнер для парсинга MathML
-      const tempDiv = doc.createElement('div')
-      tempDiv.innerHTML = mathml
-      const mathElement = tempDiv.querySelector('math')
+      // Добавляем namespace если нет
+      const mathmlWithNs = mathml.includes('xmlns')
+        ? mathml
+        : mathml.replace('<math>', '<math xmlns="http://www.w3.org/1998/Math/MathML">')
 
-      if (mathElement) {
-        span.parentNode?.replaceChild(mathElement, span)
-      }
+      return mathmlWithNs
     } catch (error) {
-      console.error('Error converting LaTeX to MathML:', error)
-      // Оставляем исходный span в случае ошибки
+      console.error('❌ Error converting LaTeX to MathML:', error, latex)
+      return match
     }
   })
 
-  return doc.body.innerHTML
+  return cleanHtml
 }

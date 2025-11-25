@@ -15,7 +15,6 @@ import TextAlign from '@tiptap/extension-text-align'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import Highlight from '@tiptap/extension-highlight'
-import Mathematics from '@tiptap/extension-mathematics'
 import { all, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { CustomOrderedList } from '../extensions/CustomOrderedList'
@@ -62,16 +61,7 @@ const editor = useEditor({
     Superscript,
     Highlight.configure({
       multicolor: false,
-    }),
-    Mathematics.configure({
-      katexOptions: {
-        throwOnError: false,
-        displayMode: false,
-        output: 'html',
-        trust: false,
-        strict: false,
-      },
-    }),
+    })
   ],
   content: '',
   editorProps: {
