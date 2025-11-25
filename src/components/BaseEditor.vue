@@ -6,22 +6,15 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { useDebounceFn } from '@vueuse/core'
-import { useEditor, EditorContent } from '@tiptap/vue-3'
-import StarterKit from '@tiptap/starter-kit'
-import Image from '@tiptap/extension-image'
-import TextAlign from '@tiptap/extension-text-align'
-import Subscript from '@tiptap/extension-subscript'
-import Superscript from '@tiptap/extension-superscript'
-import Highlight from '@tiptap/extension-highlight'
-import { all, createLowlight } from 'lowlight'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import { CustomOrderedList } from '../extensions/CustomOrderedList'
-import EditorMenuBar from './EditorMenuBar.vue'
-import LZString from 'lz-string'
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { useEditor, EditorContent } from '@tiptap/vue-3';
+import StarterKit from '@tiptap/starter-kit';
+import { Mathematics, migrateMathStrings } from '@tiptap/extension-mathematics';
+import LZString from 'lz-string';
+import { useDebounceFn } from "@vueuse/core";
+import EditorMenuBar from "@/components/EditorMenuBar.vue";
 
-// Загрузка MathJax через CDN
+// Загружаем MathJax через CDN
 const loadMathJax = () => {
   return new Promise<void>((resolve, reject) => {
     const script = document.createElement('script');
@@ -33,73 +26,138 @@ const loadMathJax = () => {
   });
 };
 
-const lowlight = createLowlight(all)
-const isContentInitialized = ref(false)
-
-const sendContentUpdate = useDebounceFn(() => {
-  if (isContentInitialized.value && editor.value) {
-    const html = editor.value.getHTML()
-    const compressed = LZString.compressToEncodedURIComponent(html)
-
-    window.parent.postMessage({
-      type: 'content-update',
-      data: compressed
-    }, '*')
-  }
-}, 500)
-
+// Редактор Tiptap
 const editor = useEditor({
   extensions: [
-    StarterKit.configure({
-      codeBlock: false,
-      orderedList: false,
+    StarterKit,
+    Mathematics.configure({
+      katexOptions: {
+        throwOnError: true
+      },
     }),
-    CustomOrderedList,
-    CodeBlockLowlight.configure({
-      lowlight,
-    }),
-    Image.configure({
-      inline: true,
-    }),
-    TextAlign.configure({
-      types: ['heading', 'paragraph'],
-      alignments: ['left', 'center', 'right', 'justify'],
-    }),
-    Subscript,
-    Superscript,
-    Highlight.configure({
-      multicolor: false,
-    })
   ],
-  content: '',
+  content: '',  // Изначально пустое содержимое
   editorProps: {
     attributes: {
       class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
-    }
+    },
   },
   onUpdate: () => {
     sendContentUpdate()
+  },
+});
+
+const isContentInitialized = ref(false);
+
+// Дебаунс для отправки обновлений контента
+const sendContentUpdate = useDebounceFn(() => {
+  if (isContentInitialized.value && editor.value) {
+    const html = editor.value.getHTML();
+    const compressed = LZString.compressToEncodedURIComponent(html);
+
+    window.parent.postMessage({
+      type: 'content-update',
+      data: compressed,
+    }, '*');
   }
-})
+}, 500);
 
-const convertMathMLToLatex = async (htmlContent: string): Promise<string> => {
-  // Дожидаемся загрузки MathJax
-  await loadMathJax();
+// Конвертация MathML в LaTeX с использованием MathJax
+async function convertMathMLToLatex(htmlContent: string): Promise<string> {
+  console.log('Input HTML:', htmlContent);
 
+  // Парсим HTML
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlContent, 'text/html');
 
-  const mathmlElements = doc.querySelectorAll('math'); // Ищем все элементы <math> в HTML контенте
-  mathmlElements.forEach((mathml) => {
-    // Используем MathJax для конвертации MathML в LaTeX
-    MathJax.Hub.Queue(['Typeset', MathJax.Hub, mathml]);
+  const mathmlElements = doc.querySelectorAll('math');
 
-    // После завершения обработки MathJax получаем LaTeX
-    const latex = mathml.textContent;  // Получаем LaTeX после обработки MathJax
-    mathml.replaceWith(`\\(${latex}\\)`);  // Заменяем MathML на LaTeX
-  });
+  for (const mathml of Array.from(mathmlElements)) {
+    try {
+      // Получаем LaTeX через MathJax
+      const latex = await new Promise<string>((resolve) => {
+        const jax = (window as any).MathJax?.Hub?.getAllJax?.(mathml)?.[0];
 
-  return doc.body.innerHTML; // Возвращаем обновленный HTML с LaTeX
+        if (jax) {
+          // Если элемент уже обработан MathJax
+          resolve(jax.originalText);
+        } else {
+          // Fallback: простая конвертация для базовых случаев
+          const latex = convertSimpleMathML(mathml);
+          resolve(latex);
+        }
+      });
+
+      console.log('Converted LaTeX:', latex);
+
+      // Заменяем MathML на LaTeX в формате \(...\) для inline math
+      // migrateMathStrings позже преобразует это в Mathematics nodes
+      const textNode = doc.createTextNode(`\\(${latex}\\)`);
+      mathml.replaceWith(textNode);
+    } catch (error) {
+      console.error('Error converting MathML:', error, mathml.outerHTML);
+    }
+  }
+
+  const result = doc.body.innerHTML;
+  console.log('Result HTML:', result);
+  return result;
+}
+
+// Простая конвертация MathML в LaTeX для базовых случаев
+function convertSimpleMathML(mathml: Element): string {
+  const tagMap: Record<string, (el: Element) => string> = {
+    'mi': (el) => el.textContent || '',
+    'mn': (el) => el.textContent || '',
+    'mo': (el) => el.textContent || '',
+    'msup': (el) => {
+      if (!el.children[0] || !el.children[1]) return '';
+      const base = convertSimpleMathML(el.children[0]);
+      const sup = convertSimpleMathML(el.children[1]);
+      return `${base}^{${sup}}`;
+    },
+    'msub': (el) => {
+      if (!el.children[0] || !el.children[1]) return '';
+      const base = convertSimpleMathML(el.children[0]);
+      const sub = convertSimpleMathML(el.children[1]);
+      return `${base}_{${sub}}`;
+    },
+    'mfrac': (el) => {
+      if (!el.children[0] || !el.children[1]) return '';
+      const num = convertSimpleMathML(el.children[0]);
+      const den = convertSimpleMathML(el.children[1]);
+      return `\\frac{${num}}{${den}}`;
+    },
+    'msqrt': (el) => {
+      if (!el.children[0]) return '';
+      const content = convertSimpleMathML(el.children[0]);
+      return `\\sqrt{${content}}`;
+    },
+    'mroot': (el) => {
+      if (!el.children[0] || !el.children[1]) return '';
+      const content = convertSimpleMathML(el.children[0]);
+      const index = convertSimpleMathML(el.children[1]);
+      return `\\sqrt[${index}]{${content}}`;
+    },
+    'mrow': (el) => {
+      return Array.from(el.children).map(child => convertSimpleMathML(child as Element)).join('');
+    },
+    'mspace': () => '\\;',
+  };
+
+  const tagName = mathml.tagName.toLowerCase();
+  const converter = tagMap[tagName];
+
+  if (converter) {
+    return converter(mathml);
+  }
+
+  // Для неизвестных тегов обрабатываем рекурсивно
+  if (mathml.children.length > 0) {
+    return Array.from(mathml.children).map(child => convertSimpleMathML(child as Element)).join('');
+  }
+
+  return mathml.textContent || '';
 }
 
 const handleMessage = async (event: MessageEvent) => {
@@ -110,18 +168,38 @@ const handleMessage = async (event: MessageEvent) => {
       // Конвертируем MathML в LaTeX
       const updatedHtml = await convertMathMLToLatex(html);
 
+      // Устанавливаем обновленный контент
       editor.value.commands.setContent(updatedHtml ?? '');
-      isContentInitialized.value = true;
 
+      if (editor.value) {
+        // Даем время на инициализацию контента
+        setTimeout(() => {
+          if (editor.value) {
+            console.log('Before migration:', editor.value.getHTML());
+            migrateMathStrings(editor.value);
+            console.log('After migration:', editor.value.getHTML());
+            // Включаем отслеживание обновлений только после успешной миграции
+            isContentInitialized.value = true;
+          }
+        }, 100);
+      }
+
+      // Преобразуем LaTeX строки в Mathematics nodes
+      migrateMathStrings(editor.value);
+
+      isContentInitialized.value = true;
     } catch (error) {
       console.error('Ошибка декомпрессии контента:', error);
     }
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
+  await loadMathJax();
   window.addEventListener('message', handleMessage);
   window.parent.postMessage({ type: 'editor-ready' }, '*');
+
+  // Преобразуем LaTeX строки в Mathematics nodes
 });
 
 onBeforeUnmount(() => {
