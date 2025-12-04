@@ -19,6 +19,7 @@ import Link from '@tiptap/extension-link';
 import LZString from 'lz-string';
 import { useDebounceFn } from "@vueuse/core";
 import EditorMenuBar from "@/components/EditorMenuBar.vue";
+import { HeaderShortcode } from "@/extensions/HeaderShortcode.ts";
 
 
 const editor = useEditor({
@@ -39,6 +40,7 @@ const editor = useEditor({
     Link.configure({
       openOnClick: false,
     }),
+    HeaderShortcode
   ],
   content: '',  // Изначально пустое содержимое
   editorProps: {
