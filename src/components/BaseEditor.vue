@@ -15,11 +15,14 @@ import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
+import { TextStyle, Color } from '@tiptap/extension-text-style'
 import Link from '@tiptap/extension-link';
 import LZString from 'lz-string';
 import { useDebounceFn } from "@vueuse/core";
 import EditorMenuBar from "@/components/EditorMenuBar.vue";
 import { HeaderShortcode } from "@/extensions/HeaderShortcode.ts";
+import HorizontalRule from '@tiptap/extension-horizontal-rule'
+import { CenterShortcode } from "@/extensions/CenterShortcode.ts";
 
 
 const editor = useEditor({
@@ -29,6 +32,11 @@ const editor = useEditor({
       katexOptions: {
         throwOnError: true
       },
+    }),
+    HorizontalRule.configure({
+      HTMLAttributes: {
+        style: 'display: block; width: 100%; margin: 16px 0; height: 2px; background-image: linear-gradient(90deg, #8850CE, #8850CE 65%, transparent 65%, transparent 100%); background-size: 15px 6px;border: none;',
+      }
     }),
     Underline,
     Subscript,
@@ -40,7 +48,10 @@ const editor = useEditor({
     Link.configure({
       openOnClick: false,
     }),
-    HeaderShortcode
+    HeaderShortcode,
+    CenterShortcode,
+    TextStyle,
+    Color
   ],
   content: '',  // Изначально пустое содержимое
   editorProps: {

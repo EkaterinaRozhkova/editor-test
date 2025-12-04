@@ -81,6 +81,17 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v7a6 6 0 0 0 12 0V4"/><line x1="4" x2="20" y1="21" y2="21"/></svg>
       </button>
       <button
+        @click="editor.chain().focus().toggleStrike().run()"
+        :class="{ 'is-active': editor.isActive('strike') }"
+        title="Зачеркнутый текст"
+      >
+         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M17.3 5H8.7a3 3 0 0 0-2.7 4.3"/>
+  <path d="M12 19h6a3 3 0 0 0 0-6H6"/>
+  <line x1="3" y1="12" x2="21" y2="12"/>
+</svg>
+        </button>
+      <button
         @click="editor.chain().focus().toggleCode().run()"
         :class="{ 'is-active': editor.isActive('code') }"
         title="Встроенный код"
@@ -114,6 +125,12 @@
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg>
       </button>
+      <input
+        type="color"
+        @input="editor.chain().focus().setColor($event?.target?.value).run()"
+        value="#489735"
+        title="Цвет текста"
+      />
     </div>
 
     <div class="divider"></div>
@@ -264,9 +281,16 @@
      <button
        @click="editor.chain().focus().toggleHeaderShortcode().run()"
        :class="{ 'is-active': editor.isActive('headerShortcode') }"
-       title="Шорткод [header] (Ctrl+Shift+H)"
+       title="Кастомный заголовок"
      >
         Заголовок
+      </button>
+      <button
+        @click="editor.chain().focus().toggleCenterShortcode().run()"
+        :class="{ 'is-active': editor.isActive('centerShortcode') }"
+        title="Центрирование"
+      >
+        Центр.
       </button>
     </div>
   </div>
@@ -487,6 +511,16 @@ button {
 
 button svg {
   display: block;
+}
+
+
+input {
+  min-width: 26px;
+  height: 26px;
+  border: 1px solid var(--button-border);
+  background: var(--button-bg);
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 button:hover:not(:disabled) {
