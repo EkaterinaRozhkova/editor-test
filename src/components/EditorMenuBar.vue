@@ -127,7 +127,7 @@
       </button>
       <input
         type="color"
-        @input="editor.chain().focus().setColor($event?.target?.value).run()"
+        @input="onColorChange"
         value="#489735"
         title="Цвет текста"
       />
@@ -399,6 +399,11 @@ const setOrderedListType = (listType: '1' | 'A' | 'a' | 'I' | 'i') => {
   props.editor.chain().focus().setOrderedListType(listType).run()
 
   isOrderedListDropdownOpen.value = false
+}
+
+const onColorChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  props.editor?.chain().focus().setColor(target.value).run();
 }
 
 // Функция для добавления ссылки
