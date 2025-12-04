@@ -28,7 +28,7 @@ export const CenterShortcode = Node.create({
   parseHTML() {
     return [
       {
-        tag: 'p[data-type="center-shortcode"]',
+        tag: 'div[data-type="center-shortcode"]',
         getAttrs: (element) => ({
           text: (element as HTMLElement).getAttribute('data-text') || '',
         }),
@@ -38,12 +38,9 @@ export const CenterShortcode = Node.create({
 
   renderHTML({ node }) {
     return [
-      'p',
-      {
-        'data-type': 'center-shortcode',
-        'data-text': node.attrs.text,
-      },
-      `[center]${node.attrs.text}[/center]`,
+      ['p', '[center]'],
+      ['p', node.attrs.text],
+      ['p', '[/center]'],
     ]
   },
 
