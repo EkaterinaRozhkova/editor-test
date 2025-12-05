@@ -268,8 +268,6 @@
       </button>
     </div>
 
-    <div class="divider"></div>
-
     <!-- Дополнительные действия -->
     <div class="button-group">
       <button
@@ -278,19 +276,20 @@
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg>
       </button>
+      <div class="divider" />
      <button
        @click="editor.chain().focus().toggleHeaderShortcode().run()"
        :class="{ 'is-active': editor.isActive('headerShortcode') }"
        title="Кастомный заголовок"
      >
-        Заголовок
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 12h10"/><path d="M7 8h10"/><path d="M9 16h6"/></svg>
       </button>
       <button
         @click="editor.chain().focus().toggleCenterShortcode().run()"
         :class="{ 'is-active': editor.isActive('centerShortcode') }"
         title="Центрирование"
       >
-        Центр.
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="17" x2="7" y1="12" y2="12"/><line x1="19" x2="5" y1="18" y2="18"/></svg>
       </button>
     </div>
   </div>

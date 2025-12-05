@@ -54,6 +54,7 @@ const editor = useEditor({
     Color
   ],
   content: '',  // Изначально пустое содержимое
+  editable: true,  // Явно разрешаем редактирование
   editorProps: {
     attributes: {
       class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
@@ -145,6 +146,13 @@ defineExpose({
 
 .editor-content::-webkit-scrollbar {
   width: 4px;
+}
+
+.ProseMirror {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .ProseMirror code {

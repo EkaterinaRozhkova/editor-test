@@ -17,6 +17,10 @@ export const HeaderShortcode = Node.create({
 
   atom: true,
 
+  selectable: true,
+
+  draggable: true,
+
   addAttributes() {
     return {
       text: {
@@ -51,9 +55,35 @@ export const HeaderShortcode = Node.create({
     return {
       toggleHeaderShortcode:
         () =>
-          ({ commands, state, chain }) => {
+          ({ state, chain }) => {
             const { from, to, empty } = state.selection
 
+            // Проверяем, находится ли курсор внутри или на headerShortcode
+            let headerNodeText: string = ''
+            let headerNodeSize: number = 0
+            let headerPos: number = -1
+            let foundNode = false
+
+            state.doc.nodesBetween(from, to, (node, pos) => {
+              if (node.type.name === this.name) {
+                headerNodeText = String(node.attrs.text || '')
+                headerNodeSize = node.nodeSize
+                headerPos = pos
+                foundNode = true
+                return false
+              }
+            })
+
+            // Если курсор на headerShortcode, разворачиваем его обратно в текст
+            if (foundNode && headerPos >= 0) {
+              return chain()
+                .focus()
+                .deleteRange({ from: headerPos, to: headerPos + headerNodeSize })
+                .insertContentAt(headerPos, { type: 'text', text: headerNodeText })
+                .run()
+            }
+
+            // Если не внутри шорткода, создаем новый
             if (empty) return false
 
             // Получаем выделенный текст
