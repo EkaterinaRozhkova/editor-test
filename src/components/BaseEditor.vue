@@ -25,7 +25,6 @@ import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import { CenterShortcode } from "@/extensions/CenterShortcode.ts";
 import { FlexShortcode, FlexColumn } from "@/extensions/FlexShortcode.ts";
 import { RowShortcode, Row } from "@/extensions/RowShortcode.ts";
-import { parseShortcodes } from "@/utils/shortcodeParser";
 
 
 const editor = useEditor({
@@ -91,20 +90,10 @@ const handleMessage = async (event: MessageEvent) => {
     try {
       const html = LZString.decompressFromEncodedURIComponent(event.data.data);
 
-      // Проверяем, содержит ли контент шорткоды
-      const hasShortcodes = /\[(flex|row|col|\/flex|\/row|\/col)(\s|[^\]]*)\]/i.test(html);
-
-      if (hasShortcodes) {
-        // Парсим шорткоды и устанавливаем структурированный контент
-        const parsedContent = parseShortcodes(html);
-        editor.value.commands.setContent({
-          type: 'doc',
-          content: parsedContent
-        });
-      } else {
         // Устанавливаем обычный HTML контент
-        editor.value.commands.setContent(html ?? '');
-      }
+      console.log(html)
+      editor.value.commands.setContent(html ?? '');
+
 
       if (editor.value) {
         // Даем время на инициализацию контента
