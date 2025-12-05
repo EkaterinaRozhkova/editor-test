@@ -25,8 +25,7 @@ import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import { CenterShortcode } from "@/extensions/CenterShortcode.ts";
 import { FlexShortcode } from "@/extensions/FlexShortcode.ts";
 import { FlexColumn } from "@/extensions/FlexColumn.ts";
-import { RowShortcode } from "@/extensions/RowShortcode.ts";
-import { Row } from "@/extensions/Row.ts";
+import { RowShortcode, Row } from "@/extensions/RowShortcode.ts";
 
 
 const editor = useEditor({

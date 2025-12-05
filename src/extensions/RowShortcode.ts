@@ -1,6 +1,7 @@
 import { Node } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import RowShortcodeView from '@/components/RowShortcodeView.vue'
+import RowView from '@/components/RowView.vue'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -49,7 +50,6 @@ export const RowShortcode = Node.create({
 
       let wrapped: any = text
 
-      // Оборачиваем от последнего mark к первому
       for (let i = marks.length - 1; i >= 0; i--) {
         const mark = marks[i]
 
@@ -78,6 +78,66 @@ export const RowShortcode = Node.create({
       return wrapped
     }
 
+    // Функция для сериализации inline содержимого
+    const serializeInlineContent = (node: any): any[] => {
+      const content: any[] = []
+      node.content.forEach((inline: any) => {
+        if (inline.isText) {
+          const text = inline.text || ''
+          if (inline.marks && inline.marks.length > 0) {
+            content.push(wrapWithMarks(text, inline.marks))
+          } else {
+            content.push(text)
+          }
+        }
+      })
+      return content
+    }
+
+    // Функция для сериализации блочного элемента
+    const serializeBlock = (blockNode: any): any => {
+      const type = blockNode.type.name
+
+      if (type === 'paragraph') {
+        const content = serializeInlineContent(blockNode)
+        return content.length > 0 ? ['p', {}, ...content] : ['p', {}, '\u00A0']
+      }
+      else if (type === 'heading') {
+        const level = blockNode.attrs.level || 1
+        const content = serializeInlineContent(blockNode)
+        return [`h${level}`, {}, ...content]
+      }
+      else if (type === 'bulletList') {
+        const items: any[] = []
+        blockNode.content.forEach((listItem: any) => {
+          const itemContent: any[] = []
+          listItem.content.forEach((itemBlock: any) => {
+            if (itemBlock.type.name === 'paragraph') {
+              itemContent.push(...serializeInlineContent(itemBlock))
+            }
+          })
+          items.push(['li', {}, ...itemContent])
+        })
+        return ['ul', {}, ...items]
+      }
+      else if (type === 'orderedList') {
+        const items: any[] = []
+        const start = blockNode.attrs.start || 1
+        blockNode.content.forEach((listItem: any) => {
+          const itemContent: any[] = []
+          listItem.content.forEach((itemBlock: any) => {
+            if (itemBlock.type.name === 'paragraph') {
+              itemContent.push(...serializeInlineContent(itemBlock))
+            }
+          })
+          items.push(['li', {}, ...itemContent])
+        })
+        return start === 1 ? ['ol', {}, ...items] : ['ol', { start }, ...items]
+      }
+
+      return ['p', {}, '\u00A0']
+    }
+
     // Формируем открывающий тег
     let openingText = "[flex column='true']"
 
@@ -97,25 +157,7 @@ export const RowShortcode = Node.create({
     node.content.forEach((child) => {
       if (child.type.name === 'row') {
         child.content.forEach((blockNode) => {
-          const contentArray: any[] = []
-
-          // Проходим по всем inline элементам
-          blockNode.content.forEach((inline) => {
-            if (inline.isText) {
-              const text = inline.text || ''
-              if (inline.marks && inline.marks.length > 0) {
-                // Оборачиваем текст в marks
-                contentArray.push(wrapWithMarks(text, inline.marks))
-              } else {
-                contentArray.push(text)
-              }
-            }
-          })
-
-          // Создаем параграф только если есть содержимое
-          if (contentArray.length > 0) {
-            result.push(['p', {}, ...contentArray])
-          }
+          result.push(serializeBlock(blockNode))
         })
       }
     })
@@ -128,7 +170,6 @@ export const RowShortcode = Node.create({
     result.push(['p', {}, '\u00A0'])
     result.push(['p', {}, '\u00A0'])
 
-    // Возвращаем div с результатом
     return ['div', { 'data-type': 'row-shortcode' }, ...result]
   },
 
@@ -232,5 +273,44 @@ export const RowShortcode = Node.create({
             return false
           },
     }
+  },
+})
+
+// Экспортируем также Row для использования в редакторе
+export const Row = Node.create({
+  name: 'row',
+
+  content: '(paragraph | heading | bulletList | orderedList)+',
+
+  group: 'row',
+
+  isolating: false,
+
+  addAttributes() {
+    return {
+      title: {
+        default: '',
+        parseHTML: (element) => (element as HTMLElement).getAttribute('data-title') || '',
+        renderHTML: (attributes) => ({
+          'data-title': attributes.title,
+        }),
+      },
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'div[data-type="row"]',
+      },
+    ]
+  },
+
+  renderHTML() {
+    return ['div', { 'data-type': 'row' }, 0]
+  },
+
+  addNodeView() {
+    return VueNodeViewRenderer(RowView)
   },
 })
