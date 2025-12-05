@@ -41,40 +41,31 @@ export const RowShortcode = Node.create({
   renderHTML({ node }) {
     const result: any[] = []
 
-    const serializeMarksToDOM = (text: string, marks: readonly any[]): any[] => {
-      if (marks.length === 0) {
-        return [text]
-      }
-
-      let current: any = text
-
-      // Оборачиваем текст в marks
-      for (let i = marks.length - 1; i >= 0; i--) {
-        const mark = marks[i]
-
+    const serializeMarks = (text: string, marks: readonly any[]) => {
+      let result = text
+      marks.forEach((mark) => {
         if (mark.type.name === 'bold') {
-          current = ['strong', {}, current]
+          result = `<strong>${result}</strong>`
         } else if (mark.type.name === 'strike') {
-          current = ['s', {}, current]
+          result = `<s>${result}</s>`
         } else if (mark.type.name === 'italic') {
-          current = ['em', {}, current]
+          result = `<em>${result}</em>`
         } else if (mark.type.name === 'underline') {
-          current = ['u', {}, current]
+          result = `<u>${result}</u>`
         } else if (mark.type.name === 'code') {
-          current = ['code', {}, current]
+          result = `<code>${result}</code>`
         } else if (mark.type.name === 'highlight') {
-          current = ['mark', {}, current]
+          result = `<mark>${result}</mark>`
         } else if (mark.type.name === 'link') {
           const href = mark.attrs.href || ''
-          current = ['a', { href }, current]
+          result = `<a href="${href}">${result}</a>`
         } else if (mark.type.name === 'subscript') {
-          current = ['sub', {}, current]
+          result = `<sub>${result}</sub>`
         } else if (mark.type.name === 'superscript') {
-          current = ['sup', {}, current]
+          result = `<sup>${result}</sup>`
         }
-      }
-
-      return [current]
+      })
+      return result
     }
 
     // Открывающий тег [flex column='true']
@@ -104,7 +95,9 @@ export const RowShortcode = Node.create({
           blockNode.content.forEach((inline) => {
             const text = inline.text || ''
             if (inline.marks && inline.marks.length > 0) {
-              contentArray.push(...serializeMarksToDOM(text, inline.marks))
+              const markedText = serializeMarks(text, inline.marks)
+              // Парсим HTML-строку обратно в структуру для renderHTML
+              contentArray.push(['span', { innerHTML: markedText }])
             } else {
               contentArray.push(text)
             }
@@ -121,8 +114,8 @@ export const RowShortcode = Node.create({
     // Закрывающий тег [/row][/flex]
     result.push(['p', {}, '[/row][/flex]'])
 
-    // Добавляем пустые параграфы с неразрывным пробелом
-    result.push(['p', {}, '\u00A0'])
+    // Добавляем пустые параграфы
+    result.push(['p', {}, '\u00A0']) // &nbsp;
     result.push(['p', {}, '\u00A0'])
     result.push(['p', {}, '\u00A0'])
 
