@@ -101,24 +101,25 @@ const deleteNode = () => {
   position: relative;
   border: 2px solid var(--menu-border);
   border-radius: 8px;
-  padding: 16px;
-  margin: 16px 0;
+  padding: 5px;
+  margin: 5px 0;
   background: var(--editor-content);
 }
 
 .flex-columns {
   display: flex;
-  gap: 16px;
+  width: 100%;
+  gap: 10px;
 }
 
 .flex-column {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  min-width: 0;
 }
 
 .column-title-input {
+  width: 100%;
+  box-sizing: border-box;
   font-size: 16px;
   font-weight: 600;
   padding: 8px;
@@ -126,6 +127,8 @@ const deleteNode = () => {
   border-radius: 4px;
   background: var(--menu-bg);
   color: var(--button-text);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .column-title-input:focus {
@@ -140,6 +143,8 @@ const deleteNode = () => {
   border-radius: 4px;
   background: var(--button-bg);
   white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
   cursor: text;
 }
 
