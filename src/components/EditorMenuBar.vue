@@ -15,47 +15,21 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div v-if="isBlockTypeDropdownOpen" class="dropdown-menu">
-          <button @click="setBlockType('paragraph')" class="dropdown-item" :class="{ 'is-active': currentBlockType === 'paragraph' }">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6H9a6 6 0 0 0 0 12h4"/><path d="M14 6h2"/><path d="M14 18h2"/><path d="M14 6v12"/></svg>
-            <span>Параграф</span>
-          </button>
-          <button @click="setBlockType('heading1')" class="dropdown-item" :class="{ 'is-active': currentBlockType === 'heading1' }">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="m17 12 3-2v8"/></svg>
-            <span>Заголовок 1</span>
-          </button>
-          <button @click="setBlockType('heading2')" class="dropdown-item" :class="{ 'is-active': currentBlockType === 'heading2' }">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1"/></svg>
-            <span>Заголовок 2</span>
-          </button>
-          <button @click="setBlockType('heading3')" class="dropdown-item" :class="{ 'is-active': currentBlockType === 'heading3' }">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17.5 10.5c1.7-1 3.5 0 3.5 1.5a2 2 0 0 1-2 2"/><path d="M17 17.5c2 1.5 4 .3 4-1.5a2 2 0 0 0-2-2"/></svg>
-            <span>Заголовок 3</span>
+          <button
+            v-for="blockType in blockTypes"
+            :key="blockType.type"
+            @click="setBlockType(blockType.type)"
+            class="dropdown-item"
+            :class="{ 'is-active': currentBlockType === blockType.type }"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" v-html="blockType.icon"></svg>
+            <span>{{ blockType.label }}</span>
           </button>
         </div>
       </div>
     </div>
 
     <div class="divider"></div>
-
-    <!-- Математические формулы -->
-    <!--     <div class="button-group"> -->
-    <!--       <button -->
-    <!--         @click="insertInlineFormula" -->
-    <!--         :class="{ 'is-active': editor.isActive('inlineMath') }" -->
-    <!--         title="Вставить строчную формулу" -->
-    <!--       > -->
-    <!--         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 14-6 6h9v-3"/><path d="M18 6h-4a4 4 0 1 0 0 8h4"/><path d="M4 6h9a4 4 0 1 1 0 8H4"/></svg> -->
-    <!--       </button> -->
-    <!--       <button -->
-    <!--         @click="insertBlockFormula" -->
-    <!--         :class="{ 'is-active': editor.isActive('mathBlock') }" -->
-    <!--         title="Вставить блочную формулу" -->
-    <!--       > -->
-    <!--         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m8 10 2 2-2 2"/><path d="m16 10-2 2 2 2"/><path d="M8 16h8"/></svg> -->
-    <!--       </button> -->
-    <!--     </div> -->
-
-    <!--     <div class="divider"></div> -->
 
     <!-- Форматирование текста -->
     <div class="button-group">
@@ -150,21 +124,15 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div v-if="isAlignmentDropdownOpen" class="dropdown-menu">
-          <button @click="setAlignment('left')" class="dropdown-item" :class="{ 'is-active': currentAlignment === 'left' }">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="15" x2="3" y1="12" y2="12"/><line x1="17" x2="3" y1="18" y2="18"/></svg>
-            <span>По левому краю</span>
-          </button>
-          <button @click="setAlignment('center')" class="dropdown-item" :class="{ 'is-active': currentAlignment === 'center' }">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="17" x2="7" y1="12" y2="12"/><line x1="19" x2="5" y1="18" y2="18"/></svg>
-            <span>По центру</span>
-          </button>
-          <button @click="setAlignment('right')" class="dropdown-item" :class="{ 'is-active': currentAlignment === 'right' }">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="21" x2="9" y1="12" y2="12"/><line x1="21" x2="7" y1="18" y2="18"/></svg>
-            <span>По правому краю</span>
-          </button>
-          <button @click="setAlignment('justify')" class="dropdown-item" :class="{ 'is-active': currentAlignment === 'justify' }">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="21" x2="3" y1="12" y2="12"/><line x1="21" x2="3" y1="18" y2="18"/></svg>
-            <span>По ширине</span>
+          <button
+            v-for="alignment in alignments"
+            :key="alignment.value"
+            @click="setAlignment(alignment.value)"
+            class="dropdown-item"
+            :class="{ 'is-active': currentAlignment === alignment.value }"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" v-html="alignment.icon"></svg>
+            <span>{{ alignment.label }}</span>
           </button>
         </div>
       </div>
@@ -186,25 +154,15 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div v-if="isOrderedListDropdownOpen" class="dropdown-menu">
-          <button @click="setOrderedListType('1')" class="dropdown-item" :class="{ 'is-active': currentListType === '1' }">
-            <span style="font-family: monospace; font-weight: 600;">1 2 3</span>
-            <span>Арабские числа</span>
-          </button>
-          <button @click="setOrderedListType('A')" class="dropdown-item" :class="{ 'is-active': currentListType === 'A' }">
-            <span style="font-family: monospace; font-weight: 600;">A B C</span>
-            <span>Прописные буквы</span>
-          </button>
-          <button @click="setOrderedListType('a')" class="dropdown-item" :class="{ 'is-active': currentListType === 'a' }">
-            <span style="font-family: monospace; font-weight: 600;">a b c</span>
-            <span>Строчные буквы</span>
-          </button>
-          <button @click="setOrderedListType('I')" class="dropdown-item" :class="{ 'is-active': currentListType === 'I' }">
-            <span style="font-family: monospace; font-weight: 600;">I II III</span>
-            <span>Римские (верхний регистр)</span>
-          </button>
-          <button @click="setOrderedListType('i')" class="dropdown-item" :class="{ 'is-active': currentListType === 'i' }">
-            <span style="font-family: monospace; font-weight: 600;">i ii iii</span>
-            <span>Римские (нижний регистр)</span>
+          <button
+            v-for="listType in orderedListTypes"
+            :key="listType.value"
+            @click="setOrderedListType(listType.value)"
+            class="dropdown-item"
+            :class="{ 'is-active': currentListType === listType.value }"
+          >
+            <span style="font-family: monospace; font-weight: 600;">{{ listType.example }}</span>
+            <span>{{ listType.label }}</span>
           </button>
         </div>
       </div>
@@ -213,13 +171,6 @@
 
     <!-- Блоки -->
     <div class="button-group">
-<!--       <button -->
-<!--         @click="editor.chain().focus().toggleCodeBlock().run()" -->
-<!--         :class="{ 'is-active': editor.isActive('codeBlock') }" -->
-<!--         title="Блок кода" -->
-<!--       > -->
-<!--         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="m10 10-2 2 2 2"/><path d="m14 14 2-2-2-2"/></svg> -->
-<!--       </button> -->
       <button
         @click="editor.chain().focus().toggleBlockquote().run()"
         :class="{ 'is-active': editor.isActive('blockquote') }"
@@ -240,12 +191,6 @@
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
       </button>
-      <!--       <button -->
-      <!--         @click="addImage" -->
-      <!--         title="Вставить изображение" -->
-      <!--       > -->
-      <!--         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> -->
-      <!--       </button> -->
     </div>
 
     <div class="divider"></div>
@@ -302,14 +247,35 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div v-if="isFlexColumnsDropdownOpen" class="dropdown-menu">
-          <button @click="insertFlexColumns(2)" class="dropdown-item">
-            <span>2 колонки</span>
+          <button
+            v-for="count in [2, 3, 4]"
+            :key="`columns-${count}`"
+            @click="insertFlexColumns(count)"
+            class="dropdown-item"
+          >
+            <span>{{ count }} колонки</span>
           </button>
-          <button @click="insertFlexColumns(3)" class="dropdown-item">
-            <span>3 колонки</span>
-          </button>
-          <button @click="insertFlexColumns(4)" class="dropdown-item">
-            <span>4 колонки</span>
+        </div>
+      </div>
+      <div ref="flexRowsDropdownRef" class="dropdown" :class="{ 'is-open': isFlexRowsDropdownOpen }">
+        <button
+          @click="toggleFlexRowsDropdown"
+          :class="{ 'is-active': editor.isActive('rowShortcode') }"
+          class="dropdown-button"
+          title="Вертикальные блоки"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="7" rx="1"/><rect x="3" y="14" width="18" height="7" rx="1"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div v-if="isFlexRowsDropdownOpen" class="dropdown-menu">
+          <button
+            v-for="item in 4"
+            :key="`dropdown-item-block__${item}`"
+            @click="insertFlexRows(item)"
+            class="dropdown-item"
+          >
+            <span v-if="item === 1">1 блок</span>
+            <span v-else>{{ item }} блока</span>
           </button>
         </div>
       </div>
@@ -326,11 +292,67 @@ const props = defineProps<{
   editor: Editor | null
 }>()
 
+// Данные для дропдаунов
+const blockTypes = [
+  {
+    type: 'paragraph',
+    label: 'Параграф',
+    icon: '<path d="M10 6H9a6 6 0 0 0 0 12h4"/><path d="M14 6h2"/><path d="M14 18h2"/><path d="M14 6v12"/>'
+  },
+  {
+    type: 'heading1',
+    label: 'Заголовок 1',
+    icon: '<path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="m17 12 3-2v8"/>'
+  },
+  {
+    type: 'heading2',
+    label: 'Заголовок 2',
+    icon: '<path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1"/>'
+  },
+  {
+    type: 'heading3',
+    label: 'Заголовок 3',
+    icon: '<path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17.5 10.5c1.7-1 3.5 0 3.5 1.5a2 2 0 0 1-2 2"/><path d="M17 17.5c2 1.5 4 .3 4-1.5a2 2 0 0 0-2-2"/>'
+  }
+]
+
+const alignments = [
+  {
+    value: 'left',
+    label: 'По левому краю',
+    icon: '<line x1="21" x2="3" y1="6" y2="6"/><line x1="15" x2="3" y1="12" y2="12"/><line x1="17" x2="3" y1="18" y2="18"/>'
+  },
+  {
+    value: 'center',
+    label: 'По центру',
+    icon: '<line x1="21" x2="3" y1="6" y2="6"/><line x1="17" x2="7" y1="12" y2="12"/><line x1="19" x2="5" y1="18" y2="18"/>'
+  },
+  {
+    value: 'right',
+    label: 'По правому краю',
+    icon: '<line x1="21" x2="3" y1="6" y2="6"/><line x1="21" x2="9" y1="12" y2="12"/><line x1="21" x2="7" y1="18" y2="18"/>'
+  },
+  {
+    value: 'justify',
+    label: 'По ширине',
+    icon: '<line x1="21" x2="3" y1="6" y2="6"/><line x1="21" x2="3" y1="12" y2="12"/><line x1="21" x2="3" y1="18" y2="18"/>'
+  }
+]
+
+const orderedListTypes = [
+  { value: '1' as const, example: '1 2 3', label: 'Арабские числа' },
+  { value: 'A' as const, example: 'A B C', label: 'Прописные буквы' },
+  { value: 'a' as const, example: 'a b c', label: 'Строчные буквы' },
+  { value: 'I' as const, example: 'I II III', label: 'Римские (верхний регистр)' },
+  { value: 'i' as const, example: 'i ii iii', label: 'Римские (нижний регистр)' }
+]
+
 // Состояния для дропдаунов
 const isBlockTypeDropdownOpen = ref(false)
 const isAlignmentDropdownOpen = ref(false)
 const isOrderedListDropdownOpen = ref(false)
 const isFlexColumnsDropdownOpen = ref(false)
+const isFlexRowsDropdownOpen = ref(false)
 const currentListType = ref<'1' | 'A' | 'a' | 'I' | 'i'>('1')
 
 // Refs для дропдаунов
@@ -338,6 +360,7 @@ const blockTypeDropdownRef = ref<HTMLElement | null>(null)
 const alignmentDropdownRef = ref<HTMLElement | null>(null)
 const orderedListDropdownRef = ref<HTMLElement | null>(null)
 const flexColumnsDropdownRef = ref<HTMLElement | null>(null)
+const flexRowsDropdownRef = ref<HTMLElement | null>(null)
 
 // Определяем текущий тип блока
 const currentBlockType = computed(() => {
@@ -382,6 +405,15 @@ const toggleFlexColumnsDropdown = () => {
   isBlockTypeDropdownOpen.value = false
   isAlignmentDropdownOpen.value = false
   isOrderedListDropdownOpen.value = false
+  isFlexRowsDropdownOpen.value = false
+}
+
+const toggleFlexRowsDropdown = () => {
+  isFlexRowsDropdownOpen.value = !isFlexRowsDropdownOpen.value
+  isBlockTypeDropdownOpen.value = false
+  isAlignmentDropdownOpen.value = false
+  isOrderedListDropdownOpen.value = false
+  isFlexColumnsDropdownOpen.value = false
 }
 
 // Установка типа блока
@@ -456,45 +488,20 @@ const setLink = () => {
   props.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
 }
 
-// Функция для добавления строчной формулы
-// const insertInlineFormula = () => {
-//   if (!props.editor) return
-//
-//   initialLatex.value = 'E = mc^2'
-//   isBlockFormula.value = false
-//   isMathModalOpen.value = true
-// }
-
-// Функция для добавления блочной формулы
-// const insertBlockFormula = () => {
-//   if (!props.editor) return
-//
-//   initialLatex.value = '\\int_{a}^{b} f(x) dx'
-//   isBlockFormula.value = true
-//   isMathModalOpen.value = true
-// }
-
-// Обработчик подтверждения формулы
-// const handleMathConfirm = (latex: string) => {
-//   if (!props.editor || !latex) return
-//
-//   if (isBlockFormula.value) {
-//     props.editor.chain().focus().insertContent({
-//       type: 'mathBlock',
-//       attrs: { latex }
-//     }).run()
-//   } else {
-//     props.editor.chain().focus().insertInlineMath({ latex }).run()
-//   }
-//
-// }
-
 // Функция для вставки flex колонок
 const insertFlexColumns = (columns: number) => {
   if (!props.editor) return
 
   props.editor.chain().focus().insertFlexShortcode(columns).run()
   isFlexColumnsDropdownOpen.value = false
+}
+
+// Функция для вставки вертикальных блоков
+const insertFlexRows = (rows: number) => {
+  if (!props.editor) return
+
+  props.editor.chain().focus().insertRowShortcode(rows).run()
+  isFlexRowsDropdownOpen.value = false
 }
 
 // Закрытие дропдаунов при клике вне их
@@ -512,6 +519,10 @@ onClickOutside(orderedListDropdownRef, () => {
 
 onClickOutside(flexColumnsDropdownRef, () => {
   isFlexColumnsDropdownOpen.value = false
+})
+
+onClickOutside(flexRowsDropdownRef, () => {
+  isFlexRowsDropdownOpen.value = false
 })
 </script>
 
