@@ -23,8 +23,7 @@ import EditorMenuBar from "@/components/EditorMenuBar.vue";
 import { HeaderShortcode } from "@/extensions/HeaderShortcode.ts";
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import { CenterShortcode } from "@/extensions/CenterShortcode.ts";
-import { FlexShortcode } from "@/extensions/FlexShortcode.ts";
-import { FlexColumn } from "@/extensions/FlexColumn.ts";
+import { FlexShortcode, FlexColumn } from "@/extensions/FlexShortcode.ts";
 import { RowShortcode, Row } from "@/extensions/RowShortcode.ts";
 
 
