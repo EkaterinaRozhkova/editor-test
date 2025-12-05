@@ -24,6 +24,7 @@ import { HeaderShortcode } from "@/extensions/HeaderShortcode.ts";
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import { CenterShortcode } from "@/extensions/CenterShortcode.ts";
 import { FlexShortcode } from "@/extensions/FlexShortcode.ts";
+import { FlexColumn } from "@/extensions/FlexColumn.ts";
 
 
 const editor = useEditor({
@@ -51,6 +52,7 @@ const editor = useEditor({
     }),
     HeaderShortcode,
     CenterShortcode,
+    FlexColumn,
     FlexShortcode,
     TextStyle,
     Color

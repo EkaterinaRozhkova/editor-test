@@ -16,32 +16,18 @@ export const FlexShortcode = Node.create({
 
   group: 'block',
 
+  content: 'flexColumn+',
+
   inline: false,
 
-  atom: true,
+  isolating: true,
 
   selectable: true,
 
   draggable: true,
 
   addAttributes() {
-    return {
-      columns: {
-        default: [],
-        parseHTML: (element) => {
-          try {
-            return JSON.parse((element as HTMLElement).getAttribute('data-columns') || '[]')
-          } catch {
-            return []
-          }
-        },
-        renderHTML: (attributes) => {
-          return {
-            'data-columns': JSON.stringify(attributes.columns),
-          }
-        },
-      },
-    }
+    return {}
   },
 
   parseHTML() {
@@ -52,33 +38,13 @@ export const FlexShortcode = Node.create({
     ]
   },
 
-  renderHTML({ node }) {
-    const columns = node.attrs.columns || []
-
-    // Формируем текст шорткода
-    const shortcodeParts: string[] = []
-    shortcodeParts.push('[flex]')
-
-    columns.forEach((col: { title: string; text: string }, index: number) => {
-      const isFinal = index === columns.length - 1
-      const finalAttr = isFinal ? " final='true'" : ''
-      shortcodeParts.push(`[col title='${col.title}'${finalAttr}]`)
-      shortcodeParts.push(col.text)
-      shortcodeParts.push('[/col]')
-    })
-
-    shortcodeParts.push('[/flex]')
-
-    // Объединяем в один текст с переносами строк
-    const shortcodeText = shortcodeParts.join('\n')
-
+  renderHTML() {
     return [
       'div',
       {
         'data-type': 'flex-shortcode',
-        'data-columns': JSON.stringify(columns),
       },
-      shortcodeText,
+      0,
     ]
   },
 
@@ -91,11 +57,18 @@ export const FlexShortcode = Node.create({
       insertFlexShortcode:
         (columns = 2) =>
         ({ chain }) => {
-          const cols = []
+          const content = []
           for (let i = 0; i < columns; i++) {
-            cols.push({
-              title: `Заголовок ${i + 1}`,
-              text: 'Текст колонки...',
+            content.push({
+              type: 'flexColumn',
+              attrs: {
+                title: `Заголовок ${i + 1}`,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                },
+              ],
             })
           }
 
@@ -103,7 +76,7 @@ export const FlexShortcode = Node.create({
             .focus()
             .insertContent({
               type: this.name,
-              attrs: { columns: cols },
+              content,
             })
             .run()
         },
@@ -114,43 +87,58 @@ export const FlexShortcode = Node.create({
           const { from, to } = state.selection
 
           // Проверяем, находится ли курсор внутри flexShortcode
-          let flexNodeColumns: any[] = []
+          let flexNode: any = null
           let flexNodeSize: number = 0
           let flexPos: number = -1
-          let foundNode = false
 
           state.doc.nodesBetween(from, to, (node, pos) => {
             if (node.type.name === this.name) {
-              flexNodeColumns = node.attrs.columns || []
+              flexNode = node
               flexNodeSize = node.nodeSize
               flexPos = pos
-              foundNode = true
               return false
             }
           })
 
           // Если курсор на flexShortcode, разворачиваем его обратно в текст
-          if (foundNode && flexPos >= 0) {
-            const shortcodeText = flexNodeColumns
-              .map((col: any, index: number) => {
-                const isFinal = index === flexNodeColumns.length - 1
-                const finalAttr = isFinal ? " final='true'" : ''
-                return `[col title='${col.title}'${finalAttr}]\n${col.text}\n[/col]`
-              })
-              .join('\n')
-
-            const fullText = `[flex]\n${shortcodeText}\n[/flex]`
-            const lines = fullText.split('\n')
-
+          if (flexNode && flexPos >= 0) {
             const content: Array<{
               type: string
               content?: Array<{ type: string; text: string }>
             }> = []
-            lines.forEach((line: string) => {
-              content.push({
-                type: 'paragraph',
-                content: line ? [{ type: 'text', text: line }] : [],
-              })
+
+            content.push({
+              type: 'paragraph',
+              content: [{ type: 'text', text: '[flex]' }],
+            })
+
+            flexNode.forEach((child: any) => {
+              if (child.type.name === 'flexColumn') {
+                const title = child.attrs.title || ''
+                content.push({
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: `[col title='${title}']` }],
+                })
+
+                // Добавляем содержимое колонки
+                child.content.forEach((blockNode: any) => {
+                  const text = blockNode.textContent || ''
+                  content.push({
+                    type: 'paragraph',
+                    content: text ? [{ type: 'text', text }] : [],
+                  })
+                })
+
+                content.push({
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: '[/col]' }],
+                })
+              }
+            })
+
+            content.push({
+              type: 'paragraph',
+              content: [{ type: 'text', text: '[/flex]' }],
             })
 
             return chain()
