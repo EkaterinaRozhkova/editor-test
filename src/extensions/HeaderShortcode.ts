@@ -12,42 +12,38 @@ export const HeaderShortcode = Node.create({
   name: 'headerShortcode',
 
   group: 'inline',
-
   inline: true,
 
-  atom: true,
+  // ВАЖНО: убираем atom
+  atom: false,
 
-  selectable: true,
+  // Внутри ноды может быть текст
+  content: 'text*',
 
-  draggable: true,
-
-  addAttributes() {
-    return {
-      text: {
-        default: '',
-      },
-    }
-  },
+  selectable: true, // по желанию можно оставить / убрать
 
   parseHTML() {
     return [
       {
         tag: 'span[data-type="header-shortcode"]',
-        getAttrs: (element) => ({
-          text: (element as HTMLElement).getAttribute('data-text') || '',
-        }),
       },
     ]
   },
 
-  renderHTML({ node }) {
+  renderHTML({ HTMLAttributes }) {
+    // contentDOM будет на месте "0"
     return [
       'span',
       {
+        ...HTMLAttributes,
         'data-type': 'header-shortcode',
-        'data-text': node.attrs.text,
       },
-      `[header]${node.attrs.text}[/header]`,
+      // статическая открывающая часть
+      ['span', { 'data-role': 'open' }, '[header]'],
+      // зона редактируемого текста
+      ['span', { 'data-role': 'content' }, 0],
+      // статическая закрывающая часть
+      ['span', { 'data-role': 'close' }, '[/header]'],
     ]
   },
 
@@ -57,50 +53,49 @@ export const HeaderShortcode = Node.create({
         () =>
           ({ state, chain }) => {
             const { from, to, empty } = state.selection
+            const { doc } = state
 
-            // Проверяем, находится ли курсор внутри или на headerShortcode
-            let headerNodeText: string = ''
-            let headerNodeSize: number = 0
-            let headerPos: number = -1
-            let foundNode = false
+            let headerNode: any = null
+            let headerPos = -1
 
-            state.doc.nodesBetween(from, to, (node, pos) => {
+            // ищем headerShortcode в выделении / под курсором
+            doc.nodesBetween(from, to, (node, pos) => {
               if (node.type.name === this.name) {
-                headerNodeText = String(node.attrs.text || '')
-                headerNodeSize = node.nodeSize
+                headerNode = node
                 headerPos = pos
-                foundNode = true
                 return false
               }
             })
 
-            // Если курсор на headerShortcode, разворачиваем его обратно в текст
-            if (foundNode && headerPos >= 0) {
+            // Если нашли — разворачиваем обратно в текст
+            if (headerNode && headerPos >= 0) {
+              const text = headerNode.textContent || ''
+
               return chain()
                 .focus()
-                .deleteRange({ from: headerPos, to: headerPos + headerNodeSize })
-                .insertContentAt(headerPos, { type: 'text', text: headerNodeText })
+                .insertContentAt(
+                  { from: headerPos, to: headerPos + headerNode.nodeSize },
+                  text,
+                )
                 .run()
             }
 
-            // Если не внутри шорткода, создаем новый
+            // Если не внутри шорткода, создаем новый из выделения
             if (empty) return false
 
-            // Получаем выделенный текст
-            const selectedText = state.doc.textBetween(from, to, '')
+            const selectedText = doc.textBetween(from, to, '')
 
             if (!selectedText) return false
 
-            // Удаляем выделенный текст и вставляем шорткод
             return chain()
               .focus()
               .deleteRange({ from, to })
               .insertContent({
                 type: this.name,
-                attrs: { text: selectedText },
+                content: [{ type: 'text', text: selectedText }],
               })
               .run()
           },
     }
-  }
+  },
 })
