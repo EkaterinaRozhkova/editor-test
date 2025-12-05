@@ -38,14 +38,72 @@ export const FlexShortcode = Node.create({
     ]
   },
 
-  renderHTML() {
-    return [
-      'div',
-      {
-        'data-type': 'flex-shortcode',
-      },
-      0,
-    ]
+  renderHTML({ node }) {
+    const parts: string[] = []
+    parts.push('[flex]')
+
+    const serializeMarks = (text: string, marks: readonly any[]) => {
+      let result = text
+      // Применяем marks в обратном порядке для правильной вложенности
+      marks.forEach((mark) => {
+        if (mark.type.name === 'bold') {
+          result = `<strong>${result}</strong>`
+        } else if (mark.type.name === 'strike') {
+          result = `<s>${result}</s>`
+        } else if (mark.type.name === 'italic') {
+          result = `<em>${result}</em>`
+        } else if (mark.type.name === 'underline') {
+          result = `<u>${result}</u>`
+        } else if (mark.type.name === 'code') {
+          result = `<code>${result}</code>`
+        } else if (mark.type.name === 'highlight') {
+          result = `<mark>${result}</mark>`
+        } else if (mark.type.name === 'link') {
+          const href = mark.attrs.href || ''
+          result = `<a href="${href}">${result}</a>`
+        } else if (mark.type.name === 'subscript') {
+          result = `<sub>${result}</sub>`
+        } else if (mark.type.name === 'superscript') {
+          result = `<sup>${result}</sup>`
+        }
+      })
+      return result
+    }
+
+    node.content.forEach((child, index) => {
+      if (child.type.name === 'flexColumn') {
+        const title = child.attrs.title || ''
+        const isFinal = index === node.content.childCount - 1
+        const finalAttr = isFinal ? " final='true'" : ''
+
+        parts.push(`[col title='${title}'${finalAttr}]`)
+        parts.push('') // Пустая строка после открывающего тега
+
+        // Сериализуем содержимое колонки
+        child.content.forEach((blockNode) => {
+          let blockHTML = ''
+
+          // Обрабатываем содержимое блока
+          blockNode.content.forEach((inline) => {
+            const text = inline.text || ''
+            if (inline.marks && inline.marks.length > 0) {
+              blockHTML += serializeMarks(text, inline.marks)
+            } else {
+              blockHTML += text
+            }
+          })
+
+          parts.push(blockHTML)
+        })
+
+        parts.push('') // Пустая строка перед закрывающим тегом
+        parts.push('[/col]')
+      }
+    })
+
+    parts.push('[/flex]')
+
+    return ['pre', { 'data-type': 'flex-shortcode' }, parts.join('\n')]
   },
 
   addNodeView() {

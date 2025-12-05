@@ -31,14 +31,9 @@ export const FlexColumn = Node.create({
     ]
   },
 
-  renderHTML({ HTMLAttributes }) {
-    return [
-      'div',
-      mergeAttributes(HTMLAttributes, {
-        'data-type': 'flex-column',
-      }),
-      0,
-    ]
+  renderHTML() {
+    // FlexColumn не рендерится отдельно, его содержимое обрабатывается родителем (FlexShortcode)
+    return ['div', { 'data-type': 'flex-column' }, 0]
   },
 
   addNodeView() {
