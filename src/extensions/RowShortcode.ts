@@ -39,36 +39,46 @@ export const RowShortcode = Node.create({
   },
 
   renderHTML({ node }) {
-    const parts: string[] = []
-    parts.push("[flex column='true']")
+    const result: any[] = []
 
-    const serializeMarks = (text: string, marks: readonly any[]) => {
-      let result = text
-      // Применяем marks в обратном порядке для правильной вложенности
-      marks.forEach((mark) => {
+    const serializeMarksToDOM = (text: string, marks: readonly any[]): any[] => {
+      if (marks.length === 0) {
+        return [text]
+      }
+
+      let current: any = text
+
+      // Оборачиваем текст в marks
+      for (let i = marks.length - 1; i >= 0; i--) {
+        const mark = marks[i]
+
         if (mark.type.name === 'bold') {
-          result = `<strong>${result}</strong>`
+          current = ['strong', {}, current]
         } else if (mark.type.name === 'strike') {
-          result = `<s>${result}</s>`
+          current = ['s', {}, current]
         } else if (mark.type.name === 'italic') {
-          result = `<em>${result}</em>`
+          current = ['em', {}, current]
         } else if (mark.type.name === 'underline') {
-          result = `<u>${result}</u>`
+          current = ['u', {}, current]
         } else if (mark.type.name === 'code') {
-          result = `<code>${result}</code>`
+          current = ['code', {}, current]
         } else if (mark.type.name === 'highlight') {
-          result = `<mark>${result}</mark>`
+          current = ['mark', {}, current]
         } else if (mark.type.name === 'link') {
           const href = mark.attrs.href || ''
-          result = `<a href="${href}">${result}</a>`
+          current = ['a', { href }, current]
         } else if (mark.type.name === 'subscript') {
-          result = `<sub>${result}</sub>`
+          current = ['sub', {}, current]
         } else if (mark.type.name === 'superscript') {
-          result = `<sup>${result}</sup>`
+          current = ['sup', {}, current]
         }
-      })
-      return result
+      }
+
+      return [current]
     }
+
+    // Открывающий тег [flex column='true']
+    let openingText = "[flex column='true']"
 
     node.content.forEach((child, index) => {
       if (child.type.name === 'row') {
@@ -76,34 +86,48 @@ export const RowShortcode = Node.create({
         const isFinal = index === node.content.childCount - 1
         const finalAttr = isFinal ? " final='true'" : ''
 
-        parts.push(`[row title='${title}'${finalAttr}]`)
-        parts.push('') // Пустая строка после открывающего тега
-
-        // Сериализуем содержимое строки
-        child.content.forEach((blockNode) => {
-          let blockHTML = ''
-
-          // Обрабатываем содержимое блока
-          blockNode.content.forEach((inline) => {
-            const text = inline.text || ''
-            if (inline.marks && inline.marks.length > 0) {
-              blockHTML += serializeMarks(text, inline.marks)
-            } else {
-              blockHTML += text
-            }
-          })
-
-          parts.push(blockHTML)
-        })
-
-        parts.push('') // Пустая строка перед закрывающим тегом
-        parts.push('[/row]')
+        // Добавляем [row title='...' final='true'] к открывающему тегу
+        openingText += `[row title='${title}'${finalAttr}']`
       }
     })
 
-    parts.push('[/flex]')
+    // Создаем первый параграф с открывающими тегами
+    result.push(['p', {}, openingText])
 
-    return ['pre', { 'data-type': 'row-shortcode' }, parts.join('\n')]
+    // Обрабатываем содержимое всех строк
+    node.content.forEach((child) => {
+      if (child.type.name === 'row') {
+        child.content.forEach((blockNode) => {
+          const contentArray: any[] = []
+
+          // Сериализуем содержимое блока с marks
+          blockNode.content.forEach((inline) => {
+            const text = inline.text || ''
+            if (inline.marks && inline.marks.length > 0) {
+              contentArray.push(...serializeMarksToDOM(text, inline.marks))
+            } else {
+              contentArray.push(text)
+            }
+          })
+
+          // Создаем параграф с содержимым
+          if (contentArray.length > 0) {
+            result.push(['p', {}, ...contentArray])
+          }
+        })
+      }
+    })
+
+    // Закрывающий тег [/row][/flex]
+    result.push(['p', {}, '[/row][/flex]'])
+
+    // Добавляем пустые параграфы с неразрывным пробелом
+    result.push(['p', {}, '\u00A0'])
+    result.push(['p', {}, '\u00A0'])
+    result.push(['p', {}, '\u00A0'])
+
+    // Возвращаем контейнер с результатом
+    return ['div', { 'data-type': 'row-shortcode' }, ...result]
   },
 
   addNodeView() {
@@ -114,100 +138,97 @@ export const RowShortcode = Node.create({
     return {
       insertRowShortcode:
         (rows = 2) =>
-        ({ chain }) => {
-          const content = []
-          for (let i = 0; i < rows; i++) {
-            content.push({
-              type: 'row',
-              attrs: {
-                title: `Заголовок ${i + 1}`,
-              },
-              content: [
-                {
-                  type: 'paragraph',
+          ({ chain }) => {
+            const content = []
+            for (let i = 0; i < rows; i++) {
+              content.push({
+                type: 'row',
+                attrs: {
+                  title: `Заголовок ${i + 1}`,
                 },
-              ],
-            })
-          }
-
-          return chain()
-            .focus()
-            .insertContent({
-              type: this.name,
-              content,
-            })
-            .run()
-        },
-
-      toggleRowShortcode:
-        () =>
-        ({ state, chain }) => {
-          const { from, to } = state.selection
-
-          // Проверяем, находится ли курсор внутри rowShortcode
-          let rowNode: any = null
-          let rowNodeSize: number = 0
-          let rowPos: number = -1
-
-          state.doc.nodesBetween(from, to, (node, pos) => {
-            if (node.type.name === this.name) {
-              rowNode = node
-              rowNodeSize = node.nodeSize
-              rowPos = pos
-              return false
-            }
-          })
-
-          // Если курсор на rowShortcode, разворачиваем его обратно в текст
-          if (rowNode && rowPos >= 0) {
-            const content: Array<{
-              type: string
-              content?: Array<{ type: string; text: string }>
-            }> = []
-
-            content.push({
-              type: 'paragraph',
-              content: [{ type: 'text', text: "[flex column='true']" }],
-            })
-
-            rowNode.forEach((child: any) => {
-              if (child.type.name === 'row') {
-                const title = child.attrs.title || ''
-                content.push({
-                  type: 'paragraph',
-                  content: [{ type: 'text', text: `[row title='${title}']` }],
-                })
-
-                // Добавляем содержимое строки
-                child.content.forEach((blockNode: any) => {
-                  const text = blockNode.textContent || ''
-                  content.push({
+                content: [
+                  {
                     type: 'paragraph',
-                    content: text ? [{ type: 'text', text }] : [],
-                  })
-                })
-
-                content.push({
-                  type: 'paragraph',
-                  content: [{ type: 'text', text: '[/row]' }],
-                })
-              }
-            })
-
-            content.push({
-              type: 'paragraph',
-              content: [{ type: 'text', text: '[/flex]' }],
-            })
+                  },
+                ],
+              })
+            }
 
             return chain()
               .focus()
-              .deleteRange({ from: rowPos, to: rowPos + rowNodeSize })
-              .insertContentAt(rowPos, content)
+              .insertContent({
+                type: this.name,
+                content,
+              })
               .run()
-          }
+          },
 
-          return false
-        },
+      toggleRowShortcode:
+        () =>
+          ({ state, chain }) => {
+            const { from, to } = state.selection
+
+            let rowNode: any = null
+            let rowNodeSize: number = 0
+            let rowPos: number = -1
+
+            state.doc.nodesBetween(from, to, (node, pos) => {
+              if (node.type.name === this.name) {
+                rowNode = node
+                rowNodeSize = node.nodeSize
+                rowPos = pos
+                return false
+              }
+            })
+
+            if (rowNode && rowPos >= 0) {
+              const content: Array<{
+                type: string
+                content?: Array<{ type: string; text: string }>
+              }> = []
+
+              content.push({
+                type: 'paragraph',
+                content: [{ type: 'text', text: "[flex column='true']" }],
+              })
+
+              rowNode.forEach((child: any) => {
+                if (child.type.name === 'row') {
+                  const title = child.attrs.title || ''
+                  content.push({
+                    type: 'paragraph',
+                    content: [{ type: 'text', text: `[row title='${title}']` }],
+                  })
+
+                  child.content.forEach((blockNode: any) => {
+                    const text = blockNode.textContent || ''
+                    content.push({
+                      type: 'paragraph',
+                      content: text ? [{ type: 'text', text }] : [],
+                    })
+                  })
+
+                  content.push({
+                    type: 'paragraph',
+                    content: [{ type: 'text', text: '[/row]' }],
+                  })
+                }
+              })
+
+              content.push({
+                type: 'paragraph',
+                content: [{ type: 'text', text: '[/flex]' }],
+              })
+
+              return chain()
+                .focus()
+                .deleteRange({ from: rowPos, to: rowPos + rowNodeSize })
+                .insertContentAt(rowPos, content)
+                .run()
+            }
+
+            return false
+          },
     }
   },
 })
