@@ -1,4 +1,6 @@
-import { Node } from '@tiptap/core'
+import { Node, mergeAttributes } from '@tiptap/core'
+import { VueNodeViewRenderer } from '@tiptap/vue-3'
+import HeaderShortcodeNodeView from '@/components/HeaderShortcodeNodeView.vue'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -14,37 +16,45 @@ export const HeaderShortcode = Node.create({
   group: 'inline',
   inline: true,
 
-  // ВАЖНО: убираем atom
-  atom: false,
+  // Делаем атомарной, чтобы нельзя было редактировать текст напрямую
+  atom: true,
 
-  // Внутри ноды может быть текст
-  content: 'text*',
+  selectable: true,
+  draggable: true,
 
-  selectable: true, // по желанию можно оставить / убрать
+  addAttributes() {
+    return {
+      text: {
+        default: '',
+      },
+    }
+  },
 
   parseHTML() {
     return [
       {
         tag: 'span[data-type="header-shortcode"]',
+        getAttrs: element => ({
+          text: (element as HTMLElement).getAttribute('data-text') || '',
+        }),
       },
     ]
   },
 
-  renderHTML({ HTMLAttributes }) {
-    // contentDOM будет на месте "0"
+  renderHTML({ node, HTMLAttributes }) {
     return [
       'span',
-      {
-        ...HTMLAttributes,
+      mergeAttributes(HTMLAttributes, {
         'data-type': 'header-shortcode',
-      },
-      // статическая открывающая часть
-      ['span', { 'data-role': 'open' }, '[header]'],
-      // зона редактируемого текста
-      ['span', { 'data-role': 'content' }, 0],
-      // статическая закрывающая часть
-      ['span', { 'data-role': 'close' }, '[/header]'],
+        'data-text': node.attrs.text,
+      }),
+      `[header]${node.attrs.text}[/header]`,
     ]
+  },
+
+  addNodeView() {
+    // Подключаем Vue-компонент для отрисовки ноды
+    return VueNodeViewRenderer(HeaderShortcodeNodeView)
   },
 
   addCommands() {
@@ -53,37 +63,37 @@ export const HeaderShortcode = Node.create({
         () =>
           ({ state, chain }) => {
             const { from, to, empty } = state.selection
-            const { doc } = state
 
-            let headerNode: any = null
+            let headerNodeText = ''
+            let headerNodeSize = 0
             let headerPos = -1
+            let foundNode = false
 
-            // ищем headerShortcode в выделении / под курсором
-            doc.nodesBetween(from, to, (node, pos) => {
+            state.doc.nodesBetween(from, to, (node, pos) => {
               if (node.type.name === this.name) {
-                headerNode = node
+                headerNodeText = String(node.attrs.text || '')
+                headerNodeSize = node.nodeSize
                 headerPos = pos
+                foundNode = true
                 return false
               }
             })
 
-            // Если нашли — разворачиваем обратно в текст
-            if (headerNode && headerPos >= 0) {
-              const text = headerNode.textContent || ''
-
+            // Если курсор на headerShortcode, разворачиваем его обратно в текст
+            if (foundNode && headerPos >= 0) {
               return chain()
                 .focus()
-                .insertContentAt(
-                  { from: headerPos, to: headerPos + headerNode.nodeSize },
-                  text,
-                )
+                .deleteRange({ from: headerPos, to: headerPos + headerNodeSize })
+                .insertContentAt(headerPos, {
+                  type: 'text',
+                  text: headerNodeText,
+                })
                 .run()
             }
 
-            // Если не внутри шорткода, создаем новый из выделения
             if (empty) return false
 
-            const selectedText = doc.textBetween(from, to, '')
+            const selectedText = state.doc.textBetween(from, to, '')
 
             if (!selectedText) return false
 
@@ -92,7 +102,7 @@ export const HeaderShortcode = Node.create({
               .deleteRange({ from, to })
               .insertContent({
                 type: this.name,
-                content: [{ type: 'text', text: selectedText }],
+                attrs: { text: selectedText },
               })
               .run()
           },
