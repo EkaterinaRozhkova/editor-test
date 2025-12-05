@@ -23,6 +23,7 @@ import EditorMenuBar from "@/components/EditorMenuBar.vue";
 import { HeaderShortcode } from "@/extensions/HeaderShortcode.ts";
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import { CenterShortcode } from "@/extensions/CenterShortcode.ts";
+import { FlexShortcode } from "@/extensions/FlexShortcode.ts";
 
 
 const editor = useEditor({
@@ -50,6 +51,7 @@ const editor = useEditor({
     }),
     HeaderShortcode,
     CenterShortcode,
+    FlexShortcode,
     TextStyle,
     Color
   ],

@@ -291,6 +291,28 @@
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="17" x2="7" y1="12" y2="12"/><line x1="19" x2="5" y1="18" y2="18"/></svg>
       </button>
+      <div ref="flexColumnsDropdownRef" class="dropdown" :class="{ 'is-open': isFlexColumnsDropdownOpen }">
+        <button
+          @click="toggleFlexColumnsDropdown"
+          :class="{ 'is-active': editor.isActive('flexShortcode') }"
+          class="dropdown-button"
+          title="Flex колонки"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div v-if="isFlexColumnsDropdownOpen" class="dropdown-menu">
+          <button @click="insertFlexColumns(2)" class="dropdown-item">
+            <span>2 колонки</span>
+          </button>
+          <button @click="insertFlexColumns(3)" class="dropdown-item">
+            <span>3 колонки</span>
+          </button>
+          <button @click="insertFlexColumns(4)" class="dropdown-item">
+            <span>4 колонки</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -308,12 +330,14 @@ const props = defineProps<{
 const isBlockTypeDropdownOpen = ref(false)
 const isAlignmentDropdownOpen = ref(false)
 const isOrderedListDropdownOpen = ref(false)
+const isFlexColumnsDropdownOpen = ref(false)
 const currentListType = ref<'1' | 'A' | 'a' | 'I' | 'i'>('1')
 
 // Refs для дропдаунов
 const blockTypeDropdownRef = ref<HTMLElement | null>(null)
 const alignmentDropdownRef = ref<HTMLElement | null>(null)
 const orderedListDropdownRef = ref<HTMLElement | null>(null)
+const flexColumnsDropdownRef = ref<HTMLElement | null>(null)
 
 // Определяем текущий тип блока
 const currentBlockType = computed(() => {
@@ -351,6 +375,13 @@ const toggleOrderedListDropdown = () => {
   isOrderedListDropdownOpen.value = !isOrderedListDropdownOpen.value
   isBlockTypeDropdownOpen.value = false
   isAlignmentDropdownOpen.value = false
+}
+
+const toggleFlexColumnsDropdown = () => {
+  isFlexColumnsDropdownOpen.value = !isFlexColumnsDropdownOpen.value
+  isBlockTypeDropdownOpen.value = false
+  isAlignmentDropdownOpen.value = false
+  isOrderedListDropdownOpen.value = false
 }
 
 // Установка типа блока
@@ -458,6 +489,14 @@ const setLink = () => {
 //
 // }
 
+// Функция для вставки flex колонок
+const insertFlexColumns = (columns: number) => {
+  if (!props.editor) return
+
+  props.editor.chain().focus().insertFlexShortcode(columns).run()
+  isFlexColumnsDropdownOpen.value = false
+}
+
 // Закрытие дропдаунов при клике вне их
 onClickOutside(blockTypeDropdownRef, () => {
   isBlockTypeDropdownOpen.value = false
@@ -469,6 +508,10 @@ onClickOutside(alignmentDropdownRef, () => {
 
 onClickOutside(orderedListDropdownRef, () => {
   isOrderedListDropdownOpen.value = false
+})
+
+onClickOutside(flexColumnsDropdownRef, () => {
+  isFlexColumnsDropdownOpen.value = false
 })
 </script>
 
