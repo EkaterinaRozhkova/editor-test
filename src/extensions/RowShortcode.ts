@@ -41,34 +41,44 @@ export const RowShortcode = Node.create({
   renderHTML({ node }) {
     const result: any[] = []
 
-    const serializeMarks = (text: string, marks: readonly any[]) => {
-      let result = text
-      marks.forEach((mark) => {
+    // Функция для создания DOM структуры с marks
+    const wrapWithMarks = (text: string, marks: readonly any[]): any => {
+      if (marks.length === 0) {
+        return text
+      }
+
+      let wrapped: any = text
+
+      // Оборачиваем от последнего mark к первому
+      for (let i = marks.length - 1; i >= 0; i--) {
+        const mark = marks[i]
+
         if (mark.type.name === 'bold') {
-          result = `<strong>${result}</strong>`
+          wrapped = ['strong', {}, wrapped]
         } else if (mark.type.name === 'strike') {
-          result = `<s>${result}</s>`
+          wrapped = ['s', {}, wrapped]
         } else if (mark.type.name === 'italic') {
-          result = `<em>${result}</em>`
+          wrapped = ['em', {}, wrapped]
         } else if (mark.type.name === 'underline') {
-          result = `<u>${result}</u>`
+          wrapped = ['u', {}, wrapped]
         } else if (mark.type.name === 'code') {
-          result = `<code>${result}</code>`
+          wrapped = ['code', {}, wrapped]
         } else if (mark.type.name === 'highlight') {
-          result = `<mark>${result}</mark>`
+          wrapped = ['mark', {}, wrapped]
         } else if (mark.type.name === 'link') {
           const href = mark.attrs.href || ''
-          result = `<a href="${href}">${result}</a>`
+          wrapped = ['a', { href }, wrapped]
         } else if (mark.type.name === 'subscript') {
-          result = `<sub>${result}</sub>`
+          wrapped = ['sub', {}, wrapped]
         } else if (mark.type.name === 'superscript') {
-          result = `<sup>${result}</sup>`
+          wrapped = ['sup', {}, wrapped]
         }
-      })
-      return result
+      }
+
+      return wrapped
     }
 
-    // Открывающий тег [flex column='true']
+    // Формируем открывающий тег
     let openingText = "[flex column='true']"
 
     node.content.forEach((child, index) => {
@@ -76,13 +86,11 @@ export const RowShortcode = Node.create({
         const title = child.attrs.title || ''
         const isFinal = index === node.content.childCount - 1
         const finalAttr = isFinal ? " final='true'" : ''
-
-        // Добавляем [row title='...' final='true'] к открывающему тегу
-        openingText += `[row title='${title}'${finalAttr}']`
+        openingText += `[row title='${title}'${finalAttr}]`
       }
     })
 
-    // Создаем первый параграф с открывающими тегами
+    // Первый параграф с открывающими тегами
     result.push(['p', {}, openingText])
 
     // Обрабатываем содержимое всех строк
@@ -91,19 +99,20 @@ export const RowShortcode = Node.create({
         child.content.forEach((blockNode) => {
           const contentArray: any[] = []
 
-          // Сериализуем содержимое блока с marks
+          // Проходим по всем inline элементам
           blockNode.content.forEach((inline) => {
-            const text = inline.text || ''
-            if (inline.marks && inline.marks.length > 0) {
-              const markedText = serializeMarks(text, inline.marks)
-              // Парсим HTML-строку обратно в структуру для renderHTML
-              contentArray.push(['span', { innerHTML: markedText }])
-            } else {
-              contentArray.push(text)
+            if (inline.isText) {
+              const text = inline.text || ''
+              if (inline.marks && inline.marks.length > 0) {
+                // Оборачиваем текст в marks
+                contentArray.push(wrapWithMarks(text, inline.marks))
+              } else {
+                contentArray.push(text)
+              }
             }
           })
 
-          // Создаем параграф с содержимым
+          // Создаем параграф только если есть содержимое
           if (contentArray.length > 0) {
             result.push(['p', {}, ...contentArray])
           }
@@ -111,15 +120,15 @@ export const RowShortcode = Node.create({
       }
     })
 
-    // Закрывающий тег [/row][/flex]
+    // Закрывающий тег
     result.push(['p', {}, '[/row][/flex]'])
 
-    // Добавляем пустые параграфы
-    result.push(['p', {}, '\u00A0']) // &nbsp;
+    // Три пустых параграфа
+    result.push(['p', {}, '\u00A0'])
     result.push(['p', {}, '\u00A0'])
     result.push(['p', {}, '\u00A0'])
 
-    // Возвращаем контейнер с результатом
+    // Возвращаем div с результатом
     return ['div', { 'data-type': 'row-shortcode' }, ...result]
   },
 
