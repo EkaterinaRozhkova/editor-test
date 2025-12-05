@@ -138,32 +138,31 @@ export const FlexShortcode = Node.create({
       return ['p', {}, '\u00A0']
     }
 
-    // Формируем открывающий тег
-    let openingText = '[flex]'
+    // Открывающий тег [flex]
+    result.push(['p', {}, '[flex]'])
 
+    // Обрабатываем каждую колонку отдельно
     node.content.forEach((child, index) => {
       if (child.type.name === 'flexColumn') {
         const title = child.attrs.title || ''
         const isFinal = index === node.content.childCount - 1
         const finalAttr = isFinal ? " final='true'" : ''
-        openingText += `[col title='${title}'${finalAttr}]`
-      }
-    })
 
-    // Первый параграф с открывающими тегами
-    result.push(['p', {}, openingText])
+        // Открывающий тег колонки
+        result.push(['p', {}, `[col title='${title}'${finalAttr}]`])
 
-    // Обрабатываем содержимое всех колонок
-    node.content.forEach((child) => {
-      if (child.type.name === 'flexColumn') {
+        // Содержимое колонки
         child.content.forEach((blockNode) => {
           result.push(serializeBlock(blockNode))
         })
+
+        // Закрывающий тег колонки
+        result.push(['p', {}, '[/col]'])
       }
     })
 
-    // Закрывающий тег
-    result.push(['p', {}, '[/col][/flex]'])
+    // Закрывающий тег [/flex]
+    result.push(['p', {}, '[/flex]'])
 
     // Три пустых параграфа
     result.push(['p', {}, '\u00A0'])
