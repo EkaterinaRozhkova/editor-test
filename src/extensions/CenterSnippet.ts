@@ -19,11 +19,29 @@ export const CenterSnippet = Extension.create({
         (options) =>
           ({ chain }) => {
             const text = options?.text ?? ''
+            const lines = text.split('\n')
 
-            const snippet = `[center]${text}[/center]`
+            const content = [
+              { type: 'paragraph', content: [{ type: 'text', text: '[center]' }] },
+              ...lines.map(line => ({
+                type: 'paragraph',
+                content: line ? [{ type: 'text', text: line }] : []
+              })),
+              { type: 'paragraph', content: [{ type: 'text', text: '[/center]' }] }
+            ]
 
-            return chain().focus().insertContent(snippet).run()
+            return chain().focus().insertContent(content).run()
           },
     }
+    //   insertCenterSnippet:
+    //     (options) =>
+    //       ({ chain }) => {
+    //         const text = options?.text ?? ''
+    //
+    //         const snippet = `[center]${text}[/center]`
+    //
+    //         return chain().focus().insertContent(snippet).run()
+    //       },
+    // }
   },
 })
