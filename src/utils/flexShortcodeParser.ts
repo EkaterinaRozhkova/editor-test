@@ -1,12 +1,41 @@
 // flexShortcodeParser.ts
-import { Fragment, Schema, Node as PMNode } from 'prosemirror-model'
+import {
+  Fragment,
+  Schema,
+  Node as PMNode,
+  DOMParser as ProseMirrorDOMParser,
+} from 'prosemirror-model'
 
+/**
+ * Парсит содержимое <div data-type="flex-shortcode"> с шорткодами
+ * [flex] / [col title='...'] / [/col] / [/flex]
+ * в структуру flexColumn-нод с сохранением форматирования внутри.
+ */
 export function parseFlexShortcodeContent(
   element: HTMLElement,
   schema: Schema,
 ): Fragment {
-  // Берём только непосредственные <p> внутри div[data-type="flex-shortcode"]
-  const paragraphs = Array.from(element.querySelectorAll<HTMLElement>(':scope > p'))
+  // Типы нод, которые нам нужны
+  const nodes = schema.nodes as typeof schema.nodes & {
+    flexColumn?: any
+    paragraph?: any
+  }
+
+  const flexColumnType = nodes.flexColumn
+  const paragraphType = nodes.paragraph
+
+  // Если по какой-то причине нужных нод нет — ничего не парсим
+  if (!flexColumnType || !paragraphType) {
+    return Fragment.empty
+  }
+
+  // Парсер DOM -> ProseMirror по текущей схеме
+  const domParser = ProseMirrorDOMParser.fromSchema(schema)
+
+  // Берём только непосредственных детей <p> внутри div[data-type="flex-shortcode"]
+  const paragraphs = Array.from(
+    element.querySelectorAll(':scope > p'),
+  ) as HTMLElement[]
 
   const flexColumns: PMNode[] = []
 
@@ -14,17 +43,17 @@ export function parseFlexShortcodeContent(
   let currentTitle = ''
   let currentBlocks: PMNode[] = []
 
-  const isEmptyP = (p: HTMLElement) => {
+  const isEmptyP = (p: HTMLElement): boolean => {
     const text = (p.textContent || '').replace(/\u00A0/g, '').trim()
     return text.length === 0
   }
 
   for (const p of paragraphs) {
-    const raw = p.textContent || ''
-    const text = raw.trim()
+    const textContent = p.textContent || ''
+    const text = textContent.trim()
 
     if (!text) {
-      // пустой абзац внутри flex — можно игнорить
+      // Пустые абзацы можно игнорить (кроме тех, что явно нужны — их добавим отдельно)
       continue
     }
 
@@ -33,21 +62,19 @@ export function parseFlexShortcodeContent(
       continue
     }
 
-    // Открытие колонки: [col title='Заголовок 1'] или [col title='...' final='true']
+    // Открытие колонки: [col title='Заголовок 1'] (в том числе с final='true')
     const colOpenMatch = text.match(
       /^\[col\s+title='([^']*)'(?:\s+final='true')?\]$/,
     )
 
     if (colOpenMatch) {
-      // Если уже были накоплены блоки предыдущей колонки — пушим её
+      // Если уже была предыдущая колонка — закрываем её
       if (inColumn) {
-        const colNode = schema.nodes?.flexColumn?.create(
+        const colNode = flexColumnType.create(
           { title: currentTitle },
           Fragment.from(currentBlocks),
         )
-        if(colNode) {
-          flexColumns.push(colNode)
-        }
+        flexColumns.push(colNode)
       }
 
       currentTitle = colOpenMatch[1] || ''
@@ -59,62 +86,66 @@ export function parseFlexShortcodeContent(
     // Закрытие колонки: [/col]
     if (text === '[/col]') {
       if (inColumn) {
-        const colNode = schema?.nodes?.flexColumn?.create(
+        const colNode = flexColumnType.create(
           { title: currentTitle },
           Fragment.from(currentBlocks),
         )
-        if(colNode) {
-          flexColumns.push(colNode)
-          currentTitle = ''
-          currentBlocks = []
-          inColumn = false
-        }
+        flexColumns.push(colNode)
+        currentTitle = ''
+        currentBlocks = []
+        inColumn = false
       }
       continue
     }
 
     // Обычный контент внутри колонки
     if (inColumn) {
-      // Здесь можно усложнить и парсить p.innerHTML → schema,
-      // но для начала берём просто текст в параграф
-      const contentText = isEmptyP(p) ? '' : raw
+      if (isEmptyP(p)) {
+        // Пустой <p> -> пустой параграф
+        const emptyPara = paragraphType.create()
+        currentBlocks.push(emptyPara)
+      } else {
+        // Парсим <p> полностью через ProseMirror DOMParser,
+        // чтобы не потерять форматирование (strong, em, ссылки и т.д.)
+        const doc = domParser.parse(p)
 
-      const para = schema?.nodes?.paragraph?.create(
-        undefined,
-        contentText ? schema.text(contentText) : undefined,
-      )
-
-      if(para) {
-        currentBlocks.push(para)
+        doc.content.forEach(child => {
+          // В flexColumn у тебя разрешены paragraph | heading | bulletList | orderedList
+          if (
+            child.type.name === 'paragraph' ||
+            child.type.name === 'heading' ||
+            child.type.name === 'bulletList' ||
+            child.type.name === 'orderedList'
+          ) {
+            currentBlocks.push(child)
+          }
+        })
       }
     }
-    // Если не внутри колонки — просто игнорируем (например, &nbsp; после [/flex])
+
+    // Всё, что вне колонки (например, лишние <p> после [/flex]) игнорируем
   }
 
-  // Если осталась незакрытая колонка
+  // Если осталась незакрытая колонка — закрываем её
   if (inColumn && currentBlocks.length) {
-    const colNode = schema.nodes?.flexColumn?.create(
+    const colNode = flexColumnType.create(
       { title: currentTitle },
       Fragment.from(currentBlocks),
     )
-    if (colNode) {
-      flexColumns.push(colNode)
-    }
+    flexColumns.push(colNode)
   }
 
-  // Если вдруг колонок не нашлось — чтобы не падать, создадим одну пустую
+  // На всякий случай: если колонок не получилось — создаём одну пустую,
+  // чтобы не уронить парсер
   if (!flexColumns.length) {
-    const emptyPara = schema.nodes?.paragraph?.create(
-      undefined,
-      schema.text(''),
-    )
-    const emptyCol = schema.nodes?.flexColumn?.create(
+    const emptyPara = paragraphType.create()
+    const emptyCol = flexColumnType.create(
       { title: '' },
-      Fragment.from(emptyPara ? [emptyPara] : []),
+      Fragment.from([emptyPara]),
     )
-    return Fragment.from(emptyCol ? [emptyCol] : [])
+    return Fragment.from([emptyCol])
   }
 
-  // Возвращаем Fragment из flexColumn-нод — это станет content для flexShortcode
   return Fragment.from(flexColumns)
 }
+
