@@ -2,6 +2,7 @@ import { Node } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import FlexShortcodeView from '@/components/FlexShortcodeView.vue'
 import FlexColumnView from '@/components/FlexColumnView.vue'
+import { parseFlexShortcodeContent } from "@/utils/flexShortcodeParser.ts";
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -35,6 +36,8 @@ export const FlexShortcode = Node.create({
     return [
       {
         tag: 'div[data-type="flex-shortcode"]',
+        getContent: (element, schema) =>
+          parseFlexShortcodeContent(element as HTMLElement, schema),
       },
     ]
   },

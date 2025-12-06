@@ -11,7 +11,6 @@
 
     <!-- Кнопка редактирования появляется только при наведении -->
     <button
-      v-if="isHovered"
       type="button"
       class="header-shortcode-node__edit-btn"
       @click.stop="openEditor"
@@ -113,7 +112,7 @@ const cancel = () => {
 }
 
 .header-shortcode-node__input {
-  width: 220px;
+  width: 400px;
   font-size: 14px;
   padding: 4px 6px;
   border: 1px solid #ccc;
