@@ -246,15 +246,41 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
-        <div v-if="isFlexColumnsDropdownOpen" class="dropdown-menu">
-          <button
-            v-for="count in [2, 3, 4]"
-            :key="`columns-${count}`"
-            @click="insertFlexColumns(count)"
-            class="dropdown-item"
-          >
-            <span>{{ count }} колонки</span>
-          </button>
+        <div v-if="isFlexColumnsDropdownOpen" class="dropdown-menu columns-form-dropdown">
+          <div class="columns-form">
+            <div class="form-header">
+              <label class="form-label">Количество колонок:</label>
+              <select v-model="columnCount" class="column-count-select">
+                <option :value="2">2</option>
+                <option :value="3">3</option>
+                <option :value="4">4</option>
+              </select>
+            </div>
+            <div class="columns-inputs">
+              <div
+                v-for="(column, index) in flexColumnsData"
+                :key="`column-${index}`"
+                class="column-input-group"
+              >
+                <label class="column-label">Колонка {{ index + 1 }}</label>
+                <input
+                  v-model="column.title"
+                  type="text"
+                  :placeholder="`Заголовок ${index + 1}`"
+                  class="column-input"
+                />
+                <textarea
+                  v-model="column.content"
+                  :placeholder="`Текст колонки ${index + 1}`"
+                  class="column-textarea"
+                  rows="2"
+                />
+              </div>
+            </div>
+            <button @click="insertFlexColumnsWithData" class="insert-button">
+              Вставить колонки
+            </button>
+          </div>
         </div>
       </div>
       <div ref="flexRowsDropdownRef" class="dropdown" :class="{ 'is-open': isFlexRowsDropdownOpen }">
@@ -284,9 +310,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import type { Editor } from '@tiptap/vue-3'
+import type { FlexColumn } from '@/extensions/FlexSnippet'
 
 const props = defineProps<{
   editor: Editor | null
@@ -354,6 +381,28 @@ const isOrderedListDropdownOpen = ref(false)
 const isFlexColumnsDropdownOpen = ref(false)
 const isFlexRowsDropdownOpen = ref(false)
 const currentListType = ref<'1' | 'A' | 'a' | 'I' | 'i'>('1')
+
+// Данные для формы flex колонок
+const columnCount = ref(2)
+const flexColumnsData = ref<FlexColumn[]>([
+  { title: '', content: '' },
+  { title: '', content: '' },
+])
+
+// Обновляем данные колонок при изменении количества
+watch(columnCount, (newCount) => {
+  const currentLength = flexColumnsData.value.length
+
+  if (newCount > currentLength) {
+    // Добавляем новые колонки
+    for (let i = currentLength; i < newCount; i++) {
+      flexColumnsData.value.push({ title: '', content: '' })
+    }
+  } else if (newCount < currentLength) {
+    // Удаляем лишние колонки
+    flexColumnsData.value = flexColumnsData.value.slice(0, newCount)
+  }
+})
 
 // Refs для дропдаунов
 const blockTypeDropdownRef = ref<HTMLElement | null>(null)
@@ -488,11 +537,24 @@ const setLink = () => {
   props.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
 }
 
-// Функция для вставки flex колонок
-const insertFlexColumns = (columns: number) => {
+// Функция для вставки flex колонок с данными из формы
+const insertFlexColumnsWithData = () => {
   if (!props.editor) return
 
-  props.editor.chain().focus().insertFlexShortcode(columns).run()
+  // Создаем колонки с заполненными данными или дефолтными значениями
+  const columns = flexColumnsData.value.map((col, index) => ({
+    title: col.title || `Заголовок ${index + 1}`,
+    content: col.content || `текст колонки ${index + 1}`,
+  }))
+
+  props.editor.chain().focus().insertFlexSnippet({ columns }).run()
+
+  // Сбрасываем форму
+  flexColumnsData.value = Array.from({ length: columnCount.value }, () => ({
+    title: '',
+    content: '',
+  }))
+
   isFlexColumnsDropdownOpen.value = false
 }
 
@@ -657,5 +719,107 @@ button:disabled {
 
 .dropdown-item span {
   font-size: 14px;
+}
+
+/* Стили для формы flex колонок */
+.columns-form-dropdown {
+  min-width: 350px;
+  max-width: 450px;
+  overflow: visible;
+}
+
+.columns-form {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--button-text);
+}
+
+.column-count-select {
+  padding: 4px 8px;
+  border: 1px solid var(--button-border);
+  background: var(--button-bg);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--button-text);
+  cursor: pointer;
+}
+
+.columns-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.column-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--button-border);
+  border-radius: 4px;
+  background: var(--menu-bg);
+}
+
+.column-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--button-text);
+}
+
+.column-input,
+.column-textarea {
+  padding: 6px 8px;
+  border: 1px solid var(--button-border);
+  background: var(--button-bg);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--button-text);
+  font-family: inherit;
+  resize: vertical;
+}
+
+.column-input:focus,
+.column-textarea:focus {
+  outline: none;
+  border-color: var(--button-hover-border);
+}
+
+.insert-button {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--button-is-active-bg);
+  color: var(--button-is-active-text);
+  border: 1px solid var(--button-is-active-border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: auto;
+  height: auto;
+}
+
+.insert-button:hover {
+  opacity: 0.9;
+}
+
+.insert-button:active {
+  transform: scale(0.98);
 }
 </style>
