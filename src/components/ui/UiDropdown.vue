@@ -131,8 +131,9 @@ onClickOutside(dropdownRef, () => {
 
 .ui-dropdown-menu {
   position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
   background: var(--button-bg);
   border: 1px solid var(--button-border);
   border-radius: 4px;

@@ -22,10 +22,10 @@ import { useDebounceFn } from "@vueuse/core";
 import EditorMenuBar from "@/components/EditorMenuBar.vue";
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import { FlexSnippet } from "@/extensions/FlexSnippet.ts";
-import { RowShortcode, Row } from "@/extensions/RowShortcode.ts";
 import { HeaderSnippet } from "@/extensions/HeaderSnippet.ts";
 import { CustomOrderedList } from "@/extensions/CustomOrderedList.ts";
 import { CenterSnippet } from "@/extensions/CenterSnippet.ts";
+import { BlockSnippet } from "@/extensions/BlockSnippet.ts";
 
 
 const editor = useEditor({
@@ -57,14 +57,12 @@ const editor = useEditor({
     FlexSnippet,
     HeaderSnippet,
     CenterSnippet,
-
-    Row,
-    RowShortcode,
+    BlockSnippet,
     TextStyle,
     Color
   ],
-  content: '',  // Изначально пустое содержимое
-  editable: true,  // Явно разрешаем редактирование
+  content: '',
+  editable: true,
   editorProps: {
     attributes: {
       class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
@@ -93,9 +91,6 @@ const handleMessage = async (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
     try {
       const html = LZString.decompressFromEncodedURIComponent(event.data.data);
-
-        // Устанавливаем обычный HTML контент
-      console.log(html)
       editor.value.commands.setContent(html ?? '');
 
 
@@ -107,8 +102,6 @@ const handleMessage = async (event: MessageEvent) => {
           }
         }, 100);
       }
-
-      // migrateMathStrings(editor.value);
 
       isContentInitialized.value = true;
     } catch (error) {
@@ -152,7 +145,7 @@ defineExpose({
   overflow: auto;
   font-size: 17px;
   line-height: 22px;
-  height: 320px;
+  height: 340px;
   background-color: var(--editor-content);
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-bg) var(--scrollbar-color);

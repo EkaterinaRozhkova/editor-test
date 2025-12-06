@@ -263,8 +263,9 @@
       <UiDropdown
         v-model:isOpen="isFlexColumnsDropdownOpen"
         title="Flex колонки"
-        :buttonClass="{ 'is-active': editor.isActive('flexShortcode') }"
+        :buttonClass="{ 'is-active': editor.isActive('flexSnippet') }"
         menuClass="columns-form-dropdown"
+        :menu-width="500"
         @toggle="toggleFlexColumnsDropdown"
       >
         <template #button-content>
@@ -297,7 +298,7 @@
                   v-model="column.content"
                   :placeholder="`Текст колонки ${index + 1}`"
                   class="column-textarea"
-                  rows="2"
+                  rows="4"
                 />
               </div>
             </div>
@@ -311,23 +312,50 @@
       <!-- Вертикальные блоки -->
       <UiDropdown
         v-model:isOpen="isFlexRowsDropdownOpen"
-        title="Вертикальные блоки"
-        :buttonClass="{ 'is-active': editor.isActive('rowShortcode') }"
-        @toggle="toggleFlexRowsDropdown"
+        title="Блоки"
+        :buttonClass="{ 'is-active': editor.isActive('blockSnippet') }"
+        menuClass="rows-form-dropdown"
+        :menu-width="420"
+        @toggle="toggleBlockDropdown"
       >
         <template #button-content>
           <SvgIcon name="rows" />
         </template>
         <template #menu-content>
-          <ui-button
-            v-for="item in 4"
-            :key="`dropdown-item-block__${item}`"
-            @click="insertFlexRows(item)"
-            class="dropdown-item"
-          >
-            <span v-if="item === 1">1 блок</span>
-            <span v-else>{{ item }} блока</span>
-          </ui-button>
+          <div class="rows-form">
+            <div class="form-header">
+              <label class="form-label">Количество блоков:</label>
+              <select v-model="columnCount" class="rows-count-select">
+                <option :value="2">2</option>
+                <option :value="3">3</option>
+                <option :value="4">4</option>
+              </select>
+            </div>
+            <div class="rows-inputs">
+              <div
+                v-for="(row, index) in rowsColumnsData"
+                :key="`rows-${index}`"
+                class="rows-input-group"
+              >
+                <label class="column-label">Блок {{ index + 1 }}</label>
+                <input
+                  v-model="row.title"
+                  type="text"
+                  :placeholder="`Заголовок ${index + 1}`"
+                  class="column-input"
+                />
+                <textarea
+                  v-model="row.content"
+                  :placeholder="`Текст блока ${index + 1}`"
+                  class="row-textarea"
+                  rows="4"
+                />
+              </div>
+            </div>
+            <UiBlueButton @click="insertRowsWithData">
+              Вставить блоки
+            </UiBlueButton>
+          </div>
         </template>
       </UiDropdown>
     </div>
@@ -339,6 +367,7 @@ import { ref, computed, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import type { Editor } from '@tiptap/vue-3'
 import type { FlexColumn } from '@/extensions/FlexSnippet'
+import type { BlocksRow } from '@/extensions/BlockSnippet'
 import UiDropdown from './ui/UiDropdown.vue'
 import UiButton from './ui/UiButton.vue'
 import UiBlueButton from "@/components/ui/UiBlueButton.vue";
@@ -425,6 +454,12 @@ const flexColumnsData = ref<FlexColumn[]>([
   { title: '', content: '' },
 ])
 
+// Данные для формы блоков (rows)
+const rowsColumnsData = ref<BlocksRow[]>([
+  { title: '', content: '' },
+  { title: '', content: '' },
+])
+
 // Обновляем данные колонок при изменении количества
 watch(columnCount, (newCount) => {
   const currentLength = flexColumnsData.value.length
@@ -437,6 +472,19 @@ watch(columnCount, (newCount) => {
   } else if (newCount < currentLength) {
     // Удаляем лишние колонки
     flexColumnsData.value = flexColumnsData.value.slice(0, newCount)
+  }
+
+  // Также обновляем данные для блоков
+  const currentRowsLength = rowsColumnsData.value.length
+
+  if (newCount > currentRowsLength) {
+    // Добавляем новые блоки
+    for (let i = currentRowsLength; i < newCount; i++) {
+      rowsColumnsData.value.push({ title: '', content: '' })
+    }
+  } else if (newCount < currentRowsLength) {
+    // Удаляем лишние блоки
+    rowsColumnsData.value = rowsColumnsData.value.slice(0, newCount)
   }
 })
 
@@ -497,11 +545,6 @@ const toggleFlexColumnsDropdown = () => {
   isFlexColumnsDropdownOpen.value = !isFlexColumnsDropdownOpen.value
 }
 
-const toggleFlexRowsDropdown = () => {
-  closeAllDropdowns()
-  isFlexRowsDropdownOpen.value = !isFlexRowsDropdownOpen.value
-}
-
 const toggleHeaderSnippetDropdown = () => {
   closeAllDropdowns()
   isHeaderSnippetDropdownOpen.value = !isHeaderSnippetDropdownOpen.value
@@ -510,6 +553,11 @@ const toggleHeaderSnippetDropdown = () => {
 const toggleCenterSnippetDropdown = () => {
   closeAllDropdowns()
   isCenterSnippetDropdownOpen.value = !isCenterSnippetDropdownOpen.value
+}
+
+const toggleBlockDropdown = () => {
+  closeAllDropdowns()
+  isFlexRowsDropdownOpen.value = !isFlexRowsDropdownOpen.value
 }
 
 // Установка типа блока
@@ -605,14 +653,6 @@ const insertFlexColumnsWithData = () => {
   isFlexColumnsDropdownOpen.value = false
 }
 
-// Функция для вставки вертикальных блоков
-const insertFlexRows = (rows: number) => {
-  if (!props.editor) return
-
-  props.editor.chain().focus().insertRowShortcode(rows).run()
-  isFlexRowsDropdownOpen.value = false
-}
-
 // Функция для вставки header snippet
 const insertHeaderSnippetWithText = () => {
   if (!props.editor) return
@@ -633,6 +673,27 @@ const insertCenterSnippetWithText = () => {
   // Сбрасываем форму и закрываем dropdown
   centerText.value = ''
   isCenterSnippetDropdownOpen.value = false
+}
+
+// Функция для вставки блоков с данными из формы
+const insertRowsWithData = () => {
+  if (!props.editor) return
+
+  // Создаем блоки с заполненными данными или дефолтными значениями
+  const rows = rowsColumnsData.value.map((row, index) => ({
+    title: row.title || `Заголовок ${index + 1}`,
+    content: row.content || `текст блока ${index + 1}`,
+  }))
+
+  props.editor.chain().focus().insertBlockSnippet({ rows }).run()
+
+  // Сбрасываем форму
+  rowsColumnsData.value = Array.from({ length: columnCount.value }, () => ({
+    title: '',
+    content: '',
+  }))
+
+  isFlexRowsDropdownOpen.value = false
 }
 
 // Закрытие дропдаунов при клике вне их
@@ -740,19 +801,13 @@ input {
   font-size: 14px;
 }
 
-/* Стили для формы flex колонок */
-.columns-form-dropdown {
-  min-width: 350px;
-  max-width: 450px;
-  overflow: visible;
-}
 
 .columns-form {
   padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 315px;
+  height: 360px;
   overflow-y: auto;
 }
 
@@ -783,7 +838,9 @@ input {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 220px;
+  height: calc(100% - 70px);
+  min-height: calc(100% -70px);
+  max-height: 100%;
   overflow-y: auto;
 }
 
@@ -833,11 +890,66 @@ input {
 }
 
 .center-form {
-  min-height: 380px;
+  min-height: 345px;
   overflow: auto;
   padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* Стили для формы блоков */
+.rows-form {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 360px;
+  overflow-y: auto;
+}
+
+.rows-count-select {
+  padding: 3px 6px;
+  border: 1px solid var(--button-border);
+  background: var(--button-bg);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--button-text);
+  cursor: pointer;
+}
+
+.rows-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: calc(100% - 70px);
+  min-height: calc(100% -70px);
+  overflow-y: auto;
+}
+
+.rows-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--button-border);
+  border-radius: 4px;
+  background: var(--menu-bg);
+}
+
+.row-textarea {
+  padding: 4px 6px;
+  border: 1px solid var(--button-border);
+  background: var(--button-bg);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--button-text);
+  font-family: inherit;
+  resize: vertical;
+}
+
+.row-textarea:focus {
+  outline: none;
+  border-color: var(--button-hover-border);
 }
 </style>
