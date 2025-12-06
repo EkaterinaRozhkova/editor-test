@@ -145,7 +145,7 @@ defineExpose({
   overflow: auto;
   font-size: 17px;
   line-height: 22px;
-  height: 340px;
+  height: 386px;
   background-color: var(--editor-content);
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-bg) var(--scrollbar-color);

@@ -214,7 +214,7 @@
         v-model:isOpen="isHeaderSnippetDropdownOpen"
         title="Кастомный заголовок"
         menuClass="header-form-dropdown"
-        :menu-width="420"
+        :menu-width="410"
         @toggle="toggleHeaderSnippetDropdown"
       >
         <template #button-content>
