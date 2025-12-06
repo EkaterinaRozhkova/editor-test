@@ -807,7 +807,7 @@ input {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  height: 360px;
+  height: 379px;
   overflow-y: auto;
 }
 
@@ -904,7 +904,7 @@ input {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  height: 360px;
+  height: 379px;
   overflow-y: auto;
 }
 
