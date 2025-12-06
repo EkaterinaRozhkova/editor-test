@@ -25,11 +25,17 @@ import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import { CenterShortcode } from "@/extensions/CenterShortcode.ts";
 import { FlexSnippet } from "@/extensions/FlexSnippet.ts";
 import { RowShortcode, Row } from "@/extensions/RowShortcode.ts";
+import { HeaderSnippet } from "@/extensions/HeaderSnippet.ts";
+import { CustomOrderedList } from "@/extensions/CustomOrderedList.ts";
+import { CenterSnippet } from "@/extensions/CenterSnippet.ts";
 
 
 const editor = useEditor({
   extensions: [
-    StarterKit,
+    StarterKit.configure({
+      orderedList: false, // Отключаем стандартный OrderedList
+    }),
+    CustomOrderedList, // Подключаем кастомный OrderedList
     Mathematics.configure({
       katexOptions: {
         throwOnError: true
@@ -50,11 +56,10 @@ const editor = useEditor({
     Link.configure({
       openOnClick: false,
     }),
-    HeaderShortcode,
-    CenterShortcode,
     FlexSnippet,
-    // FlexColumn,
-    // FlexShortcode,
+    HeaderSnippet,
+    CenterSnippet,
+
     Row,
     RowShortcode,
     TextStyle,

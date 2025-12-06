@@ -3,28 +3,23 @@
     <!-- Дропдаун для типа блока -->
     <div class="button-group">
       <div ref="blockTypeDropdownRef" class="dropdown" :class="{ 'is-open': isBlockTypeDropdownOpen }">
-        <button
+        <ui-button
           @click="toggleBlockTypeDropdown"
           class="dropdown-button"
           title="Тип блока"
         >
-          <svg v-if="currentBlockType === 'paragraph'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6H9a6 6 0 0 0 0 12h4"/><path d="M14 6h2"/><path d="M14 18h2"/><path d="M14 6v12"/></svg>
-          <svg v-else-if="currentBlockType === 'heading1'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="m17 12 3-2v8"/></svg>
-          <svg v-else-if="currentBlockType === 'heading2'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1"/></svg>
-          <svg v-else-if="currentBlockType === 'heading3'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17.5 10.5c1.7-1 3.5 0 3.5 1.5a2 2 0 0 1-2 2"/><path d="M17 17.5c2 1.5 4 .3 4-1.5a2 2 0 0 0-2-2"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
+          <SvgIcon :name="currentBlockType" />
+        </ui-button>
         <div v-if="isBlockTypeDropdownOpen" class="dropdown-menu">
-          <button
+          <ui-button
             v-for="blockType in blockTypes"
             :key="blockType.type"
             @click="setBlockType(blockType.type)"
             class="dropdown-item"
             :class="{ 'is-active': currentBlockType === blockType.type }"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" v-html="blockType.icon"></svg>
             <span>{{ blockType.label }}</span>
-          </button>
+          </ui-button>
         </div>
       </div>
     </div>
@@ -33,72 +28,68 @@
 
     <!-- Форматирование текста -->
     <div class="button-group">
-      <button
+      <ui-button
         @click="editor.chain().focus().toggleBold().run()"
         :class="{ 'is-active': editor.isActive('bold') }"
         title="Жирный (Ctrl+B)"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"/></svg>
-      </button>
-      <button
+        <SvgIcon name="bold" />
+      </ui-button>
+      <ui-button
         @click="editor.chain().focus().toggleItalic().run()"
         :class="{ 'is-active': editor.isActive('italic') }"
         title="Курсив (Ctrl+I)"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="10" y1="4" y2="4"/><line x1="14" x2="5" y1="20" y2="20"/><line x1="15" x2="9" y1="4" y2="20"/></svg>
-      </button>
-      <button
+        <SvgIcon name="italic" />
+      </ui-button>
+      <ui-button
         @click="editor.chain().focus().toggleUnderline().run()"
         :class="{ 'is-active': editor.isActive('underline') }"
         title="Подчеркнутый текст"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v7a6 6 0 0 0 12 0V4"/><line x1="4" x2="20" y1="21" y2="21"/></svg>
-      </button>
-      <button
+        <SvgIcon name="underline" />
+      </ui-button>
+      <ui-button
         @click="editor.chain().focus().toggleStrike().run()"
         :class="{ 'is-active': editor.isActive('strike') }"
         title="Зачеркнутый текст"
       >
-         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M17.3 5H8.7a3 3 0 0 0-2.7 4.3"/>
-  <path d="M12 19h6a3 3 0 0 0 0-6H6"/>
-  <line x1="3" y1="12" x2="21" y2="12"/>
-</svg>
-        </button>
-      <button
+        <SvgIcon name="strike" />
+      </ui-button>
+      <ui-button
         @click="editor.chain().focus().toggleCode().run()"
         :class="{ 'is-active': editor.isActive('code') }"
         title="Встроенный код"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      </button>
-      <button
+        <SvgIcon name="code" />
+      </ui-button>
+      <ui-button
         @click="editor.chain().focus().toggleSubscript().run()"
         :class="{ 'is-active': editor.isActive('subscript') }"
         title="Подстрочный"
       >
         <span style="font-size: 14px; font-weight: 600;">X<sub>2</sub></span>
-      </button>
-      <button
+      </ui-button>
+      <ui-button
         @click="editor.chain().focus().toggleSuperscript().run()"
         :class="{ 'is-active': editor.isActive('superscript') }"
         title="Надстрочный"
       >
         <span style="font-size: 14px; font-weight: 600;">X<sup>2</sup></span>
-      </button>
-      <button
+      </ui-button>
+      <ui-button
         @click="editor.chain().focus().setHorizontalRule().run()"
         title="Горизонтальная линия"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="12" y2="12"/></svg>
-      </button>
-      <button
+        <SvgIcon name="horizontal-rule" />
+      </ui-button>
+      <ui-button
         @click="editor.chain().focus().toggleHighlight().run()"
         :class="{ 'is-active': editor.isActive('highlight') }"
         title="Выделение цветом"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg>
-      </button>
+        <SvgIcon name="highlight" />
+      </ui-button>
       <input
         type="color"
         @input="onColorChange"
@@ -112,49 +103,44 @@
     <!-- Дропдаун для выравнивания -->
     <div class="button-group">
       <div ref="alignmentDropdownRef" class="dropdown" :class="{ 'is-open': isAlignmentDropdownOpen }">
-        <button
+        <ui-button
           @click="toggleAlignmentDropdown"
           class="dropdown-button"
           title="Выравнивание"
         >
-          <svg v-if="currentAlignment === 'left'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="15" x2="3" y1="12" y2="12"/><line x1="17" x2="3" y1="18" y2="18"/></svg>
-          <svg v-else-if="currentAlignment === 'center'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="17" x2="7" y1="12" y2="12"/><line x1="19" x2="5" y1="18" y2="18"/></svg>
-          <svg v-else-if="currentAlignment === 'right'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="21" x2="9" y1="12" y2="12"/><line x1="21" x2="7" y1="18" y2="18"/></svg>
-          <svg v-else-if="currentAlignment === 'justify'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="21" x2="3" y1="12" y2="12"/><line x1="21" x2="3" y1="18" y2="18"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
+          <SvgIcon v-if="currentAlignment" :name="`align-${currentAlignment}`" />
+        </ui-button>
         <div v-if="isAlignmentDropdownOpen" class="dropdown-menu">
-          <button
+          <ui-button
             v-for="alignment in alignments"
             :key="alignment.value"
             @click="setAlignment(alignment.value)"
             class="dropdown-item"
             :class="{ 'is-active': currentAlignment === alignment.value }"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" v-html="alignment.icon"></svg>
             <span>{{ alignment.label }}</span>
-          </button>
+          </ui-button>
         </div>
       </div>
-      <button
+      <ui-button
         @click="editor.chain().focus().toggleBulletList().run()"
         :class="{ 'is-active': editor.isActive('bulletList') }"
         title="Маркированный список"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
-      </button>
+        <SvgIcon name="bullet-list" />
+      </ui-button>
       <div ref="orderedListDropdownRef" class="dropdown" :class="{ 'is-open': isOrderedListDropdownOpen }">
-        <button
+        <ui-button
           @click="toggleOrderedListDropdown"
           :class="{ 'is-active': editor.isActive('orderedList') }"
           class="dropdown-button"
           title="Нумерованный список"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="21" y1="6" y2="6"/><line x1="10" x2="21" y1="12" y2="12"/><line x1="10" x2="21" y1="18" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
+          <SvgIcon name="ordered-list" />
+          <SvgIcon name="chevron" class="chevron" />
+        </ui-button>
         <div v-if="isOrderedListDropdownOpen" class="dropdown-menu">
-          <button
+          <ui-button
             v-for="listType in orderedListTypes"
             :key="listType.value"
             @click="setOrderedListType(listType.value)"
@@ -163,7 +149,7 @@
           >
             <span style="font-family: monospace; font-weight: 600;">{{ listType.example }}</span>
             <span>{{ listType.label }}</span>
-          </button>
+          </ui-button>
         </div>
       </div>
     </div>
@@ -171,82 +157,120 @@
 
     <!-- Блоки -->
     <div class="button-group">
-      <button
+      <ui-button
         @click="editor.chain().focus().toggleBlockquote().run()"
         :class="{ 'is-active': editor.isActive('blockquote') }"
         title="Цитата"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
-      </button>
+        <SvgIcon name="blockquote" />
+      </ui-button>
     </div>
 
     <div class="divider"></div>
 
     <!-- Ссылки и изображения -->
     <div class="button-group">
-      <button
+      <ui-button
         @click="setLink"
         :class="{ 'is-active': editor.isActive('link') }"
         title="Вставить ссылку"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-      </button>
+        <SvgIcon name="link" />
+      </ui-button>
     </div>
 
     <div class="divider"></div>
 
     <!-- История -->
     <div class="button-group">
-      <button
+      <ui-button
         @click="editor.chain().focus().undo().run()"
         :disabled="!editor.can().undo()"
         title="Отменить (Ctrl+Z)"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
-      </button>
-      <button
+        <SvgIcon name="undo" />
+      </ui-button>
+      <ui-button
         @click="editor.chain().focus().redo().run()"
         :disabled="!editor.can().redo()"
         title="Повторить (Ctrl+Shift+Z)"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
-      </button>
+        <SvgIcon name="redo" />
+      </ui-button>
     </div>
 
     <!-- Дополнительные действия -->
     <div class="button-group">
-      <button
+      <ui-button
         @click="editor.chain().focus().setHardBreak().run()"
         title="Жёсткий перенос строки"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg>
-      </button>
+        <SvgIcon name="hard-break" />
+      </ui-button>
       <div class="divider" />
-     <button
-       @click="editor.chain().focus().toggleHeaderShortcode().run()"
-       :class="{ 'is-active': editor.isActive('headerShortcode') }"
-       title="Кастомный заголовок"
-     >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 12h10"/><path d="M7 8h10"/><path d="M9 16h6"/></svg>
-      </button>
-      <button
-        @click="editor.chain().focus().toggleCenterShortcode().run()"
-        :class="{ 'is-active': editor.isActive('centerShortcode') }"
-        title="Центрирование"
+
+      <!-- Кастомный заголовок -->
+      <UiDropdown
+        v-model:isOpen="isHeaderSnippetDropdownOpen"
+        title="Кастомный заголовок"
+        menuClass="header-form-dropdown"
+        :menu-width="420"
+        @toggle="toggleHeaderSnippetDropdown"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="17" x2="7" y1="12" y2="12"/><line x1="19" x2="5" y1="18" y2="18"/></svg>
-      </button>
-      <div ref="flexColumnsDropdownRef" class="dropdown" :class="{ 'is-open': isFlexColumnsDropdownOpen }">
-        <button
-          @click="toggleFlexColumnsDropdown"
-          :class="{ 'is-active': editor.isActive('flexShortcode') }"
-          class="dropdown-button"
-          title="Flex колонки"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div v-if="isFlexColumnsDropdownOpen" class="dropdown-menu columns-form-dropdown">
+        <template #button-content>
+          <SvgIcon name="header-snippet" />
+        </template>
+        <template #menu-content>
+          <div class="header-form">
+            <UiTextarea
+              v-model="headerText"
+              placeholder="Введите текст заголовка"
+              @keydown.enter="insertHeaderSnippetWithText"
+            />
+            <UiBlueButton @click="insertHeaderSnippetWithText">
+              Вставить
+            </UiBlueButton>
+          </div>
+        </template>
+      </UiDropdown>
+
+      <!-- Центрирование -->
+      <UiDropdown
+        v-model:isOpen="isCenterSnippetDropdownOpen"
+        title="Центрирование"
+        menuClass="center-form-dropdown"
+        :menu-width="365"
+        @toggle="toggleCenterSnippetDropdown"
+      >
+        <template #button-content>
+          <SvgIcon name="align-center" />
+        </template>
+        <template #menu-content>
+          <div class="center-form">
+            <UiTextarea
+              v-model="centerText"
+              placeholder="Введите значение"
+              @keydown.enter="insertCenterSnippetWithText"
+            />
+            <UiBlueButton @click="insertCenterSnippetWithText">
+              Вставить
+            </UiBlueButton>
+          </div>
+        </template>
+      </UiDropdown>
+
+      <!-- Flex колонки -->
+      <UiDropdown
+        v-model:isOpen="isFlexColumnsDropdownOpen"
+        title="Flex колонки"
+        :buttonClass="{ 'is-active': editor.isActive('flexShortcode') }"
+        menuClass="columns-form-dropdown"
+        @toggle="toggleFlexColumnsDropdown"
+      >
+        <template #button-content>
+          <SvgIcon name="columns" />
+        </template>
+        <template #menu-content>
           <div class="columns-form">
             <div class="form-header">
               <label class="form-label">Количество колонок:</label>
@@ -277,24 +301,25 @@
                 />
               </div>
             </div>
-            <button @click="insertFlexColumnsWithData" class="insert-button">
+            <UiBlueButton @click="insertFlexColumnsWithData">
               Вставить колонки
-            </button>
+            </UiBlueButton>
           </div>
-        </div>
-      </div>
-      <div ref="flexRowsDropdownRef" class="dropdown" :class="{ 'is-open': isFlexRowsDropdownOpen }">
-        <button
-          @click="toggleFlexRowsDropdown"
-          :class="{ 'is-active': editor.isActive('rowShortcode') }"
-          class="dropdown-button"
-          title="Вертикальные блоки"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="7" rx="1"/><rect x="3" y="14" width="18" height="7" rx="1"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div v-if="isFlexRowsDropdownOpen" class="dropdown-menu">
-          <button
+        </template>
+      </UiDropdown>
+
+      <!-- Вертикальные блоки -->
+      <UiDropdown
+        v-model:isOpen="isFlexRowsDropdownOpen"
+        title="Вертикальные блоки"
+        :buttonClass="{ 'is-active': editor.isActive('rowShortcode') }"
+        @toggle="toggleFlexRowsDropdown"
+      >
+        <template #button-content>
+          <SvgIcon name="rows" />
+        </template>
+        <template #menu-content>
+          <ui-button
             v-for="item in 4"
             :key="`dropdown-item-block__${item}`"
             @click="insertFlexRows(item)"
@@ -302,9 +327,9 @@
           >
             <span v-if="item === 1">1 блок</span>
             <span v-else>{{ item }} блока</span>
-          </button>
-        </div>
-      </div>
+          </ui-button>
+        </template>
+      </UiDropdown>
     </div>
   </div>
 </template>
@@ -314,6 +339,11 @@ import { ref, computed, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import type { Editor } from '@tiptap/vue-3'
 import type { FlexColumn } from '@/extensions/FlexSnippet'
+import UiDropdown from './ui/UiDropdown.vue'
+import UiButton from './ui/UiButton.vue'
+import UiBlueButton from "@/components/ui/UiBlueButton.vue";
+import UiTextarea from "@/components/ui/UiTextarea.vue";
+import SvgIcon from '@/components/ui/SvgIcon.vue'
 
 const props = defineProps<{
   editor: Editor | null
@@ -380,7 +410,13 @@ const isAlignmentDropdownOpen = ref(false)
 const isOrderedListDropdownOpen = ref(false)
 const isFlexColumnsDropdownOpen = ref(false)
 const isFlexRowsDropdownOpen = ref(false)
+const isHeaderSnippetDropdownOpen = ref(false)
+const isCenterSnippetDropdownOpen = ref(false)
 const currentListType = ref<'1' | 'A' | 'a' | 'I' | 'i'>('1')
+
+// Данные для snippet форм
+const headerText = ref('')
+const centerText = ref('')
 
 // Данные для формы flex колонок
 const columnCount = ref(2)
@@ -408,8 +444,6 @@ watch(columnCount, (newCount) => {
 const blockTypeDropdownRef = ref<HTMLElement | null>(null)
 const alignmentDropdownRef = ref<HTMLElement | null>(null)
 const orderedListDropdownRef = ref<HTMLElement | null>(null)
-const flexColumnsDropdownRef = ref<HTMLElement | null>(null)
-const flexRowsDropdownRef = ref<HTMLElement | null>(null)
 
 // Определяем текущий тип блока
 const currentBlockType = computed(() => {
@@ -431,38 +465,51 @@ const currentAlignment = computed(() => {
   return 'left'
 })
 
-// Переключатели дропдаунов
-const toggleBlockTypeDropdown = () => {
-  isBlockTypeDropdownOpen.value = !isBlockTypeDropdownOpen.value
-  isAlignmentDropdownOpen.value = false
-}
-
-const toggleAlignmentDropdown = () => {
-  isAlignmentDropdownOpen.value = !isAlignmentDropdownOpen.value
-  isBlockTypeDropdownOpen.value = false
-  isOrderedListDropdownOpen.value = false
-}
-
-const toggleOrderedListDropdown = () => {
-  isOrderedListDropdownOpen.value = !isOrderedListDropdownOpen.value
-  isBlockTypeDropdownOpen.value = false
-  isAlignmentDropdownOpen.value = false
-}
-
-const toggleFlexColumnsDropdown = () => {
-  isFlexColumnsDropdownOpen.value = !isFlexColumnsDropdownOpen.value
-  isBlockTypeDropdownOpen.value = false
-  isAlignmentDropdownOpen.value = false
-  isOrderedListDropdownOpen.value = false
-  isFlexRowsDropdownOpen.value = false
-}
-
-const toggleFlexRowsDropdown = () => {
-  isFlexRowsDropdownOpen.value = !isFlexRowsDropdownOpen.value
+// Универсальная функция для закрытия всех дропдаунов
+const closeAllDropdowns = () => {
   isBlockTypeDropdownOpen.value = false
   isAlignmentDropdownOpen.value = false
   isOrderedListDropdownOpen.value = false
   isFlexColumnsDropdownOpen.value = false
+  isFlexRowsDropdownOpen.value = false
+  isHeaderSnippetDropdownOpen.value = false
+  isCenterSnippetDropdownOpen.value = false
+}
+
+// Переключатели дропдаунов
+const toggleBlockTypeDropdown = () => {
+  closeAllDropdowns()
+  isBlockTypeDropdownOpen.value = !isBlockTypeDropdownOpen.value
+}
+
+const toggleAlignmentDropdown = () => {
+  closeAllDropdowns()
+  isAlignmentDropdownOpen.value = !isAlignmentDropdownOpen.value
+}
+
+const toggleOrderedListDropdown = () => {
+  closeAllDropdowns()
+  isOrderedListDropdownOpen.value = !isOrderedListDropdownOpen.value
+}
+
+const toggleFlexColumnsDropdown = () => {
+  closeAllDropdowns()
+  isFlexColumnsDropdownOpen.value = !isFlexColumnsDropdownOpen.value
+}
+
+const toggleFlexRowsDropdown = () => {
+  closeAllDropdowns()
+  isFlexRowsDropdownOpen.value = !isFlexRowsDropdownOpen.value
+}
+
+const toggleHeaderSnippetDropdown = () => {
+  closeAllDropdowns()
+  isHeaderSnippetDropdownOpen.value = !isHeaderSnippetDropdownOpen.value
+}
+
+const toggleCenterSnippetDropdown = () => {
+  closeAllDropdowns()
+  isCenterSnippetDropdownOpen.value = !isCenterSnippetDropdownOpen.value
 }
 
 // Установка типа блока
@@ -566,6 +613,28 @@ const insertFlexRows = (rows: number) => {
   isFlexRowsDropdownOpen.value = false
 }
 
+// Функция для вставки header snippet
+const insertHeaderSnippetWithText = () => {
+  if (!props.editor) return
+
+  props.editor.chain().focus().insertHeaderSnippet({ text: headerText.value }).run()
+
+  // Сбрасываем форму и закрываем dropdown
+  headerText.value = ''
+  isHeaderSnippetDropdownOpen.value = false
+}
+
+// Функция для вставки center snippet
+const insertCenterSnippetWithText = () => {
+  if (!props.editor) return
+
+  props.editor.chain().focus().insertCenterSnippet({ text: centerText.value }).run()
+
+  // Сбрасываем форму и закрываем dropdown
+  centerText.value = ''
+  isCenterSnippetDropdownOpen.value = false
+}
+
 // Закрытие дропдаунов при клике вне их
 onClickOutside(blockTypeDropdownRef, () => {
   isBlockTypeDropdownOpen.value = false
@@ -577,14 +646,6 @@ onClickOutside(alignmentDropdownRef, () => {
 
 onClickOutside(orderedListDropdownRef, () => {
   isOrderedListDropdownOpen.value = false
-})
-
-onClickOutside(flexColumnsDropdownRef, () => {
-  isFlexColumnsDropdownOpen.value = false
-})
-
-onClickOutside(flexRowsDropdownRef, () => {
-  isFlexRowsDropdownOpen.value = false
 })
 </script>
 
@@ -612,28 +673,6 @@ onClickOutside(flexRowsDropdownRef, () => {
   margin: 0 4px;
 }
 
-button {
-  padding: 3px 5px;
-  border: 1px solid var(--button-border);
-  background: var(--button-bg);
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--button-text);
-  transition: all 0.15s ease;
-  min-width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-button svg {
-  display: block;
-}
-
-
 input {
   min-width: 26px;
   height: 26px;
@@ -641,26 +680,6 @@ input {
   background: var(--button-bg);
   border-radius: 4px;
   cursor: pointer;
-}
-
-button:hover:not(:disabled) {
-  background: var(--button-hover-bg);
-  border-color: var(--button-hover-border);
-}
-
-button:active:not(:disabled) {
-  background: var(--button-active-bg);
-}
-
-button.is-active {
-  background: var(--button-is-active-bg);
-  color: var(--button-is-active-text);
-  border-color: var(--button-is-active-border);
-}
-
-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
 }
 
 /* Стили для дропдаунов */
@@ -729,10 +748,12 @@ button:disabled {
 }
 
 .columns-form {
-  padding: 12px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  max-height: 315px;
+  overflow-y: auto;
 }
 
 .form-header {
@@ -743,17 +764,17 @@ button:disabled {
 }
 
 .form-label {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--button-text);
 }
 
 .column-count-select {
-  padding: 4px 8px;
+  padding: 3px 6px;
   border: 1px solid var(--button-border);
   background: var(--button-bg);
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 12px;
   color: var(--button-text);
   cursor: pointer;
 }
@@ -761,34 +782,34 @@ button:disabled {
 .columns-inputs {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-height: 300px;
+  gap: 8px;
+  max-height: 220px;
   overflow-y: auto;
 }
 
 .column-input-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px;
+  gap: 4px;
+  padding: 6px;
   border: 1px solid var(--button-border);
   border-radius: 4px;
   background: var(--menu-bg);
 }
 
 .column-label {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--button-text);
 }
 
 .column-input,
 .column-textarea {
-  padding: 6px 8px;
+  padding: 4px 6px;
   border: 1px solid var(--button-border);
   background: var(--button-bg);
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 12px;
   color: var(--button-text);
   font-family: inherit;
   resize: vertical;
@@ -800,26 +821,23 @@ button:disabled {
   border-color: var(--button-hover-border);
 }
 
-.insert-button {
-  width: 100%;
-  padding: 8px 12px;
-  background: var(--button-is-active-bg);
-  color: var(--button-is-active-text);
-  border: 1px solid var(--button-is-active-border);
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  min-width: auto;
-  height: auto;
+/* Стили для формы header snippet */
+
+.header-form {
+  min-height: 150px;
+  padding: 8px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.insert-button:hover {
-  opacity: 0.9;
-}
-
-.insert-button:active {
-  transform: scale(0.98);
+.center-form {
+  min-height: 380px;
+  overflow: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 </style>

@@ -24,10 +24,7 @@ export const FlexSnippet = Extension.create({
       insertFlexSnippet:
         (options) =>
           ({ chain }) => {
-            const columns = options?.columns ?? [
-              { title: 'Заголовок 1', content: 'текст первой колонки' },
-              { title: 'Заголовок 2', content: 'текст второй колонки' },
-            ]
+            const columns = options?.columns ?? []
 
             const snippetLines = ['[flex]']
 
