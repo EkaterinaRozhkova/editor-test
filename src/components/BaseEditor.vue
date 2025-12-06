@@ -20,9 +20,7 @@ import Link from '@tiptap/extension-link';
 import LZString from 'lz-string';
 import { useDebounceFn } from "@vueuse/core";
 import EditorMenuBar from "@/components/EditorMenuBar.vue";
-import { HeaderShortcode } from "@/extensions/HeaderShortcode.ts";
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
-import { CenterShortcode } from "@/extensions/CenterShortcode.ts";
 import { FlexSnippet } from "@/extensions/FlexSnippet.ts";
 import { RowShortcode, Row } from "@/extensions/RowShortcode.ts";
 import { HeaderSnippet } from "@/extensions/HeaderSnippet.ts";
