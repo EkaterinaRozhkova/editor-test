@@ -259,7 +259,7 @@
         title="Колонки"
         :buttonClass="{ 'is-active': editor.isActive('flexSnippet') }"
         menuClass="columns-form-dropdown"
-        :menu-width="500"
+        :menu-width="450"
         @toggle="toggleFlexColumnsDropdown"
       >
         <template #button-content>
@@ -977,5 +977,12 @@ input {
   border: 1px solid var(--button-border);
   border-radius: 4px;
   background: var(--menu-bg);
+}
+</style>
+
+<style>
+.header-form-dropdown {
+  left: 0 !important;
+  transform: translateX(0) !important;
 }
 </style>
