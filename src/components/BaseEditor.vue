@@ -53,18 +53,19 @@ const editor = useEditor({
     TableKit.configure({
       table: {
         resizable: true,
+        lastColumnResizable: false,
         HTMLAttributes: {
           style: 'max-width: 100%; margin: 0 auto; font-size: 12px; border: 1px solid #EAECF0;border-collapse: collapse;',
         },
       },
       tableCell: {
         HTMLAttributes: {
-          style: 'border: 1px solid #EAECF0;padding: 8px;',
+          style: 'border: 1px solid #EAECF0;padding: 8px;position: relative;',
         },
       },
       tableHeader: {
         HTMLAttributes: {
-          style: 'border: 1px solid #EAECF0;padding: 8px;',
+          style: 'border: 1px solid #EAECF0;padding: 8px;position: relative;',
         },
       }
     }),
@@ -178,6 +179,12 @@ defineExpose({
 }
 
 .ProseMirror table {
+  max-width: 100%;
+  margin: 0px auto;
+  font-size: 12px;
+  border: 1px solid rgb(234, 236, 240);
+  border-collapse: collapse;
+  width: 100%;
   td,
   th {
 
@@ -185,6 +192,22 @@ defineExpose({
       margin: 0;
     }
   }
+
+  .column-resize-handle {
+    background-color: var(--button-is-active-bg);
+    bottom: -2px;
+    pointer-events: none;
+    position: absolute;
+    right: -2px;
+    top: 0;
+    width: 4px;
+  }
+
+  &.resize-cursor {
+    cursor: ew-resize;
+    cursor: col-resize;
+  }
+
 }
 
 .ProseMirror code {

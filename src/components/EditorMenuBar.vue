@@ -397,12 +397,22 @@
       </ui-button>
       </div>
     </div>
-    <div v-else class="menu-bar"><div class="button-group">
-      <ui-button @click="tableMode = false">К меню</ui-button>
-      <ui-button @click="editor.chain().focus().insertTable({ rows: 2, cols: 3, withHeaderRow: true }).run()">
+    <div v-else class="menu-bar">
+      <ui-button @click="tableMode = false">< Назад</ui-button>
+      <ui-button @click="editor.chain().focus().insertTable({ rows: 2, cols: 2 }).run()">
           Вставить таблицу
         </ui-button>
-    </div>
+        <ui-button @click="editor.chain().focus().deleteTable().run()">Удалить таблицу</ui-button>
+        <ui-button @click="editor.chain().focus().addColumnBefore().run()">+ Столбец слева</ui-button>
+        <ui-button @click="editor.chain().focus().addColumnAfter().run()">+ Столбец справа</ui-button>
+        <ui-button @click="editor.chain().focus().addRowBefore().run()">+ Строку выше</ui-button>
+        <ui-button @click="editor.chain().focus().addRowAfter().run()">+ Строку ниже</ui-button>
+        <ui-button @click="editor.chain().focus().deleteColumn().run()">- Столбец</ui-button>
+        <ui-button @click="editor.chain().focus().deleteRow().run()">- Строку</ui-button>
+        <ui-button @click="editor.chain().focus().mergeCells().run()">Объединить ячейки</ui-button>
+        <ui-button @click="editor.chain().focus().splitCell().run()">Разделить ячейку</ui-button>
+        <ui-button @click="editor.chain().focus().goToNextCell().run()">К следующей ячейке</ui-button>
+        <ui-button @click="editor.chain().focus().goToPreviousCell().run()">К предыдущей ячейке</ui-button>
     </div>
   </div>
 </template>
