@@ -1,6 +1,6 @@
 <template>
   <div class="base-editor" v-if="editor">
-    <EditorMenuBar :editor="editor" @upload-audio="sendFile" v-model:currentFile="currentFile"/>
+    <EditorMenuBar :editor="editor" @upload-file="sendFile" v-model:currentFile="currentFile"/>
     <EditorContent :editor="editor" class="editor-content" />
   </div>
 </template>
@@ -106,11 +106,15 @@ const sendContentUpdate = useDebounceFn(() => {
   }
 }, 500);
 
-const sendFile = (file: File) => {
+const sendFile = async (file: File) => {
+  const arrayBuffer = await file.arrayBuffer()
   window.parent.postMessage({
     type: 'upload-file',
-    data: file,
-  }, '*');
+    name: file.name,
+    size: file.size,
+    fileType: file.type,
+    data: arrayBuffer
+  }, '*', [arrayBuffer]);
 }
 
 const handleMessage = async (event: MessageEvent) => {

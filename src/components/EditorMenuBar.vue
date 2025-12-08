@@ -493,7 +493,7 @@ const props = defineProps<{
   currentFile: Upload | null
 }>()
 
-const emit = defineEmits(['upload-audio', 'update:currentFile'])
+const emit = defineEmits(['upload-file', 'update:currentFile'])
 
 
 // Данные для дропдаунов
@@ -881,7 +881,7 @@ const handleAudioFileSelect = (event: Event) => {
     alert('Допустимые форматы: MP3, OPUS')
     return
   }
-  emit('upload-audio', file)
+  emit('upload-file', file)
 }
 
 // Вставка аудио с данными
