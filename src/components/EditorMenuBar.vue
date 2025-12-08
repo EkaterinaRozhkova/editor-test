@@ -880,11 +880,17 @@ const handleAudioFileSelect = (event: Event) => {
 const insertAudioWithData = () => {
   if (!props.editor || !uploadedAudioPath.value) return
 
-  props.editor.chain().focus().insertAudioSnippet({
-    src: uploadedAudioPath.value,
+  props.editor.chain().focus().setAudioShortcode({
+    path: uploadedAudioPath.value,
     text: audioText.value,
     textPosition: audioTextPosition.value
-  }).run()
+  })
+
+  // props.editor.chain().focus().insertAudioSnippet({
+  //   src: uploadedAudioPath.value,
+  //   text: audioText.value,
+  //   textPosition: audioTextPosition.value
+  // }).run()
 
   // Сбрасываем форму
   audioText.value = ''

@@ -43,8 +43,8 @@ defineEmits<{
 }
 
 
-ui-blue-button:hover:not(:disabled) {
-  opacity: .9;
+ui-blue-button:hover {
+  background-color: var(--link-hover-color);
 }
 
 ui-blue-button:active:not(:disabled) {
@@ -52,6 +52,7 @@ ui-blue-button:active:not(:disabled) {
 }
 
 ui-blue-button:disabled {
+  pointer-events: none;
   opacity: 0.7;
   cursor: not-allowed;
 }

@@ -27,6 +27,7 @@ import { CenterSnippet } from "../extensions/snippets/CenterSnippet.ts";
 import { BlockSnippet } from "../extensions/snippets/BlockSnippet.ts";
 import { SectionSnippet } from "@/extensions/snippets/SectionSnippet.ts";
 import { AudioSnippet } from "@/extensions/snippets/AudioSnippet.ts";
+import { AudioShortcode } from "@/extensions/AudioShortcode.ts";
 
 
 const editor = useEditor({
@@ -75,7 +76,8 @@ const editor = useEditor({
     CenterSnippet,
     BlockSnippet,
     SectionSnippet,
-    AudioSnippet,
+    // AudioSnippet,
+    AudioShortcode,
     TextStyle,
     Color
   ],
