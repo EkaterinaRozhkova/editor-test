@@ -215,7 +215,7 @@
           <SvgIcon name="header-snippet" />
         </template>
         <template #menu-content>
-          <div class="header-form">
+          <div class="header-form form">
             <UiTextarea
               v-model="headerText"
               placeholder="Введите текст заголовка"
@@ -240,7 +240,7 @@
           <SvgIcon name="align-center" />
         </template>
         <template #menu-content>
-          <div class="center-form">
+          <div class="center-form form">
             <UiTextarea
               v-model="centerText"
               placeholder="Введите значение"
@@ -266,7 +266,7 @@
           <SvgIcon name="columns" />
         </template>
         <template #menu-content>
-          <div class="columns-form">
+          <div class="columns-form form">
             <div class="form-header">
               <label class="form-label">Количество колонок:</label>
               <select v-model="columnCount" class="column-count-select">
@@ -291,7 +291,7 @@
                 <textarea
                   v-model="column.content"
                   :placeholder="`Текст колонки ${index + 1}`"
-                  class="column-textarea"
+                  class="form-textarea"
                   rows="4"
                 />
               </div>
@@ -316,7 +316,7 @@
           <SvgIcon name="rows" />
         </template>
         <template #menu-content>
-          <div class="rows-form">
+          <div class="rows-form form">
             <div class="form-header">
               <label class="form-label">Количество блоков:</label>
               <select v-model="columnCount" class="rows-count-select">
@@ -341,13 +341,48 @@
                 <textarea
                   v-model="row.content"
                   :placeholder="`Текст блока ${index + 1}`"
-                  class="row-textarea"
+                  class="form-textarea"
                   rows="4"
                 />
               </div>
             </div>
             <UiBlueButton @click="insertRowsWithData">
               Вставить блоки
+            </UiBlueButton>
+          </div>
+        </template>
+      </UiDropdown>
+
+      <!-- Секции -->
+      <UiDropdown
+        v-model:isOpen="isSectionDropdownOpen"
+        title="Секции"
+        :buttonClass="{ 'is-active': editor.isActive('sectionSnippet') }"
+        menuClass="rows-form-dropdown"
+        :menu-width="420"
+        @toggle="toggleSectionDropdown"
+      >
+        <template #button-content>
+          <SvgIcon name="section" />
+        </template>
+        <template #menu-content>
+          <div class="form">
+            <div class="form-header">
+              <label class="form-label">Выберите иконку:</label>
+              <select v-model="iconSelected" class="rows-count-select">
+                <option :value="option.value" v-for="option in sectionIconOptions" :key="option.label">{{ option.label }}</option>
+              </select>
+            </div>
+            <div>
+              <textarea
+                v-model="sectionText"
+                :placeholder="`Текст секции`"
+                class="form-textarea"
+                rows="15"
+              />
+            </div>
+             <UiBlueButton @click="insertSectionWithData">
+              Вставить
             </UiBlueButton>
           </div>
         </template>
@@ -360,8 +395,8 @@
 import { ref, computed, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import type { Editor } from '@tiptap/vue-3'
-import type { FlexColumn } from '@/extensions/FlexSnippet'
-import type { BlocksRow } from '@/extensions/BlockSnippet'
+import type { FlexColumn } from '../extensions/snippets/FlexSnippet'
+import type { BlocksRow } from '../extensions/snippets/BlockSnippet'
 import UiDropdown from './ui/UiDropdown.vue'
 import UiButton from './ui/UiButton.vue'
 import UiBlueButton from "@/components/ui/UiBlueButton.vue";
@@ -372,59 +407,64 @@ const props = defineProps<{
   editor: Editor | null
 }>()
 
+
 // Данные для дропдаунов
 const blockTypes = [
   {
     type: 'paragraph',
-    label: 'Параграф',
-    icon: '<path d="M10 6H9a6 6 0 0 0 0 12h4"/><path d="M14 6h2"/><path d="M14 18h2"/><path d="M14 6v12"/>'
+    label: 'Параграф'
   },
   {
     type: 'heading1',
-    label: 'Заголовок 1',
-    icon: '<path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="m17 12 3-2v8"/>'
+    label: 'Заголовок 1'
   },
   {
     type: 'heading2',
-    label: 'Заголовок 2',
-    icon: '<path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1"/>'
+    label: 'Заголовок 2'
   },
   {
     type: 'heading3',
-    label: 'Заголовок 3',
-    icon: '<path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17.5 10.5c1.7-1 3.5 0 3.5 1.5a2 2 0 0 1-2 2"/><path d="M17 17.5c2 1.5 4 .3 4-1.5a2 2 0 0 0-2-2"/>'
+    label: 'Заголовок 3'
   }
 ]
 
 const alignments = [
   {
     value: 'left',
-    label: 'По левому краю',
-    icon: '<line x1="21" x2="3" y1="6" y2="6"/><line x1="15" x2="3" y1="12" y2="12"/><line x1="17" x2="3" y1="18" y2="18"/>'
+    label: 'По левому краю'
   },
   {
     value: 'center',
-    label: 'По центру',
-    icon: '<line x1="21" x2="3" y1="6" y2="6"/><line x1="17" x2="7" y1="12" y2="12"/><line x1="19" x2="5" y1="18" y2="18"/>'
+    label: 'По центру'
   },
   {
     value: 'right',
-    label: 'По правому краю',
-    icon: '<line x1="21" x2="3" y1="6" y2="6"/><line x1="21" x2="9" y1="12" y2="12"/><line x1="21" x2="7" y1="18" y2="18"/>'
+    label: 'По правому краю'
   },
   {
     value: 'justify',
-    label: 'По ширине',
-    icon: '<line x1="21" x2="3" y1="6" y2="6"/><line x1="21" x2="3" y1="12" y2="12"/><line x1="21" x2="3" y1="18" y2="18"/>'
+    label: 'По ширине'
   }
 ]
 
+const sectionIconOptions = [
+  { value: 'none', label: 'Нет иконки'},
+  { value: 'example', label: 'Пример/Задача'},
+  { value: 'note', label: 'Примечание'},
+  { value: 'exercise', label: 'Упраждения'},
+  { value: 'question', label: 'Контрольные вопросы'},
+  { value: 'theory', label: 'Нач.школа Теория'},
+  { value: 'reflection', label: 'Нач.школа Рефлексия'},
+  { value: 'exercisePrimary', label: 'Нач.школа Упражнение'},
+  { value: 'questionPrimary', label: 'Нач.школа Вопрос'}
+]
+
 const orderedListTypes = [
-  { value: '1' as const, example: '1 2 3', label: 'Арабские числа' },
-  { value: 'A' as const, example: 'A B C', label: 'Прописные буквы' },
-  { value: 'a' as const, example: 'a b c', label: 'Строчные буквы' },
-  { value: 'I' as const, example: 'I II III', label: 'Римские (верхний регистр)' },
-  { value: 'i' as const, example: 'i ii iii', label: 'Римские (нижний регистр)' }
+  { value: '1' as const, example: '1 2', label: 'Арабские числа' },
+  { value: 'A' as const, example: 'A B', label: 'Прописные буквы' },
+  { value: 'a' as const, example: 'a b', label: 'Строчные буквы' },
+  { value: 'I' as const, example: 'I II', label: 'Римские (верхний регистр)' },
+  { value: 'i' as const, example: 'i ii', label: 'Римские (нижний регистр)' }
 ]
 
 // Состояния для дропдаунов
@@ -435,6 +475,7 @@ const isFlexColumnsDropdownOpen = ref(false)
 const isFlexRowsDropdownOpen = ref(false)
 const isHeaderSnippetDropdownOpen = ref(false)
 const isCenterSnippetDropdownOpen = ref(false)
+const isSectionDropdownOpen = ref(false)
 const currentListType = ref<'1' | 'A' | 'a' | 'I' | 'i'>('1')
 
 // Данные для snippet форм
@@ -447,6 +488,10 @@ const flexColumnsData = ref<FlexColumn[]>([
   { title: '', content: '' },
   { title: '', content: '' },
 ])
+
+// Данные для формы секций
+const iconSelected = ref('none')
+const sectionText = ref('')
 
 // Данные для формы блоков (rows)
 const rowsColumnsData = ref<BlocksRow[]>([
@@ -516,6 +561,7 @@ const closeAllDropdowns = () => {
   isFlexRowsDropdownOpen.value = false
   isHeaderSnippetDropdownOpen.value = false
   isCenterSnippetDropdownOpen.value = false
+  isSectionDropdownOpen.value = false
 }
 
 // Переключатели дропдаунов
@@ -552,6 +598,11 @@ const toggleCenterSnippetDropdown = () => {
 const toggleBlockDropdown = () => {
   closeAllDropdowns()
   isFlexRowsDropdownOpen.value = !isFlexRowsDropdownOpen.value
+}
+
+const toggleSectionDropdown = () => {
+  closeAllDropdowns()
+  isSectionDropdownOpen.value = !isSectionDropdownOpen.value
 }
 
 // Установка типа блока
@@ -656,6 +707,15 @@ const insertHeaderSnippetWithText = () => {
   // Сбрасываем форму и закрываем dropdown
   headerText.value = ''
   isHeaderSnippetDropdownOpen.value = false
+}
+// Функция для вставки section snippet
+const insertSectionWithData = () => {
+  if (!props.editor) return
+  props.editor.chain().focus().insertSectionSnippet({ text: sectionText.value, icon: iconSelected.value  }).run()
+
+  sectionText.value = ''
+  iconSelected.value = 'none'
+  isSectionDropdownOpen.value = false
 }
 
 // Функция для вставки center snippet
@@ -800,14 +860,30 @@ input {
   font-size: 14px;
 }
 
-
-.columns-form {
+.form {
   padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  height: 379px;
   overflow-y: auto;
+}
+
+.form-textarea {
+  padding: 4px 6px;
+  border: 1px solid var(--button-border);
+  background: var(--button-bg);
+  display: block;
+  width: 100%;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--button-text);
+  font-family: inherit;
+  resize: vertical;
+}
+
+
+.columns-form {
+  height: 379px;
 }
 
 .form-header {
@@ -859,52 +935,19 @@ input {
   color: var(--button-text);
 }
 
-.column-input,
-.column-textarea {
-  padding: 4px 6px;
-  border: 1px solid var(--button-border);
-  background: var(--button-bg);
-  border-radius: 4px;
-  font-size: 12px;
-  color: var(--button-text);
-  font-family: inherit;
-  resize: vertical;
-}
-
-.column-input:focus,
-.column-textarea:focus {
-  outline: none;
-  border-color: var(--button-hover-border);
-}
-
 /* Стили для формы header snippet */
 
 .header-form {
   min-height: 150px;
-  padding: 8px;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .center-form {
   min-height: 345px;
-  overflow: auto;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 /* Стили для формы блоков */
 .rows-form {
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   height: 379px;
-  overflow-y: auto;
 }
 
 .rows-count-select {
@@ -934,21 +977,5 @@ input {
   border: 1px solid var(--button-border);
   border-radius: 4px;
   background: var(--menu-bg);
-}
-
-.row-textarea {
-  padding: 4px 6px;
-  border: 1px solid var(--button-border);
-  background: var(--button-bg);
-  border-radius: 4px;
-  font-size: 12px;
-  color: var(--button-text);
-  font-family: inherit;
-  resize: vertical;
-}
-
-.row-textarea:focus {
-  outline: none;
-  border-color: var(--button-hover-border);
 }
 </style>

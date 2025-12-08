@@ -21,11 +21,12 @@ import LZString from 'lz-string';
 import { useDebounceFn } from "@vueuse/core";
 import EditorMenuBar from "@/components/EditorMenuBar.vue";
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
-import { FlexSnippet } from "@/extensions/FlexSnippet.ts";
-import { HeaderSnippet } from "@/extensions/HeaderSnippet.ts";
+import { FlexSnippet } from "../extensions/snippets/FlexSnippet.ts";
+import { HeaderSnippet } from "../extensions/snippets/HeaderSnippet.ts";
 import { CustomOrderedList } from "@/extensions/CustomOrderedList.ts";
-import { CenterSnippet } from "@/extensions/CenterSnippet.ts";
-import { BlockSnippet } from "@/extensions/BlockSnippet.ts";
+import { CenterSnippet } from "../extensions/snippets/CenterSnippet.ts";
+import { BlockSnippet } from "../extensions/snippets/BlockSnippet.ts";
+import { SectionSnippet } from "@/extensions/snippets/SectionSnippet.ts";
 
 
 const editor = useEditor({
@@ -58,6 +59,7 @@ const editor = useEditor({
     HeaderSnippet,
     CenterSnippet,
     BlockSnippet,
+    SectionSnippet,
     TextStyle,
     Color
   ],
