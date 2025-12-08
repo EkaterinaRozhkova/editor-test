@@ -9,6 +9,7 @@
           title="Тип блока"
         >
           <SvgIcon :name="currentBlockType" />
+          <SvgIcon name="chevron" class="chevron" />
         </ui-button>
         <div v-if="isBlockTypeDropdownOpen" class="dropdown-menu">
           <ui-button
@@ -109,6 +110,7 @@
           title="Выравнивание"
         >
           <SvgIcon v-if="currentAlignment" :name="`align-${currentAlignment}`" />
+          <SvgIcon name="chevron" class="chevron" />
         </ui-button>
         <div v-if="isAlignmentDropdownOpen" class="dropdown-menu">
           <ui-button
@@ -139,7 +141,7 @@
           <SvgIcon name="ordered-list" />
           <SvgIcon name="chevron" class="chevron" />
         </ui-button>
-        <div v-if="isOrderedListDropdownOpen" class="dropdown-menu">
+        <div v-if="isOrderedListDropdownOpen" class="dropdown-menu ordered-list-menu">
           <ui-button
             v-for="listType in orderedListTypes"
             :key="listType.value"
@@ -153,21 +155,6 @@
         </div>
       </div>
     </div>
-    <div class="divider"></div>
-
-    <!-- Блоки -->
-    <div class="button-group">
-      <ui-button
-        @click="editor.chain().focus().toggleBlockquote().run()"
-        :class="{ 'is-active': editor.isActive('blockquote') }"
-        title="Цитата"
-      >
-        <SvgIcon name="blockquote" />
-      </ui-button>
-    </div>
-
-    <div class="divider"></div>
-
     <!-- Ссылки и изображения -->
     <div class="button-group">
       <ui-button
@@ -176,6 +163,16 @@
         title="Вставить ссылку"
       >
         <SvgIcon name="link" />
+      </ui-button>
+    </div>
+    <!-- Блоки -->
+    <div class="button-group">
+      <ui-button
+        @click="editor.chain().focus().toggleBlockquote().run()"
+        :class="{ 'is-active': editor.isActive('blockquote') }"
+        title="Цитата"
+      >
+        <SvgIcon name="blockquote" />
       </ui-button>
     </div>
 
@@ -771,8 +768,13 @@ input {
   border-radius: 4px;
   box-shadow: var(--dropdown-shadow);
   z-index: 1000;
-  min-width: 180px;
+  width: max-content;
   overflow: hidden;
+}
+
+.ordered-list-menu {
+  right: 0;
+  left: auto;
 }
 
 .dropdown-item {
