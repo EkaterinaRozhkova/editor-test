@@ -1,6 +1,6 @@
 <template>
   <div class="base-editor" v-if="editor">
-    <EditorMenuBar :editor="editor" />
+    <EditorMenuBar :editor="editor" @upload-audio="sendFile" v-model:currentFile="currentFile"/>
     <EditorContent :editor="editor" class="editor-content" />
   </div>
 </template>
@@ -26,6 +26,7 @@ import { CustomOrderedList } from "@/extensions/CustomOrderedList.ts";
 import { CenterSnippet } from "../extensions/snippets/CenterSnippet.ts";
 import { BlockSnippet } from "../extensions/snippets/BlockSnippet.ts";
 import { SectionSnippet } from "@/extensions/snippets/SectionSnippet.ts";
+import { AudioSnippet } from "@/extensions/snippets/AudioSnippet.ts";
 
 
 const editor = useEditor({
@@ -60,12 +61,12 @@ const editor = useEditor({
       },
       tableCell: {
         HTMLAttributes: {
-          style: 'border: 1px solid #D1D5DB;padding: 8px;position: relative;',
+          style: 'border: 1px solid #EAECF0;padding: 8px;position: relative;',
         },
       },
       tableHeader: {
         HTMLAttributes: {
-          style: 'border: 1px solid #D1D5DB;padding: 8px;position: relative;',
+          style: 'border: 1px solid #EAECF0;padding: 8px;position: relative;font-weight: 400;text-align: left',
         },
       }
     }),
@@ -74,6 +75,7 @@ const editor = useEditor({
     CenterSnippet,
     BlockSnippet,
     SectionSnippet,
+    AudioSnippet,
     TextStyle,
     Color
   ],
@@ -90,6 +92,7 @@ const editor = useEditor({
 });
 
 const isContentInitialized = ref(false);
+const currentFile = ref(null)
 
 const sendContentUpdate = useDebounceFn(() => {
   if (isContentInitialized.value && editor.value) {
@@ -102,6 +105,13 @@ const sendContentUpdate = useDebounceFn(() => {
     }, '*');
   }
 }, 500);
+
+const sendFile = (file: File) => {
+  window.parent.postMessage({
+    type: 'upload-file',
+    data: file,
+  }, '*');
+}
 
 const handleMessage = async (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
@@ -123,6 +133,10 @@ const handleMessage = async (event: MessageEvent) => {
     } catch (error) {
       console.error('Ошибка декомпрессии контента:', error);
     }
+  }
+
+  if(event.data.type === 'file-uploaded' && editor.value) {
+    currentFile.value = event?.data?.data || null
   }
 };
 
