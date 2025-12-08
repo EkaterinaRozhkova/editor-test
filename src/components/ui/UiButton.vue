@@ -24,7 +24,7 @@ defineEmits<{
 }>()
 </script>
 
-<style>
+<style scoped>
 button {
   padding: 3px 5px;
   border: 1px solid var(--button-border);

@@ -87,6 +87,7 @@ export const AudioShortcode = Node.create<AudioShortcodeOptions>({
       setAudioShortcode:
         (attributes) =>
           ({ commands }) => {
+        console.log(attributes)
             return commands.insertContent({
               type: this.name,
               attrs: attributes,
