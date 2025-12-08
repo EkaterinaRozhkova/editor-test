@@ -55,17 +55,17 @@ const editor = useEditor({
         resizable: true,
         lastColumnResizable: false,
         HTMLAttributes: {
-          style: 'max-width: 100%; margin: 0 auto; font-size: 12px; border: 1px solid #EAECF0;border-collapse: collapse;',
+          style: 'max-width: 100%; margin: 0 auto; font-size: 12px; border: 1px solid #D1D5DB;border-collapse: collapse;',
         },
       },
       tableCell: {
         HTMLAttributes: {
-          style: 'border: 1px solid #EAECF0;padding: 8px;position: relative;',
+          style: 'border: 1px solid #D1D5DB;padding: 8px;position: relative;',
         },
       },
       tableHeader: {
         HTMLAttributes: {
-          style: 'border: 1px solid #EAECF0;padding: 8px;position: relative;',
+          style: 'border: 1px solid #D1D5DB;padding: 8px;position: relative;',
         },
       }
     }),
