@@ -1,3 +1,4 @@
+// audioShortcode.ts
 import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import AudioShortcodeComponent from '@/components/AudioShortcodeComponent.vue'
@@ -35,7 +36,10 @@ export const AudioShortcode = Node.create<AudioShortcodeOptions>({
     return {
       path: {
         default: '',
-        parseHTML: element => element.getAttribute('data-path'),
+        parseHTML: element => {
+          const audio = element.querySelector('audio')
+          return audio?.getAttribute('data-path') || element.getAttribute('data-path') || ''
+        },
         renderHTML: attributes => {
           if (!attributes.path) {
             return {}
@@ -45,7 +49,10 @@ export const AudioShortcode = Node.create<AudioShortcodeOptions>({
       },
       text: {
         default: '',
-        parseHTML: element => element.getAttribute('data-text'),
+        parseHTML: element => {
+          const audio = element.querySelector('audio')
+          return audio?.getAttribute('data-text') || element.getAttribute('data-text') || ''
+        },
         renderHTML: attributes => {
           if (!attributes.text) {
             return {}
@@ -55,7 +62,10 @@ export const AudioShortcode = Node.create<AudioShortcodeOptions>({
       },
       textPosition: {
         default: 'left',
-        parseHTML: element => element.getAttribute('data-text-position') || 'left',
+        parseHTML: element => {
+          const audio = element.querySelector('audio')
+          return audio?.getAttribute('data-text-position') || element.getAttribute('data-text-position') || 'left'
+        },
         renderHTML: attributes => {
           if (!attributes.textPosition || attributes.textPosition === 'left') {
             return {}
@@ -69,13 +79,32 @@ export const AudioShortcode = Node.create<AudioShortcodeOptions>({
   parseHTML() {
     return [
       {
-        tag: 'audio-shortcode',
+        tag: 'div',
+        getAttrs: element => {
+          if (element instanceof HTMLElement && element.querySelector('audio[data-path]')) {
+            return {}
+          }
+          return false
+        },
       },
     ]
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['audio-shortcode', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)]
+    const { path, text, textPosition, ...attrs } = HTMLAttributes
+
+    return [
+      'div',
+      mergeAttributes(this.options.HTMLAttributes, attrs),
+      [
+        'audio',
+        mergeAttributes({
+          'data-path': path,
+          'data-text': text,
+          'data-text-position': textPosition,
+        }),
+      ],
+    ]
   },
 
   addNodeView() {
@@ -87,7 +116,7 @@ export const AudioShortcode = Node.create<AudioShortcodeOptions>({
       setAudioShortcode:
         (attributes) =>
           ({ commands }) => {
-        console.log(attributes)
+            console.log(attributes)
             return commands.insertContent({
               type: this.name,
               attrs: attributes,

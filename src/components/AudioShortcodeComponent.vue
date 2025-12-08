@@ -1,3 +1,5 @@
+// AudioShortcodeComponent.vue
+/*
 <template>
   <node-view-wrapper class="audio-shortcode-wrapper">
     <div
@@ -33,9 +35,7 @@
       </span>
     </div>
 
-    <div v-if="selected" class="audio-controls">
-      <button @click="deleteNode" class="control-btn delete-btn">Удалить</button>
-    </div>
+    <button @click="deleteNode" class="control-btn delete-btn">X</button>
   </node-view-wrapper>
 </template>
 
@@ -71,3 +71,21 @@ const deleteNode = () => {
   props.deleteNode()
 }
 </script>
+
+<style scoped>
+.audio-shortcode {
+  position: relative;
+}
+.delete-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 10px;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+</style>
+
