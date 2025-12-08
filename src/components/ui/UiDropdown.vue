@@ -88,7 +88,7 @@ onClickOutside(dropdownRef, () => {
 }
 
 .ui-dropdown-button {
-  min-width: 60px;
+  width: max-content;
   gap: 4px;
   padding: 3px 5px;
   border: 1px solid var(--button-border);

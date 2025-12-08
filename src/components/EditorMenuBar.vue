@@ -175,9 +175,6 @@
         <SvgIcon name="blockquote" />
       </ui-button>
     </div>
-
-    <div class="divider"></div>
-
     <!-- История -->
     <div class="button-group">
       <ui-button
@@ -259,7 +256,7 @@
       <!-- Flex колонки -->
       <UiDropdown
         v-model:isOpen="isFlexColumnsDropdownOpen"
-        title="Flex колонки"
+        title="Колонки"
         :buttonClass="{ 'is-active': editor.isActive('flexSnippet') }"
         menuClass="columns-form-dropdown"
         :menu-width="500"
@@ -746,7 +743,7 @@ input {
 }
 
 .dropdown-button {
-  min-width: 60px;
+  width: max-content;
   gap: 4px;
 }
 
