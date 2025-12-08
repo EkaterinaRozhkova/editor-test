@@ -10,13 +10,12 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import { Mathematics } from '@tiptap/extension-mathematics';
-import Underline from '@tiptap/extension-underline';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyle, Color } from '@tiptap/extension-text-style'
-import Link from '@tiptap/extension-link';
+import { TableKit } from '@tiptap/extension-table'
 import LZString from 'lz-string';
 import { useDebounceFn } from "@vueuse/core";
 import EditorMenuBar from "@/components/EditorMenuBar.vue";
@@ -32,9 +31,9 @@ import { SectionSnippet } from "@/extensions/snippets/SectionSnippet.ts";
 const editor = useEditor({
   extensions: [
     StarterKit.configure({
-      orderedList: false, // Отключаем стандартный OrderedList
+      orderedList: false,
     }),
-    CustomOrderedList, // Подключаем кастомный OrderedList
+    CustomOrderedList,
     Mathematics.configure({
       katexOptions: {
         throwOnError: true
@@ -45,15 +44,14 @@ const editor = useEditor({
         style: 'display: block; width: 100%; margin: 16px 0; height: 2px; background-image: linear-gradient(90deg, #8850CE, #8850CE 65%, transparent 65%, transparent 100%); background-size: 15px 6px;border: none;',
       }
     }),
-    Underline,
     Subscript,
     Superscript,
     Highlight,
     TextAlign.configure({
       types: ['heading', 'paragraph'],
     }),
-    Link.configure({
-      openOnClick: false,
+    TableKit.configure({
+      table: { resizable: true },
     }),
     FlexSnippet,
     HeaderSnippet,
@@ -171,6 +169,59 @@ defineExpose({
   border: 1px solid var(--menu-border);
 }
 
+.ProseMirror table {
+  border-collapse: collapse;
+  margin: 0;
+  overflow: hidden;
+  table-layout: fixed;
+  width: 100%;
+
+  td,
+  th {
+    border: 1px solid rgba(61, 37, 20, .12);
+    box-sizing: border-box;
+    min-width: 1em;
+    padding: 6px 8px;
+    position: relative;
+    vertical-align: top;
+
+    > * {
+      margin-bottom: 0;
+    }
+  }
+
+  .selectedCell:after {
+    background: rgba(61, 37, 20, .08);
+    content: '';
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 2;
+  }
+
+  .column-resize-handle {
+    background-color: #6a00f5;
+    bottom: -2px;
+    pointer-events: none;
+    position: absolute;
+    right: -2px;
+    top: 0;
+    width: 4px;
+  }
+
+  .tableWrapper {
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+
+  &.resize-cursor {
+    cursor: ew-resize;
+    cursor: col-resize;
+  }
+}
 
 /* Стили для списков */
 .ProseMirror ol {

@@ -47,7 +47,7 @@ button :deep(svg) {
 }
 
 button:hover:not(:disabled) {
-  opacity: .9;
+  background: var(--button-hover-bg);
 }
 
 button:active:not(:disabled) {

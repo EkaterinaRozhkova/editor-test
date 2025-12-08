@@ -1,5 +1,6 @@
 <template>
-  <div class="menu-bar" v-if="editor">
+  <div v-if="editor">
+    <div v-if="!tableMode" class="menu-bar">
     <!-- Дропдаун для типа блока -->
     <div class="button-group">
       <div ref="blockTypeDropdownRef" class="dropdown" :class="{ 'is-open': isBlockTypeDropdownOpen }">
@@ -387,6 +388,21 @@
           </div>
         </template>
       </UiDropdown>
+
+      <ui-button
+        @click="tableMode = true"
+        title="Вставить таблицу"
+      >
+        <SvgIcon name="table" />
+      </ui-button>
+      </div>
+    </div>
+    <div v-else class="menu-bar"><div class="button-group">
+      <ui-button @click="tableMode = false">К меню</ui-button>
+      <ui-button @click="editor.chain().focus().insertTable({ rows: 2, cols: 3, withHeaderRow: true }).run()">
+          Вставить таблицу
+        </ui-button>
+    </div>
     </div>
   </div>
 </template>
@@ -477,6 +493,8 @@ const isHeaderSnippetDropdownOpen = ref(false)
 const isCenterSnippetDropdownOpen = ref(false)
 const isSectionDropdownOpen = ref(false)
 const currentListType = ref<'1' | 'A' | 'a' | 'I' | 'i'>('1')
+
+const tableMode = ref(false)
 
 // Данные для snippet форм
 const headerText = ref('')
