@@ -30,9 +30,9 @@ export const AudioSnippet = Extension.create({
 
             let snippet = ''
             if (textPosition === 'left') {
-              snippet = `${textElement}${audioElement}`
+              snippet = `<div class="raw-html-embed">${textElement}${audioElement}</div>`
             } else {
-              snippet = `${audioElement}${textElement}`
+              snippet = `<div class="raw-html-embed">${audioElement}${textElement}</div>`
             }
 
             return chain().focus().insertContent(snippet).run()
