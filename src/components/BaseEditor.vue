@@ -51,7 +51,22 @@ const editor = useEditor({
       types: ['heading', 'paragraph'],
     }),
     TableKit.configure({
-      table: { resizable: true },
+      table: {
+        resizable: true,
+        HTMLAttributes: {
+          style: 'max-width: 100%; margin: 0 auto; font-size: 12px; border: 1px solid #EAECF0;border-collapse: collapse;',
+        },
+      },
+      tableCell: {
+        HTMLAttributes: {
+          style: 'border: 1px solid #EAECF0;padding: 8px;',
+        },
+      },
+      tableHeader: {
+        HTMLAttributes: {
+          style: 'border: 1px solid #EAECF0;padding: 8px;',
+        },
+      }
     }),
     FlexSnippet,
     HeaderSnippet,
@@ -162,65 +177,21 @@ defineExpose({
   -ms-user-select: text;
 }
 
+.ProseMirror table {
+  td,
+  th {
+
+    > * {
+      margin: 0;
+    }
+  }
+}
+
 .ProseMirror code {
   padding: 2px 5px;
   border-radius: 4px;
   background: var(--menu-bg);
   border: 1px solid var(--menu-border);
-}
-
-.ProseMirror table {
-  border-collapse: collapse;
-  margin: 0;
-  overflow: hidden;
-  table-layout: fixed;
-  width: 100%;
-
-  td,
-  th {
-    border: 1px solid rgba(61, 37, 20, .12);
-    box-sizing: border-box;
-    min-width: 1em;
-    padding: 6px 8px;
-    position: relative;
-    vertical-align: top;
-
-    > * {
-      margin-bottom: 0;
-    }
-  }
-
-  .selectedCell:after {
-    background: rgba(61, 37, 20, .08);
-    content: '';
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    pointer-events: none;
-    position: absolute;
-    z-index: 2;
-  }
-
-  .column-resize-handle {
-    background-color: #6a00f5;
-    bottom: -2px;
-    pointer-events: none;
-    position: absolute;
-    right: -2px;
-    top: 0;
-    width: 4px;
-  }
-
-  .tableWrapper {
-    margin: 1.5rem 0;
-    overflow-x: auto;
-  }
-
-  &.resize-cursor {
-    cursor: ew-resize;
-    cursor: col-resize;
-  }
 }
 
 /* Стили для списков */
