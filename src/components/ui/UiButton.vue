@@ -55,7 +55,7 @@ button:active:not(:disabled) {
 }
 
 button.is-active {
-  background-color: #3b82f6;
+  background-color: var(--link-color);
   color: white;
 }
 
