@@ -435,15 +435,6 @@
                 @change="handleAudioFileSelect"
                 class="file-input"
               />
-              <div v-if="audioFileName" class="file-info">
-                {{ audioFileName }}
-              </div>
-              <div v-if="isAudioUploading" class="upload-status">
-                Загрузка...
-              </div>
-              <div v-if="uploadedAudioPath" class="upload-status success">
-                Файл загружен
-              </div>
             </div>
             <p class="file-hint">Допустимый формат: MP3, OPUS</p>
             <UiBlueButton @click="insertAudioWithData" :disabled="!uploadedAudioPath">
@@ -601,6 +592,7 @@ const audioFileInput = ref<HTMLInputElement | null>(null)
 watch(() => props.currentFile, (newValue) => {
   if(newValue) {
   audioFileName.value = newValue.name
+  uploadedAudioPath.value = newValue.path
   isAudioUploading.value = true
   } else {
     emit('update:currentFile', null)
@@ -899,6 +891,8 @@ const insertAudioWithData = () => {
   audioTextPosition.value = 'right'
   audioFileName.value = ''
   uploadedAudioPath.value = ''
+  emit('update:currentFile', null)
+
   if (audioFileInput.value) {
     audioFileInput.value.value = ''
   }
@@ -1177,14 +1171,6 @@ input {
   font-size: 12px;
   color: var(--button-text);
   cursor: pointer;
-}
-
-.file-info {
-  font-size: 11px;
-  color: var(--button-text);
-  padding: 4px;
-  background: var(--menu-bg);
-  border-radius: 4px;
 }
 
 .upload-status {
