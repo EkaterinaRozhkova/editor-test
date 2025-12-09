@@ -17,9 +17,7 @@ declare module '@tiptap/core' {
 
 export const AudioBlock = Node.create({
   name: 'audioBlock',
-
   group: 'block',
-
   atom: true,
 
   addAttributes() {
@@ -49,8 +47,8 @@ export const AudioBlock = Node.create({
 
           const src = audio.getAttribute('src') || ''
           const text = span?.textContent || ''
-
           let textPosition: 'left' | 'right' = 'right'
+
           if (span && audio) {
             const spanIndex = Array.from(el.children).indexOf(span)
             const audioIndex = Array.from(el.children).indexOf(audio)
@@ -85,7 +83,106 @@ export const AudioBlock = Node.create({
       }
     }
 
-    return ['div', { class: 'raw-html-embed' }, ...children]
+    // Добавляем кнопку удаления
+    children.push([
+      'button',
+      {
+        class: 'audio-block-delete',
+        type: 'button',
+        'data-delete-audio': 'true',
+        style: 'position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; padding: 0; border: none; background: rgba(0, 0, 0, 0.6); color: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; line-height: 1; z-index: 10;'
+      },
+      '×'
+    ])
+
+    return [
+      'div',
+      {
+        class: 'raw-html-embed',
+        style: 'position: relative;'
+      },
+      ...children
+    ]
+  },
+
+  addNodeView() {
+    return ({ node, editor, getPos }) => {
+      const dom = document.createElement('div')
+      dom.className = 'raw-html-embed'
+      dom.style.position = 'relative'
+
+      const { src, text, textPosition } = node.attrs
+
+      // Создаем элементы
+      const audio = document.createElement('audio')
+      audio.className = 'audio'
+      audio.controls = true
+      audio.setAttribute('controlslist', 'nodownload')
+      audio.src = src
+
+      const span = document.createElement('span')
+      span.textContent = text
+
+      // Добавляем в нужном порядке
+      if (textPosition === 'left' && text) {
+        dom.appendChild(span)
+        dom.appendChild(audio)
+      } else {
+        dom.appendChild(audio)
+        if (text) {
+          dom.appendChild(span)
+        }
+      }
+
+      // Создаем кнопку удаления
+      const deleteButton = document.createElement('button')
+      deleteButton.className = 'audio-block-delete'
+      deleteButton.type = 'button'
+      deleteButton.textContent = '×'
+      deleteButton.style.cssText = `
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border: none;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        line-height: 1;
+        z-index: 10;
+        transition: background 0.2s;
+      `
+
+      // Обработчик удаления
+      deleteButton.addEventListener('click', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        if (typeof getPos === 'function') {
+          const pos = getPos()
+          editor.commands.deleteRange({
+            from: pos ?? 0,
+            to: pos ?? 0 + node.nodeSize
+          })
+        }
+      })
+
+      dom.appendChild(deleteButton)
+
+      return {
+        dom,
+        destroy() {
+          deleteButton.removeEventListener('click', () => {})
+        }
+      }
+    }
   },
 
   addCommands() {
