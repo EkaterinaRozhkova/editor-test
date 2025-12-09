@@ -83,24 +83,9 @@ export const AudioBlock = Node.create({
       }
     }
 
-    // Добавляем кнопку удаления
-    children.push([
-      'button',
-      {
-        class: 'audio-block-delete',
-        type: 'button',
-        'data-delete-audio': 'true',
-        style: 'position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; padding: 0; border: none; background: rgba(0, 0, 0, 0.6); color: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; line-height: 1; z-index: 10;'
-      },
-      '×'
-    ])
-
     return [
       'div',
-      {
-        class: 'raw-html-embed',
-        style: 'position: relative;'
-      },
+      { class: 'raw-html-embed' },
       ...children
     ]
   },
@@ -134,7 +119,7 @@ export const AudioBlock = Node.create({
         }
       }
 
-      // Создаем кнопку удаления
+      // Создаем кнопку удаления (только в редакторе)
       const deleteButton = document.createElement('button')
       deleteButton.className = 'audio-block-delete'
       deleteButton.type = 'button'
@@ -160,16 +145,24 @@ export const AudioBlock = Node.create({
         transition: background 0.2s;
       `
 
+      // Hover эффект
+      deleteButton.addEventListener('mouseenter', () => {
+        deleteButton.style.background = 'rgba(0, 0, 0, 0.8)'
+      })
+      deleteButton.addEventListener('mouseleave', () => {
+        deleteButton.style.background = 'rgba(0, 0, 0, 0.6)'
+      })
+
       // Обработчик удаления
       deleteButton.addEventListener('click', (e) => {
         e.preventDefault()
         e.stopPropagation()
 
         if (typeof getPos === 'function') {
-          const pos = getPos()
+          const pos = getPos() ?? 0
           editor.commands.deleteRange({
-            from: pos ?? 0,
-            to: pos ?? 0 + node.nodeSize
+            from: pos,
+            to: pos + node.nodeSize
           })
         }
       })
@@ -179,6 +172,8 @@ export const AudioBlock = Node.create({
       return {
         dom,
         destroy() {
+          deleteButton.removeEventListener('mouseenter', () => {})
+          deleteButton.removeEventListener('mouseleave', () => {})
           deleteButton.removeEventListener('click', () => {})
         }
       }
