@@ -402,54 +402,6 @@
       >
         <SvgIcon name="audio" />
       </ui-button>
-
-      <!-- Аудио -->
-<!--       <UiDropdown -->
-<!--         v-model:isOpen="isAudioDropdownOpen" -->
-<!--         title="Вставить аудио" -->
-<!--         menuClass="audio-form-dropdown" -->
-<!--         :menu-width="340" -->
-<!--         @toggle="toggleAudioDropdown" -->
-<!--       > -->
-<!--         <template #button-content> -->
-<!--           <SvgIcon name="audio" /> -->
-<!--         </template> -->
-<!--         <template #menu-content> -->
-<!--           <div class="audio-form form"> -->
-<!--             <div class="form-header"> -->
-<!--               <label class="form-label">Позиционирование текста</label> -->
-<!--             </div> -->
-<!--             <div class="radio-group"> -->
-<!--               <label class="radio-label"> -->
-<!--                 <input type="radio" v-model="audioTextPosition" value="left" /> -->
-<!--                 <span>Слева</span> -->
-<!--               </label> -->
-<!--               <label class="radio-label"> -->
-<!--                 <input type="radio" v-model="audioTextPosition" value="right" /> -->
-<!--                 <span>Справа</span> -->
-<!--               </label> -->
-<!--             </div> -->
-<!--             <UiTextarea -->
-<!--               v-model="audioText" -->
-<!--               placeholder="Введите текст" -->
-<!--             /> -->
-<!--             <div class="file-upload"> -->
-<!--               <label class="form-label">Выбрать MP3 или OPUS файл</label> -->
-<!--               <input -->
-<!--                 ref="audioFileInput" -->
-<!--                 type="file" -->
-<!--                 accept=".mp3,.opus,audio/mpeg,audio/opus" -->
-<!--                 @change="handleAudioFileSelect" -->
-<!--                 class="file-input" -->
-<!--               /> -->
-<!--             </div> -->
-<!--             <p class="file-hint">Допустимый формат: MP3, OPUS</p> -->
-<!--             <UiBlueButton @click="insertAudioWithData" :disabled="!uploadedAudioPath"> -->
-<!--               Вставить -->
-<!--             </UiBlueButton> -->
-<!--           </div> -->
-<!--         </template> -->
-<!--       </UiDropdown> -->
       </div>
     </div>
 <!--     отдельное меню для таблиц -->
@@ -487,11 +439,10 @@ import SvgIcon from '@/components/ui/SvgIcon.vue'
 import type { Upload } from "@/types/upload.ts";
 
 const props = defineProps<{
-  editor: Editor | null,
-  currentFile: Upload | null
+  editor: Editor | null
 }>()
 
-const emit = defineEmits(['add-audio', 'update:currentFile'])
+const emit = defineEmits(['add-audio'])
 
 
 // Данные для дропдаунов
@@ -587,21 +538,7 @@ const rowsColumnsData = ref<BlocksRow[]>([
   { title: '', content: '' },
 ])
 
-// Данные для формы аудио
-const isAudioDropdownOpen = ref(false)
-const audioText = ref('')
-const audioTextPosition = ref<'left' | 'right'>('right')
-const audioFileName = ref('')
-const uploadedAudioPath = ref('')
-const audioFileInput = ref<HTMLInputElement | null>(null)
 
-watch(() => props.currentFile, (newValue) => {
-  if (newValue) {
-    insertAudioWithData()
-  } else {
-    emit('update:currentFile', null)
-  }
-})
 
 // Обновляем данные колонок при изменении количества
 watch(columnCount, (newCount) => {
@@ -666,7 +603,6 @@ const closeAllDropdowns = () => {
   isHeaderSnippetDropdownOpen.value = false
   isCenterSnippetDropdownOpen.value = false
   isSectionDropdownOpen.value = false
-  isAudioDropdownOpen.value = false
 }
 
 // Переключатели дропдаунов
@@ -862,28 +798,6 @@ const handleAudioSelect = () => {
 }
 
 // Вставка аудио с данными
-const insertAudioWithData = () => {
-  if (!props.editor) return
-
-  props.editor.chain().focus().insertAudioBlock({
-    src: uploadedAudioPath.value,
-    text: audioText.value,
-    textPosition: audioTextPosition.value
-  }).run()
-
-  // Сбрасываем форму
-  audioText.value = ''
-  audioTextPosition.value = 'right'
-  audioFileName.value = ''
-  uploadedAudioPath.value = ''
-  emit('update:currentFile', null)
-
-  if (audioFileInput.value) {
-    audioFileInput.value.value = ''
-  }
-
-  isAudioDropdownOpen.value = false
-}
 
 // Закрытие дропдаунов при клике вне их
 onClickOutside(blockTypeDropdownRef, () => {
@@ -1113,25 +1027,6 @@ input {
   border: 1px solid var(--button-border);
   border-radius: 4px;
   background: var(--menu-bg);
-}
-
-/* Стили для формы аудио */
-.audio-form {
-  min-height: 340px;
-}
-
-.radio-group {
-  display: flex;
-  gap: 16px;
-}
-
-.radio-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--button-text);
-  cursor: pointer;
 }
 
 .radio-label input[type="radio"] {

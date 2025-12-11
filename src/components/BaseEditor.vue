@@ -1,6 +1,6 @@
 <template>
   <div class="base-editor" v-if="editor">
-    <EditorMenuBar :editor="editor" @add-audio="addAudio" v-model:currentFile="currentFile"/>
+    <EditorMenuBar :editor="editor" @add-audio="addAudio" />
     <EditorContent :editor="editor" class="editor-content" />
   </div>
 </template>
@@ -104,7 +104,6 @@ const editor = useEditor({
 
 
 const isContentInitialized = ref(false);
-const currentFile = ref(null)
 
 const sendContentUpdate = useDebounceFn(() => {
   if (isContentInitialized.value && editor.value) {
@@ -147,8 +146,12 @@ const handleMessage = async (event: MessageEvent) => {
     }
   }
 
-  if(event.data.type === 'file-uploaded' && editor.value) {
-    currentFile.value = event?.data?.data || null
+  if(event.data.type === 'audio-uploaded' && editor.value) {
+    editor.value.chain().focus().insertAudioBlock({
+      src: event?.data?.data.src ?? '',
+      text: event?.data?.data.text ?? '',
+      textPosition: event?.data?.data.textPosition ?? 'left'
+    }).run()
   }
 };
 
