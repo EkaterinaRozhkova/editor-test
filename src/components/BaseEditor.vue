@@ -158,13 +158,11 @@ const handleMessage = async (event: MessageEvent) => {
   }
 
   if (event.data.type === 'audio-uploaded' && editor.value) {
-    const { src, text,textPosition } = event?.data?.data
-    editor.value.chain().focus().insertAudioBlock({ src, text, textPosition }).run()
+    editor.value.chain().focus().insertAudioBlock(event?.data?.data).run()
   }
 
   if (event.data.type === 'image-uploaded' && editor.value) {
-    const { url, name, width, alt, text } = event?.data?.data
-    editor.value.chain().focus().insertImageSnippet({ url, name, width, alt, text }).run()
+    editor.value.chain().focus().insertImageSnippet(event?.data?.data).run()
   }
 };
 

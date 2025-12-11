@@ -6,6 +6,7 @@ export interface ImageSnippetOptions {
   width?: string | number
   alt?: string
   text?: string
+  position?: string
 }
 
 declare module '@tiptap/core' {
@@ -29,11 +30,12 @@ export const ImageSnippet = Extension.create({
               name = '',
               width = '50',
               alt = '',
-              text = ''
+              text = '',
+              position = 'left'
             } = options
 
             const snippetLines = [
-              `[img url='${url}' loading='lazy' name='${name}' width='${width}' alt='${alt}']`
+              `[img url='${url}' loading='lazy' name='${name}' float='${position}' width='${width}' alt='${alt}']`
             ]
 
             if (text) {
