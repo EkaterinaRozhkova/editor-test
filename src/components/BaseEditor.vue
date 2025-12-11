@@ -32,6 +32,7 @@ import { BlockSnippet } from "../extensions/snippets/BlockSnippet.ts";
 import { SectionSnippet } from "@/extensions/snippets/SectionSnippet.ts";
 import { AudioBlock } from "@/extensions/AudioBlock.ts";
 import Image from '@tiptap/extension-image'
+import Code from '@tiptap/extension-code'
 import { ImageSnippet } from "@/extensions/snippets/ImageSnippet.ts";
 
 const editor = useEditor({
@@ -49,6 +50,11 @@ const editor = useEditor({
       HTMLAttributes: {
         style: 'display: block; width: 100%; margin: 16px 0; height: 2px; background-image: linear-gradient(90deg, #8850CE, #8850CE 65%, transparent 65%, transparent 100%); background-size: 15px 6px;border: none;',
       }
+    }),
+    Code.configure({
+      HTMLAttributes: {
+        class: 'inline-code',
+      },
     }),
     Subscript,
     Superscript,
@@ -256,7 +262,7 @@ defineExpose({
 
 }
 
-.ProseMirror code {
+.ProseMirror .inline-code {
   padding: 2px 5px;
   border-radius: 4px;
   background: var(--menu-bg);

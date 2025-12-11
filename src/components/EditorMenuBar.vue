@@ -61,7 +61,7 @@
       <ui-button
         @click="editor.chain().focus().toggleCode().run()"
         :class="{ 'is-active': editor.isActive('code') }"
-        title="Встроенный код"
+        title="Инлайновый код"
       >
         <SvgIcon name="code" />
       </ui-button>
