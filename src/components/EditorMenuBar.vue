@@ -409,6 +409,13 @@
       >
         <SvgIcon name="image" />
       </ui-button>
+      <ui-button
+        @click="editor.chain().focus().setCodeBlock().run()"
+        :disabled="editor.isActive('codeBlock')"
+        title="Вставить блок кода"
+      >
+        <SvgIcon name="code-block" />
+      </ui-button>
       </div>
     </div>
 <!--     отдельное меню для таблиц -->
