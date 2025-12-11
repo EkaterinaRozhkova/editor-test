@@ -19,15 +19,6 @@ export default defineConfig({
     vueDevTools(),
     svgLoader(),
   ],
-  server: {
-    proxy: {
-      '/upload/': {
-        target: process.env.NUXT_ENV_API_URL_S3 ?? 'https://onlineschool-1.hb.bizmrg.com/',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/upload/, '')
-      }
-    }
-  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

@@ -396,53 +396,60 @@
         <SvgIcon name="table" />
       </ui-button>
 
-      <!-- Аудио -->
-      <UiDropdown
-        v-model:isOpen="isAudioDropdownOpen"
-        title="Вставить аудио"
-        menuClass="audio-form-dropdown"
-        :menu-width="340"
-        @toggle="toggleAudioDropdown"
+      <ui-button
+        @click="handleAudioFileSelect"
+        title="Вставить Аудио"
       >
-        <template #button-content>
-          <SvgIcon name="audio" />
-        </template>
-        <template #menu-content>
-          <div class="audio-form form">
-            <div class="form-header">
-              <label class="form-label">Позиционирование текста</label>
-            </div>
-            <div class="radio-group">
-              <label class="radio-label">
-                <input type="radio" v-model="audioTextPosition" value="left" />
-                <span>Слева</span>
-              </label>
-              <label class="radio-label">
-                <input type="radio" v-model="audioTextPosition" value="right" />
-                <span>Справа</span>
-              </label>
-            </div>
-            <UiTextarea
-              v-model="audioText"
-              placeholder="Введите текст"
-            />
-            <div class="file-upload">
-              <label class="form-label">Выбрать MP3 или OPUS файл</label>
-              <input
-                ref="audioFileInput"
-                type="file"
-                accept=".mp3,.opus,audio/mpeg,audio/opus"
-                @change="handleAudioFileSelect"
-                class="file-input"
-              />
-            </div>
-            <p class="file-hint">Допустимый формат: MP3, OPUS</p>
-            <UiBlueButton @click="insertAudioWithData" :disabled="!uploadedAudioPath">
-              Вставить
-            </UiBlueButton>
-          </div>
-        </template>
-      </UiDropdown>
+        <SvgIcon name="audio" />
+      </ui-button>
+
+      <!-- Аудио -->
+<!--       <UiDropdown -->
+<!--         v-model:isOpen="isAudioDropdownOpen" -->
+<!--         title="Вставить аудио" -->
+<!--         menuClass="audio-form-dropdown" -->
+<!--         :menu-width="340" -->
+<!--         @toggle="toggleAudioDropdown" -->
+<!--       > -->
+<!--         <template #button-content> -->
+<!--           <SvgIcon name="audio" /> -->
+<!--         </template> -->
+<!--         <template #menu-content> -->
+<!--           <div class="audio-form form"> -->
+<!--             <div class="form-header"> -->
+<!--               <label class="form-label">Позиционирование текста</label> -->
+<!--             </div> -->
+<!--             <div class="radio-group"> -->
+<!--               <label class="radio-label"> -->
+<!--                 <input type="radio" v-model="audioTextPosition" value="left" /> -->
+<!--                 <span>Слева</span> -->
+<!--               </label> -->
+<!--               <label class="radio-label"> -->
+<!--                 <input type="radio" v-model="audioTextPosition" value="right" /> -->
+<!--                 <span>Справа</span> -->
+<!--               </label> -->
+<!--             </div> -->
+<!--             <UiTextarea -->
+<!--               v-model="audioText" -->
+<!--               placeholder="Введите текст" -->
+<!--             /> -->
+<!--             <div class="file-upload"> -->
+<!--               <label class="form-label">Выбрать MP3 или OPUS файл</label> -->
+<!--               <input -->
+<!--                 ref="audioFileInput" -->
+<!--                 type="file" -->
+<!--                 accept=".mp3,.opus,audio/mpeg,audio/opus" -->
+<!--                 @change="handleAudioFileSelect" -->
+<!--                 class="file-input" -->
+<!--               /> -->
+<!--             </div> -->
+<!--             <p class="file-hint">Допустимый формат: MP3, OPUS</p> -->
+<!--             <UiBlueButton @click="insertAudioWithData" :disabled="!uploadedAudioPath"> -->
+<!--               Вставить -->
+<!--             </UiBlueButton> -->
+<!--           </div> -->
+<!--         </template> -->
+<!--       </UiDropdown> -->
       </div>
     </div>
 <!--     отдельное меню для таблиц -->
@@ -484,7 +491,7 @@ const props = defineProps<{
   currentFile: Upload | null
 }>()
 
-const emit = defineEmits(['upload-file', 'update:currentFile'])
+const emit = defineEmits(['add-audio', 'update:currentFile'])
 
 
 // Данные для дропдаунов
@@ -585,15 +592,12 @@ const isAudioDropdownOpen = ref(false)
 const audioText = ref('')
 const audioTextPosition = ref<'left' | 'right'>('right')
 const audioFileName = ref('')
-const isAudioUploading = ref(false)
 const uploadedAudioPath = ref('')
 const audioFileInput = ref<HTMLInputElement | null>(null)
 
 watch(() => props.currentFile, (newValue) => {
-  if(newValue) {
-  audioFileName.value = newValue.name
-  uploadedAudioPath.value = newValue.path
-  isAudioUploading.value = true
+  if (newValue) {
+    insertAudioWithData()
   } else {
     emit('update:currentFile', null)
   }
@@ -851,29 +855,10 @@ const insertRowsWithData = () => {
   isFlexRowsDropdownOpen.value = false
 }
 
-// Переключатель для аудио дропдауна
-const toggleAudioDropdown = () => {
-  closeAllDropdowns()
-  isAudioDropdownOpen.value = !isAudioDropdownOpen.value
-}
 
 // Обработка выбора аудио файла
-const handleAudioFileSelect = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-
-  if (!file) return
-
-  // Проверяем формат файла
-  const allowedTypes = ['audio/mpeg', 'audio/opus', 'audio/mp3']
-  const allowedExtensions = ['.mp3', '.opus']
-  const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase()
-
-  if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
-    alert('Допустимые форматы: MP3, OPUS')
-    return
-  }
-  emit('upload-file', file)
+const handleAudioFileSelect = () => {
+  emit('add-audio')
 }
 
 // Вставка аудио с данными

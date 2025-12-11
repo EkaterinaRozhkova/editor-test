@@ -1,6 +1,6 @@
 <template>
   <div class="base-editor" v-if="editor">
-    <EditorMenuBar :editor="editor" @upload-file="sendFile" v-model:currentFile="currentFile"/>
+    <EditorMenuBar :editor="editor" @addAudio="addAudio" v-model:currentFile="currentFile"/>
     <EditorContent :editor="editor" class="editor-content" />
   </div>
 </template>
@@ -27,6 +27,7 @@ import { CenterSnippet } from "../extensions/snippets/CenterSnippet.ts";
 import { BlockSnippet } from "../extensions/snippets/BlockSnippet.ts";
 import { SectionSnippet } from "@/extensions/snippets/SectionSnippet.ts";
 import { AudioBlock } from "@/extensions/AudioBlock.ts";
+import Image from '@tiptap/extension-image'
 
 
 
@@ -78,6 +79,15 @@ const editor = useEditor({
     SectionSnippet,
     AudioBlock,
     TextStyle,
+    Image.configure({
+      resize: {
+        enabled: true,
+        directions: ['top', 'bottom', 'left', 'right'], // can be any direction or diagonal combination
+        minWidth: 50,
+        minHeight: 50,
+        alwaysPreserveAspectRatio: true,
+      }
+    }),
     Color
   ],
   content: '',
@@ -108,15 +118,10 @@ const sendContentUpdate = useDebounceFn(() => {
   }
 }, 500);
 
-const sendFile = async (file: File) => {
-  const arrayBuffer = await file.arrayBuffer()
+const addAudio = async () => {
   window.parent.postMessage({
-    type: 'upload-file',
-    name: file.name,
-    size: file.size,
-    fileType: file.type,
-    data: arrayBuffer
-  }, '*', [arrayBuffer]);
+    type: 'add-audio'
+  });
 }
 
 const handleMessage = async (event: MessageEvent) => {
