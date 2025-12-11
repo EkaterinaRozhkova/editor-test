@@ -1,6 +1,10 @@
 <template>
   <div class="base-editor" v-if="editor">
-    <EditorMenuBar :editor="editor" @add-audio="addAudio" />
+    <EditorMenuBar
+      :editor="editor"
+      @add-audio="addAudio"
+      @add-image="addImage"
+    />
     <EditorContent :editor="editor" class="editor-content" />
   </div>
 </template>
@@ -28,8 +32,7 @@ import { BlockSnippet } from "../extensions/snippets/BlockSnippet.ts";
 import { SectionSnippet } from "@/extensions/snippets/SectionSnippet.ts";
 import { AudioBlock } from "@/extensions/AudioBlock.ts";
 import Image from '@tiptap/extension-image'
-
-
+import { ImageSnippet } from "@/extensions/snippets/ImageSnippet.ts";
 
 const editor = useEditor({
   extensions: [
@@ -78,6 +81,7 @@ const editor = useEditor({
     BlockSnippet,
     SectionSnippet,
     AudioBlock,
+    ImageSnippet,
     TextStyle,
     Image.configure({
       resize: {
@@ -124,6 +128,13 @@ const addAudio = () => {
   }, '*');
 }
 
+const addImage = () => {
+  window.parent.postMessage({
+    type: 'add-image',
+    data: '',
+  }, '*');
+}
+
 const handleMessage = async (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
     try {
@@ -146,12 +157,14 @@ const handleMessage = async (event: MessageEvent) => {
     }
   }
 
-  if(event.data.type === 'audio-uploaded' && editor.value) {
-    editor.value.chain().focus().insertAudioBlock({
-      src: event?.data?.data.src ?? '',
-      text: event?.data?.data.text ?? '',
-      textPosition: event?.data?.data.textPosition ?? 'left'
-    }).run()
+  if (event.data.type === 'audio-uploaded' && editor.value) {
+    const { src, text,textPosition } = event?.data?.data
+    editor.value.chain().focus().insertAudioBlock({ src, text, textPosition }).run()
+  }
+
+  if (event.data.type === 'image-uploaded' && editor.value) {
+    const { url, name, width, alt, text } = event?.data?.data
+    editor.value.chain().focus().insertImageSnippet({ url, name, width, alt, text }).run()
   }
 };
 

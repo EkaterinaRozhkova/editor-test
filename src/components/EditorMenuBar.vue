@@ -402,6 +402,13 @@
       >
         <SvgIcon name="audio" />
       </ui-button>
+
+      <ui-button
+        @click="handleImageSelect"
+        title="Вставить Картинку"
+      >
+        <SvgIcon name="image" />
+      </ui-button>
       </div>
     </div>
 <!--     отдельное меню для таблиц -->
@@ -431,18 +438,17 @@ import { onClickOutside } from '@vueuse/core'
 import type { Editor } from '@tiptap/vue-3'
 import type { FlexColumn } from '../extensions/snippets/FlexSnippet'
 import type { BlocksRow } from '../extensions/snippets/BlockSnippet'
-import UiDropdown from './ui/UiDropdown.vue'
-import UiButton from './ui/UiButton.vue'
+import UiDropdown from '@/components/ui/UiDropdown.vue'
+import UiButton from '@/components/ui/UiButton.vue'
 import UiBlueButton from "@/components/ui/UiBlueButton.vue";
 import UiTextarea from "@/components/ui/UiTextarea.vue";
 import SvgIcon from '@/components/ui/SvgIcon.vue'
-import type { Upload } from "@/types/upload.ts";
 
 const props = defineProps<{
   editor: Editor | null
 }>()
 
-const emit = defineEmits(['add-audio'])
+const emit = defineEmits(['add-audio', 'add-image'])
 
 
 // Данные для дропдаунов
@@ -792,12 +798,13 @@ const insertRowsWithData = () => {
 }
 
 
-// Обработка выбора аудио файла
 const handleAudioSelect = () => {
   emit('add-audio')
 }
 
-// Вставка аудио с данными
+const handleImageSelect = () => {
+  emit('add-image')
+}
 
 // Закрытие дропдаунов при клике вне их
 onClickOutside(blockTypeDropdownRef, () => {
