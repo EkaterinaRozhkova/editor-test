@@ -86,8 +86,8 @@
         <SvgIcon name="horizontal-rule" />
       </ui-button>
       <ui-button
-        @click="editor.chain().focus().toggleHighlight().run()"
-        :class="{ 'is-active': editor.isActive('highlight') }"
+        @click="editor.chain().focus().toggleCodeBlock().run()"
+        :class="{ 'is-active': editor.isActive('codeBlock') }"
         title="Выделение цветом"
       >
         <SvgIcon name="highlight" />
