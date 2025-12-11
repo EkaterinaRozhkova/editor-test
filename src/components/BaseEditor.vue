@@ -1,6 +1,6 @@
 <template>
   <div class="base-editor" v-if="editor">
-    <EditorMenuBar :editor="editor" @addAudio="addAudio" v-model:currentFile="currentFile"/>
+    <EditorMenuBar :editor="editor" @add-audio="addAudio" v-model:currentFile="currentFile"/>
     <EditorContent :editor="editor" class="editor-content" />
   </div>
 </template>
@@ -118,7 +118,7 @@ const sendContentUpdate = useDebounceFn(() => {
   }
 }, 500);
 
-const addAudio = async () => {
+const addAudio = () => {
   window.parent.postMessage({
     type: 'add-audio'
   });

@@ -397,7 +397,7 @@
       </ui-button>
 
       <ui-button
-        @click="handleAudioFileSelect"
+        @click="handleAudioSelect"
         title="Вставить Аудио"
       >
         <SvgIcon name="audio" />
@@ -857,7 +857,7 @@ const insertRowsWithData = () => {
 
 
 // Обработка выбора аудио файла
-const handleAudioFileSelect = () => {
+const handleAudioSelect = () => {
   emit('add-audio')
 }
 
