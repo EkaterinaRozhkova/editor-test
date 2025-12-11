@@ -14,10 +14,8 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import { Mathematics } from '@tiptap/extension-mathematics';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
-import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyle, Color } from '@tiptap/extension-text-style'
 import { TableKit } from '@tiptap/extension-table'
@@ -33,11 +31,13 @@ import { BlockSnippet } from "../extensions/snippets/BlockSnippet.ts";
 import { SectionSnippet } from "@/extensions/snippets/SectionSnippet.ts";
 import { AudioBlock } from "@/extensions/AudioBlock.ts";
 import Image from '@tiptap/extension-image'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Code from '@tiptap/extension-code'
 import { ImageSnippet } from "@/extensions/snippets/ImageSnippet.ts";
 import "highlight.js/styles/atom-one-light.css"
 import { all, createLowlight } from 'lowlight'
 
+// create a lowlight instance
 const lowlight = createLowlight(all)
 
 const editor = useEditor({
@@ -47,6 +47,9 @@ const editor = useEditor({
       codeBlock: false, // отключаем стандартный CodeBlock, используем CodeBlockLowlight
     }),
     CustomOrderedList,
+    CodeBlockLowlight.configure({
+      lowlight,
+    }),
     Mathematics.configure({
       katexOptions: {
         throwOnError: true
@@ -64,7 +67,6 @@ const editor = useEditor({
     }),
     Subscript,
     Superscript,
-    Highlight,
     TextAlign.configure({
       types: ['heading', 'paragraph'],
     }),
@@ -104,12 +106,7 @@ const editor = useEditor({
         alwaysPreserveAspectRatio: true,
       }
     }),
-    Color,
-    CodeBlockLowlight.configure({
-      lowlight,
-      tabSize: 2,
-      defaultLanguage: 'auto' // автоопределение языка
-    }),
+    Color
   ],
   content: '',
   editable: true,
@@ -329,99 +326,4 @@ defineExpose({
 .ProseMirror ul li {
   margin: 4px 0;
 }
-
-/* Стили для блоков кода с подсветкой синтаксиса */
-.ProseMirror pre {
-  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-  background: #fafafa;
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  padding: 12px 16px;
-  margin: 12px 0;
-  overflow-x: auto;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.ProseMirror pre code {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: inherit;
-  color: #24292e;
-  border-radius: 0;
-  display: block;
-  white-space: pre;
-}
-
-/* Стили highlight.js для подсветки синтаксиса */
-.ProseMirror pre code .hljs-comment,
-.ProseMirror pre code .hljs-quote {
-  color: #a0a1a7;
-  font-style: italic;
-}
-
-.ProseMirror pre code .hljs-doctag,
-.ProseMirror pre code .hljs-keyword,
-.ProseMirror pre code .hljs-formula {
-  color: #a626a4;
-}
-
-.ProseMirror pre code .hljs-section,
-.ProseMirror pre code .hljs-name,
-.ProseMirror pre code .hljs-selector-tag,
-.ProseMirror pre code .hljs-deletion,
-.ProseMirror pre code .hljs-subst {
-  color: #e45649;
-}
-
-.ProseMirror pre code .hljs-literal {
-  color: #0184bb;
-}
-
-.ProseMirror pre code .hljs-string,
-.ProseMirror pre code .hljs-regexp,
-.ProseMirror pre code .hljs-addition,
-.ProseMirror pre code .hljs-attribute,
-.ProseMirror pre code .hljs-meta-string {
-  color: #50a14f;
-}
-
-.ProseMirror pre code .hljs-built_in,
-.ProseMirror pre code .hljs-class .hljs-title {
-  color: #c18401;
-}
-
-.ProseMirror pre code .hljs-attr,
-.ProseMirror pre code .hljs-variable,
-.ProseMirror pre code .hljs-template-variable,
-.ProseMirror pre code .hljs-type,
-.ProseMirror pre code .hljs-selector-class,
-.ProseMirror pre code .hljs-selector-attr,
-.ProseMirror pre code .hljs-selector-pseudo,
-.ProseMirror pre code .hljs-number {
-  color: #986801;
-}
-
-.ProseMirror pre code .hljs-symbol,
-.ProseMirror pre code .hljs-bullet,
-.ProseMirror pre code .hljs-link,
-.ProseMirror pre code .hljs-meta,
-.ProseMirror pre code .hljs-selector-id,
-.ProseMirror pre code .hljs-title {
-  color: #4078f2;
-}
-
-.ProseMirror pre code .hljs-emphasis {
-  font-style: italic;
-}
-
-.ProseMirror pre code .hljs-strong {
-  font-weight: bold;
-}
-
-.ProseMirror pre code .hljs-link {
-  text-decoration: underline;
-}
-
 </style>

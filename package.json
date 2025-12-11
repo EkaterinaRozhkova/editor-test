@@ -15,8 +15,7 @@
     "lint": "eslint . --fix --cache"
   },
   "dependencies": {
-    "@tiptap/extension-code-block-lowlight": "^3.11.0",
-    "@tiptap/extension-highlight": "^3.11.0",
+    "@tiptap/extension-code-block-lowlight": "^3.13.0",
     "@tiptap/extension-image": "^3.13.0",
     "@tiptap/extension-link": "^3.11.0",
     "@tiptap/extension-mathematics": "^3.11.0",
