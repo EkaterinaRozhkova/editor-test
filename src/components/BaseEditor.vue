@@ -120,8 +120,9 @@ const sendContentUpdate = useDebounceFn(() => {
 
 const addAudio = () => {
   window.parent.postMessage({
-    type: 'add-audio'
-  });
+    type: 'add-audio',
+    data: '',
+  }, '*');
 }
 
 const handleMessage = async (event: MessageEvent) => {
