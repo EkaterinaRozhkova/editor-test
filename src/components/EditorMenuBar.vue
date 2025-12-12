@@ -230,7 +230,7 @@
         @toggle="toggleHeaderExtensionDropdown"
       >
         <template #button-content>
-          <SvgIcon name="header-extension" />
+          <SvgIcon name="header" />
         </template>
         <template #menu-content>
           <div class="header-form form">
