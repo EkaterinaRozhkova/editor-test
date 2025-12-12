@@ -31,14 +31,14 @@ import { useDebounceFn } from '@vueuse/core'
 import EditorMenuBar from '@/components/EditorMenuBar.vue'
 
 import { CustomOrderedList } from '@/extensions/CustomOrderedList'
-import { FlexSnippet } from '@/extensions/snippets/FlexSnippet'
-import { HeaderSnippet } from '@/extensions/snippets/HeaderSnippet'
-import { CenterSnippet } from '@/extensions/snippets/CenterSnippet'
-import { BlockSnippet } from '@/extensions/snippets/BlockSnippet'
-import { SectionSnippet } from '@/extensions/snippets/SectionSnippet'
-import { ImageSnippet } from '@/extensions/snippets/ImageSnippet'
-import { AudioBlock } from '@/extensions/AudioBlock'
-import { CodeBlock } from '@/extensions/snippets/CodeBlock'
+import { FlexExtension } from '@/extensions/FlexExtension.ts'
+import { HeaderExtension } from '@/extensions/HeaderExtension.ts'
+import { CenterExtension } from '@/extensions/CenterExtension.ts'
+import { BlockExtension } from '@/extensions/BlockExtension.ts'
+import { SectionExtension } from '@/extensions/SectionExtension.ts'
+import { ImageExtension } from '@/extensions/ImageExtension.ts'
+import { AudioExtension } from '@/extensions/AudioExtension.ts'
+import { CodeBlockExtension } from '@/extensions/CodeBlockExtension.ts'
 
 import { exportHtmlWithHighlight } from '@/utils/exportHtmlWithHighlight'
 import 'highlight.js/styles/atom-one-light.css'
@@ -59,7 +59,7 @@ const editor = useEditor({
       lowlight,
     }),
 
-    CodeBlock,
+    CodeBlockExtension,
 
     Mathematics.configure({
       katexOptions: {
@@ -113,13 +113,13 @@ const editor = useEditor({
       },
     }),
 
-    FlexSnippet,
-    HeaderSnippet,
-    CenterSnippet,
-    BlockSnippet,
-    SectionSnippet,
-    AudioBlock,
-    ImageSnippet,
+    FlexExtension,
+    HeaderExtension,
+    CenterExtension,
+    BlockExtension,
+    SectionExtension,
+    AudioExtension,
+    ImageExtension,
 
     TextStyle,
     Color,
@@ -210,7 +210,7 @@ const handleMessage = (event: MessageEvent) => {
     editor.value
       .chain()
       .focus()
-      .insertImageSnippet(event.data.data)
+      .insertImageExtension(event.data.data)
       .run()
   }
 }
@@ -335,14 +335,15 @@ defineExpose({
 }
 
 .ProseMirror .inline-code {
-  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-  font-size: 12px;
-  font-weight: 500;
-  background-color: #f6f8fa;
-  color: #24292f;
-  padding: .2em .4em;
-  border-radius: 3px;
-  border: 1px solid #d0d7de;
+  background: hsla(0, 0%, 78%, .2);
+  border: 1px solid #c4c4c4;
+  border-radius: 5px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 15px;
+  color: #353535;
+  direction: ltr;
+  font-style: normal;
+  padding: 3px 4px;
 }
 
 /* Стили для списков */

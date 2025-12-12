@@ -85,6 +85,29 @@
       >
         <SvgIcon name="horizontal-rule" />
       </ui-button>
+
+
+       <div ref="colorDropdownRef" class="dropdown" :class="{ 'is-open': isColorDropdownOpen }">
+        <ui-button
+          @click="toggleColorDropdown"
+          class="dropdown-button"
+          title="Цветной текст"
+        >
+          <SvgIcon name="color" />
+          <SvgIcon name="chevron" class="chevron" />
+        </ui-button>
+        <div v-if="isColorDropdownOpen" class="dropdown-menu">
+          <ui-button
+            v-for="color in colors"
+            :key="color.value"
+            @click="setColor(color.value)"
+            class="dropdown-item"
+            :class="{ 'is-active': currentColor === color.value }"
+          >
+            <span class="color-item" :style="{background: color.value}"/><span>{{ color.label }}</span>
+          </ui-button>
+        </div>
+      </div>
       <ui-button
         @click="editor.chain().focus().toggleCodeBlock().run()"
         :class="{ 'is-active': editor.isActive('codeBlock') }"
@@ -92,12 +115,6 @@
       >
         <SvgIcon name="highlight" />
       </ui-button>
-      <input
-        type="color"
-        @input="onColorChange"
-        value="#489735"
-        title="Цвет текста"
-      />
     </div>
 
     <div class="divider"></div>
@@ -206,23 +223,23 @@
 
       <!-- Кастомный заголовок -->
       <UiDropdown
-        v-model:isOpen="isHeaderSnippetDropdownOpen"
+        v-model:isOpen="isHeaderExtensionDropdownOpen"
         title="Кастомный заголовок"
         menuClass="header-form-dropdown"
         :menu-width="410"
-        @toggle="toggleHeaderSnippetDropdown"
+        @toggle="toggleHeaderExtensionDropdown"
       >
         <template #button-content>
-          <SvgIcon name="header-snippet" />
+          <SvgIcon name="header-extension" />
         </template>
         <template #menu-content>
           <div class="header-form form">
             <UiTextarea
               v-model="headerText"
               placeholder="Введите текст заголовка"
-              @keydown.enter="insertHeaderSnippetWithText"
+              @keydown.enter="insertHeaderExtensionWithText"
             />
-            <UiBlueButton @click="insertHeaderSnippetWithText">
+            <UiBlueButton @click="insertHeaderExtensionWithText">
               Вставить
             </UiBlueButton>
           </div>
@@ -231,11 +248,11 @@
 
       <!-- Центрирование -->
       <UiDropdown
-        v-model:isOpen="isCenterSnippetDropdownOpen"
+        v-model:isOpen="isCenterExtensionDropdownOpen"
         title="Центрирование"
         menuClass="center-form-dropdown"
         :menu-width="365"
-        @toggle="toggleCenterSnippetDropdown"
+        @toggle="toggleCenterExtensionDropdown"
       >
         <template #button-content>
           <SvgIcon name="align-center" />
@@ -245,9 +262,9 @@
             <UiTextarea
               v-model="centerText"
               placeholder="Введите значение"
-              @keydown.enter="insertCenterSnippetWithText"
+              @keydown.enter="insertCenterExtensionWithText"
             />
-            <UiBlueButton @click="insertCenterSnippetWithText">
+            <UiBlueButton @click="insertCenterExtensionWithText">
               Вставить
             </UiBlueButton>
           </div>
@@ -258,7 +275,7 @@
       <UiDropdown
         v-model:isOpen="isFlexColumnsDropdownOpen"
         title="Колонки"
-        :buttonClass="{ 'is-active': editor.isActive('flexSnippet') }"
+        :buttonClass="{ 'is-active': editor.isActive('flexExtension') }"
         menuClass="columns-form-dropdown"
         :menu-width="450"
         @toggle="toggleFlexColumnsDropdown"
@@ -308,7 +325,7 @@
       <UiDropdown
         v-model:isOpen="isFlexRowsDropdownOpen"
         title="Блоки"
-        :buttonClass="{ 'is-active': editor.isActive('blockSnippet') }"
+        :buttonClass="{ 'is-active': editor.isActive('blockExtension') }"
         menuClass="rows-form-dropdown"
         :menu-width="420"
         @toggle="toggleBlockDropdown"
@@ -358,7 +375,7 @@
       <UiDropdown
         v-model:isOpen="isSectionDropdownOpen"
         title="Секции"
-        :buttonClass="{ 'is-active': editor.isActive('sectionSnippet') }"
+        :buttonClass="{ 'is-active': editor.isActive('sectionExtension') }"
         menuClass="rows-form-dropdown"
         :menu-width="420"
         @toggle="toggleSectionDropdown"
@@ -443,8 +460,8 @@
 import { ref, computed, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import type { Editor } from '@tiptap/vue-3'
-import type { FlexColumn } from '../extensions/snippets/FlexSnippet'
-import type { BlocksRow } from '../extensions/snippets/BlockSnippet'
+import type { FlexColumn } from '../extensions/FlexExtension.ts'
+import type { BlocksRow } from '../extensions/BlockExtension.ts'
 import UiDropdown from '@/components/ui/UiDropdown.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiBlueButton from "@/components/ui/UiBlueButton.vue";
@@ -497,6 +514,16 @@ const alignments = [
   }
 ]
 
+const colors = [
+  {value: '#7136BC', label: 'Фиолетовый'},
+  {value: '#489735', label: 'Зеленый'},
+  {value: '#E4443A', label:   'Красный'},
+  {value: '#1C78E3', label:   'Голубой'},
+  {value: '#FF60CD', label: 'Розовый'}
+]
+
+
+
 const sectionIconOptions = [
   { value: 'none', label: 'Нет иконки'},
   { value: 'example', label: 'Пример/Задача'},
@@ -521,16 +548,17 @@ const orderedListTypes = [
 const isBlockTypeDropdownOpen = ref(false)
 const isAlignmentDropdownOpen = ref(false)
 const isOrderedListDropdownOpen = ref(false)
+const isColorDropdownOpen = ref(false)
 const isFlexColumnsDropdownOpen = ref(false)
 const isFlexRowsDropdownOpen = ref(false)
-const isHeaderSnippetDropdownOpen = ref(false)
-const isCenterSnippetDropdownOpen = ref(false)
+const isHeaderExtensionDropdownOpen = ref(false)
+const isCenterExtensionDropdownOpen = ref(false)
 const isSectionDropdownOpen = ref(false)
 const currentListType = ref<'1' | 'A' | 'a' | 'I' | 'i'>('1')
 
 const tableMode = ref(false)
 
-// Данные для snippet форм
+// Данные для extension форм
 const headerText = ref('')
 const centerText = ref('')
 
@@ -585,6 +613,7 @@ watch(columnCount, (newCount) => {
 const blockTypeDropdownRef = ref<HTMLElement | null>(null)
 const alignmentDropdownRef = ref<HTMLElement | null>(null)
 const orderedListDropdownRef = ref<HTMLElement | null>(null)
+const colorDropdownRef = ref<HTMLElement | null>(null)
 
 // Определяем текущий тип блока
 const currentBlockType = computed(() => {
@@ -606,15 +635,24 @@ const currentAlignment = computed(() => {
   return 'left'
 })
 
+// Определяем текущий цвет текста
+const currentColor = computed(() => {
+  if (!props.editor) return ''
+
+  const { color } = props.editor.getAttributes('textStyle')
+  return color || ''
+})
+
 // Универсальная функция для закрытия всех дропдаунов
 const closeAllDropdowns = () => {
   isBlockTypeDropdownOpen.value = false
   isAlignmentDropdownOpen.value = false
   isOrderedListDropdownOpen.value = false
+  isColorDropdownOpen.value = false
   isFlexColumnsDropdownOpen.value = false
   isFlexRowsDropdownOpen.value = false
-  isHeaderSnippetDropdownOpen.value = false
-  isCenterSnippetDropdownOpen.value = false
+  isHeaderExtensionDropdownOpen.value = false
+  isCenterExtensionDropdownOpen.value = false
   isSectionDropdownOpen.value = false
 }
 
@@ -629,6 +667,11 @@ const toggleAlignmentDropdown = () => {
   isAlignmentDropdownOpen.value = !isAlignmentDropdownOpen.value
 }
 
+const toggleColorDropdown = () => {
+  closeAllDropdowns()
+  isColorDropdownOpen.value = !isColorDropdownOpen.value
+}
+
 const toggleOrderedListDropdown = () => {
   closeAllDropdowns()
   isOrderedListDropdownOpen.value = !isOrderedListDropdownOpen.value
@@ -639,14 +682,14 @@ const toggleFlexColumnsDropdown = () => {
   isFlexColumnsDropdownOpen.value = !isFlexColumnsDropdownOpen.value
 }
 
-const toggleHeaderSnippetDropdown = () => {
+const toggleHeaderExtensionDropdown = () => {
   closeAllDropdowns()
-  isHeaderSnippetDropdownOpen.value = !isHeaderSnippetDropdownOpen.value
+  isHeaderExtensionDropdownOpen.value = !isHeaderExtensionDropdownOpen.value
 }
 
-const toggleCenterSnippetDropdown = () => {
+const toggleCenterExtensionDropdown = () => {
   closeAllDropdowns()
-  isCenterSnippetDropdownOpen.value = !isCenterSnippetDropdownOpen.value
+  isCenterExtensionDropdownOpen.value = !isCenterExtensionDropdownOpen.value
 }
 
 const toggleBlockDropdown = () => {
@@ -689,6 +732,14 @@ const setAlignment = (alignment: string) => {
   isAlignmentDropdownOpen.value = false
 }
 
+// Установка цвета текста
+const setColor = (color: string) => {
+  if (!props.editor) return
+
+  props.editor.chain().focus().setColor(color).run()
+  isColorDropdownOpen.value = false
+}
+
 // Установка типа нумерованного списка
 const setOrderedListType = (listType: '1' | 'A' | 'a' | 'I' | 'i') => {
   if (!props.editor) return
@@ -706,10 +757,7 @@ const setOrderedListType = (listType: '1' | 'A' | 'a' | 'I' | 'i') => {
   isOrderedListDropdownOpen.value = false
 }
 
-const onColorChange = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  props.editor?.chain().focus().setColor(target.value).run();
-}
+
 
 // Функция для добавления ссылки
 const setLink = () => {
@@ -741,7 +789,7 @@ const insertFlexColumnsWithData = () => {
     content: col.content || `текст колонки ${index + 1}`,
   }))
 
-  props.editor.chain().focus().insertFlexSnippet({ columns }).run()
+  props.editor.chain().focus().insertFlexExtension({ columns }).run()
 
   // Сбрасываем форму
   flexColumnsData.value = Array.from({ length: columnCount.value }, () => ({
@@ -752,35 +800,35 @@ const insertFlexColumnsWithData = () => {
   isFlexColumnsDropdownOpen.value = false
 }
 
-// Функция для вставки header snippet
-const insertHeaderSnippetWithText = () => {
+// Функция для вставки header extension
+const insertHeaderExtensionWithText = () => {
   if (!props.editor) return
 
-  props.editor.chain().focus().insertHeaderSnippet({ text: headerText.value }).run()
+  props.editor.chain().focus().insertHeaderExtension({ text: headerText.value }).run()
 
   // Сбрасываем форму и закрываем dropdown
   headerText.value = ''
-  isHeaderSnippetDropdownOpen.value = false
+  isHeaderExtensionDropdownOpen.value = false
 }
-// Функция для вставки section snippet
+// Функция для вставки section extension
 const insertSectionWithData = () => {
   if (!props.editor) return
-  props.editor.chain().focus().insertSectionSnippet({ text: sectionText.value, icon: iconSelected.value  }).run()
+  props.editor.chain().focus().insertSectionExtension({ text: sectionText.value, icon: iconSelected.value  }).run()
 
   sectionText.value = ''
   iconSelected.value = 'none'
   isSectionDropdownOpen.value = false
 }
 
-// Функция для вставки center snippet
-const insertCenterSnippetWithText = () => {
+// Функция для вставки center extension
+const insertCenterExtensionWithText = () => {
   if (!props.editor) return
 
-  props.editor.chain().focus().insertCenterSnippet({ text: centerText.value }).run()
+  props.editor.chain().focus().insertCenterExtension({ text: centerText.value }).run()
 
   // Сбрасываем форму и закрываем dropdown
   centerText.value = ''
-  isCenterSnippetDropdownOpen.value = false
+  isCenterExtensionDropdownOpen.value = false
 }
 
 // Функция для вставки блоков с данными из формы
@@ -793,7 +841,7 @@ const insertRowsWithData = () => {
     content: row.content || `текст блока ${index + 1}`,
   }))
 
-  props.editor.chain().focus().insertBlockSnippet({ rows }).run()
+  props.editor.chain().focus().insertBlockExtension({ rows }).run()
 
   // Сбрасываем форму
   rowsColumnsData.value = Array.from({ length: columnCount.value }, () => ({
@@ -820,6 +868,10 @@ onClickOutside(blockTypeDropdownRef, () => {
 
 onClickOutside(alignmentDropdownRef, () => {
   isAlignmentDropdownOpen.value = false
+})
+
+onClickOutside(colorDropdownRef, () => {
+  isColorDropdownOpen.value = false
 })
 
 onClickOutside(orderedListDropdownRef, () => {
@@ -890,6 +942,12 @@ input {
   z-index: 1000;
   width: max-content;
   overflow: hidden;
+}
+
+.color-item {
+  width: 15px;
+  height: 10px;
+  margin-right: 5px;
 }
 
 .ordered-list-menu {
@@ -978,7 +1036,7 @@ input {
   flex-direction: column;
   gap: 8px;
   height: calc(100% - 70px);
-  min-height: calc(100% -70px);
+  min-height: calc(100% - 70px);
   max-height: 100%;
   overflow-y: auto;
 }
@@ -999,7 +1057,7 @@ input {
   color: var(--button-text);
 }
 
-/* Стили для формы header snippet */
+/* Стили для формы header */
 
 .header-form {
   min-height: 150px;
@@ -1029,7 +1087,7 @@ input {
   flex-direction: column;
   gap: 8px;
   height: calc(100% - 70px);
-  min-height: calc(100% -70px);
+  min-height: calc(100% - 70px);
   overflow-y: auto;
 }
 
