@@ -10,86 +10,109 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { useEditor, EditorContent } from '@tiptap/vue-3';
-import StarterKit from '@tiptap/starter-kit';
-import { Mathematics } from '@tiptap/extension-mathematics';
-import Subscript from '@tiptap/extension-subscript';
-import Superscript from '@tiptap/extension-superscript';
-import TextAlign from '@tiptap/extension-text-align';
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { useEditor, EditorContent } from '@tiptap/vue-3'
+import StarterKit from '@tiptap/starter-kit'
+import { Mathematics } from '@tiptap/extension-mathematics'
+import Subscript from '@tiptap/extension-subscript'
+import Superscript from '@tiptap/extension-superscript'
+import TextAlign from '@tiptap/extension-text-align'
 import { TextStyle, Color } from '@tiptap/extension-text-style'
 import { TableKit } from '@tiptap/extension-table'
-import LZString from 'lz-string';
-import { useDebounceFn } from "@vueuse/core";
-import EditorMenuBar from "@/components/EditorMenuBar.vue";
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
-import { FlexSnippet } from "../extensions/snippets/FlexSnippet.ts";
-import { HeaderSnippet } from "../extensions/snippets/HeaderSnippet.ts";
-import { CustomOrderedList } from "@/extensions/CustomOrderedList.ts";
-import { CenterSnippet } from "../extensions/snippets/CenterSnippet.ts";
-import { BlockSnippet } from "../extensions/snippets/BlockSnippet.ts";
-import { SectionSnippet } from "@/extensions/snippets/SectionSnippet.ts";
-import { AudioBlock } from "@/extensions/AudioBlock.ts";
 import Image from '@tiptap/extension-image'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Code from '@tiptap/extension-code'
-import { ImageSnippet } from "@/extensions/snippets/ImageSnippet.ts";
-import "highlight.js/styles/atom-one-light.css"
-import { all, createLowlight } from 'lowlight'
-import { CodeBlock } from "@/extensions/snippets/CodeBlock.ts";
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 
-// create a lowlight instance
+import { all, createLowlight } from 'lowlight'
+import LZString from 'lz-string'
+import { useDebounceFn } from '@vueuse/core'
+
+import EditorMenuBar from '@/components/EditorMenuBar.vue'
+
+import { CustomOrderedList } from '@/extensions/CustomOrderedList'
+import { FlexSnippet } from '@/extensions/snippets/FlexSnippet'
+import { HeaderSnippet } from '@/extensions/snippets/HeaderSnippet'
+import { CenterSnippet } from '@/extensions/snippets/CenterSnippet'
+import { BlockSnippet } from '@/extensions/snippets/BlockSnippet'
+import { SectionSnippet } from '@/extensions/snippets/SectionSnippet'
+import { ImageSnippet } from '@/extensions/snippets/ImageSnippet'
+import { AudioBlock } from '@/extensions/AudioBlock'
+import { CodeBlock } from '@/extensions/snippets/CodeBlock'
+
+import { exportHtmlWithHighlight } from '@/utils/exportHtmlWithHighlight'
+import 'highlight.js/styles/atom-one-light.css'
+
+// lowlight (для визуального codeBlock в редакторе)
 const lowlight = createLowlight(all)
 
 const editor = useEditor({
   extensions: [
     StarterKit.configure({
       orderedList: false,
-      codeBlock: false, // отключаем стандартный CodeBlock, используем CodeBlockLowlight
+      codeBlock: false,
     }),
+
     CustomOrderedList,
+
     CodeBlockLowlight.configure({
       lowlight,
     }),
+
+    CodeBlock,
+
     Mathematics.configure({
       katexOptions: {
-        throwOnError: true
+        throwOnError: true,
       },
     }),
+
     HorizontalRule.configure({
       HTMLAttributes: {
-        style: 'display: block; width: 100%; margin: 16px 0; height: 2px; background-image: linear-gradient(90deg, #8850CE, #8850CE 65%, transparent 65%, transparent 100%); background-size: 15px 6px;border: none;',
-      }
+        style:
+          'display:block;width:100%;margin:16px 0;height:2px;' +
+          'background-image:linear-gradient(90deg,#8850CE,#8850CE 65%,transparent 65%,transparent 100%);' +
+          'background-size:15px 6px;border:none;',
+      },
     }),
+
     Code.configure({
       HTMLAttributes: {
         class: 'inline-code',
       },
     }),
+
     Subscript,
     Superscript,
+
     TextAlign.configure({
       types: ['heading', 'paragraph'],
     }),
+
     TableKit.configure({
       table: {
         resizable: true,
         lastColumnResizable: false,
         HTMLAttributes: {
-          style: 'max-width: 100%; margin: 0 auto; font-size: 12px; border: 1px solid #D1D5DB;border-collapse: collapse;',
+          style:
+            'max-width:100%;margin:0 auto;font-size:12px;' +
+            'border:1px solid #D1D5DB;border-collapse:collapse;',
         },
       },
       tableCell: {
         HTMLAttributes: {
-          style: 'border: 1px solid #EAECF0;padding: 8px;position: relative;',
+          style: 'border:1px solid #EAECF0;padding:8px;position:relative;',
         },
       },
       tableHeader: {
         HTMLAttributes: {
-          style: 'border: 1px solid #EAECF0;padding: 8px;position: relative;font-weight: 400;text-align: left',
+          style:
+            'border:1px solid #EAECF0;padding:8px;position:relative;' +
+            'font-weight:400;text-align:left;',
         },
-      }
+      },
     }),
+
     FlexSnippet,
     HeaderSnippet,
     CenterSnippet,
@@ -97,109 +120,130 @@ const editor = useEditor({
     SectionSnippet,
     AudioBlock,
     ImageSnippet,
+
     TextStyle,
+    Color,
+
     Image.configure({
       resize: {
         enabled: true,
-        directions: ['top', 'bottom', 'left', 'right'], // can be any direction or diagonal combination
+        directions: ['top', 'bottom', 'left', 'right'],
         minWidth: 50,
         minHeight: 50,
         alwaysPreserveAspectRatio: true,
-      }
+      },
     }),
-    Color,
-    CodeBlock
   ],
+
   content: '',
   editable: true,
+
   editorProps: {
     attributes: {
-      class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
+      class:
+        'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
     },
   },
+
   onUpdate: () => {
     sendContentUpdate()
   },
-});
+})
 
+const isContentInitialized = ref(false)
 
-const isContentInitialized = ref(false);
-
+/**
+ * 🔥 ГЛАВНОЕ ИЗМЕНЕНИЕ ЗДЕСЬ
+ * Экспортируем HTML УЖЕ С ПОДСВЕТКОЙ
+ */
 const sendContentUpdate = useDebounceFn(() => {
-  if (isContentInitialized.value && editor.value) {
-    const html = editor.value.getHTML();
-    const compressed = LZString.compressToEncodedURIComponent(html);
+  if (!isContentInitialized.value || !editor.value) return
 
-    window.parent.postMessage({
+  const rawHtml = editor.value.getHTML()
+  const highlightedHtml = exportHtmlWithHighlight(rawHtml)
+  const compressed =
+    LZString.compressToEncodedURIComponent(highlightedHtml)
+
+  window.parent.postMessage(
+    {
       type: 'content-update',
       data: compressed,
-    }, '*');
-  }
-}, 500);
+    },
+    '*',
+  )
+}, 500)
 
 const addAudio = () => {
-  window.parent.postMessage({
-    type: 'add-audio',
-    data: '',
-  }, '*');
+  window.parent.postMessage({ type: 'add-audio', data: '' }, '*')
 }
 
 const addImage = () => {
-  window.parent.postMessage({
-    type: 'add-image',
-    data: '',
-  }, '*');
+  window.parent.postMessage({ type: 'add-image', data: '' }, '*')
 }
 
-const handleMessage = async (event: MessageEvent) => {
+const handleMessage = (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
     try {
-      const html = LZString.decompressFromEncodedURIComponent(event.data.data);
-      editor.value.commands.setContent(html ?? '');
+      const html = LZString.decompressFromEncodedURIComponent(
+        event.data.data,
+      )
 
+      editor.value.commands.setContent(html ?? '')
 
-      if (editor.value) {
-        // Даем время на инициализацию контента
-        setTimeout(() => {
-          if (editor.value) {
-            isContentInitialized.value = true;
-          }
-        }, 100);
-      }
-
-      isContentInitialized.value = true;
-    } catch (error) {
-      console.error('Ошибка декомпрессии контента:', error);
+      setTimeout(() => {
+        isContentInitialized.value = true
+      }, 100)
+    } catch (e) {
+      console.error('Ошибка декомпрессии контента:', e)
     }
   }
 
   if (event.data.type === 'audio-uploaded' && editor.value) {
-    editor.value.chain().focus().insertAudioBlock(event?.data?.data).run()
+    editor.value
+      .chain()
+      .focus()
+      .insertAudioBlock(event.data.data)
+      .run()
   }
 
   if (event.data.type === 'image-uploaded' && editor.value) {
-    editor.value.chain().focus().insertImageSnippet(event?.data?.data).run()
+    editor.value
+      .chain()
+      .focus()
+      .insertImageSnippet(event.data.data)
+      .run()
   }
-};
+}
 
-onMounted(async () => {
-  window.addEventListener('message', handleMessage);
-  window.parent.postMessage({ type: 'editor-ready' }, '*');
-});
+onMounted(() => {
+  window.addEventListener('message', handleMessage)
+  window.parent.postMessage({ type: 'editor-ready' }, '*')
+})
 
 onBeforeUnmount(() => {
-  window.removeEventListener('message', handleMessage);
-  editor.value?.destroy();
-});
+  window.removeEventListener('message', handleMessage)
+  editor.value?.destroy()
+})
 
+/**
+ * 🔥 expose тоже отдаёт подсвеченный HTML
+ */
 defineExpose({
-  getHTML: () => editor.value?.getHTML(),
-  getCompressed: () => {
-    const html = editor.value?.getHTML();
-    return html ? LZString.compressToEncodedURIComponent(html) : null;
+  getHTML: () => {
+    const raw = editor.value?.getHTML()
+    return raw ? exportHtmlWithHighlight(raw) : null
   },
-  editor
-});
+
+  getCompressed: () => {
+    const raw = editor.value?.getHTML()
+    if (!raw) return null
+
+    const highlighted = exportHtmlWithHighlight(raw)
+    return LZString.compressToEncodedURIComponent(highlighted)
+  },
+
+  editor,
+})
 </script>
 
 
