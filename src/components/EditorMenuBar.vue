@@ -591,15 +591,12 @@ watch(columnCount, (newCount) => {
       flexColumnsData.value.push({ title: '', content: '' })
     }
   } else if (newCount < currentLength) {
-    // Удаляем лишние колонки
     flexColumnsData.value = flexColumnsData.value.slice(0, newCount)
   }
 
-  // Также обновляем данные для блоков
   const currentRowsLength = rowsColumnsData.value.length
 
   if (newCount > currentRowsLength) {
-    // Добавляем новые блоки
     for (let i = currentRowsLength; i < newCount; i++) {
       rowsColumnsData.value.push({ title: '', content: '' })
     }
@@ -861,7 +858,6 @@ const handleImageSelect = () => {
   emit('add-image')
 }
 
-// Закрытие дропдаунов при клике вне их
 onClickOutside(blockTypeDropdownRef, () => {
   isBlockTypeDropdownOpen.value = false
 })
@@ -1106,43 +1102,6 @@ input {
   width: 14px;
   height: 14px;
   cursor: pointer;
-}
-
-.file-upload {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  height: 50px;
-}
-
-.file-input {
-  display: block;
-  height: 60px;
-  background: var(--button-bg);
-  border-radius: 4px;
-  font-size: 12px;
-  color: var(--button-text);
-  cursor: pointer;
-}
-
-.upload-status {
-  font-size: 11px;
-  padding: 4px;
-  border-radius: 4px;
-  background: var(--menu-bg);
-  color: var(--button-text);
-}
-
-.upload-status.success {
-  background: #d4edda;
-  color: #155724;
-}
-
-.file-hint {
-  font-size: 10px;
-  color: var(--button-text);
-  opacity: 0.7;
-  margin: 0;
 }
 </style>
 

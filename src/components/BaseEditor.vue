@@ -23,11 +23,9 @@ import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import Image from '@tiptap/extension-image'
 import Code from '@tiptap/extension-code'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-
 import { all, createLowlight } from 'lowlight'
 import LZString from 'lz-string'
 import { useDebounceFn } from '@vueuse/core'
-
 import EditorMenuBar from '@/components/EditorMenuBar.vue'
 import Highlight from '@tiptap/extension-highlight'
 import { CustomOrderedList } from '@/extensions/CustomOrderedList'
@@ -42,7 +40,6 @@ import { CodeBlockExtension } from '@/extensions/CodeBlockExtension.ts'
 import { exportHtmlWithHighlight } from '@/utils/exportHtmlWithHighlight'
 import 'highlight.js/styles/atom-one-light.css'
 
-// lowlight (для визуального codeBlock в редакторе)
 const lowlight = createLowlight(all)
 
 const editor = useEditor({
@@ -152,10 +149,7 @@ const editor = useEditor({
 
 const isContentInitialized = ref(false)
 
-/**
- * 🔥 ГЛАВНОЕ ИЗМЕНЕНИЕ ЗДЕСЬ
- * Экспортируем HTML УЖЕ С ПОДСВЕТКОЙ
- */
+
 const sendContentUpdate = useDebounceFn(() => {
   if (!isContentInitialized.value || !editor.value) return
 
@@ -225,9 +219,6 @@ onBeforeUnmount(() => {
   editor.value?.destroy()
 })
 
-/**
- * 🔥 expose тоже отдаёт подсвеченный HTML
- */
 defineExpose({
   getHTML: () => {
     const raw = editor.value?.getHTML()
