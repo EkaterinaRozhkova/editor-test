@@ -22,6 +22,7 @@ export const CodeBlock = Node.create({
           return { 'data-language': attrs.language }
         },
       },
+
       mode: {
         default: 'code',
         parseHTML: element => {
@@ -40,18 +41,30 @@ export const CodeBlock = Node.create({
   },
 
   renderHTML({ node }) {
+    const classes = ['hljs']
+
+    if (node.attrs.language) {
+      classes.push(`language-${node.attrs.language}`)
+    }
+
+    if (node.attrs.mode === 'html') {
+      classes.push('xmp')
+    }
+
     return [
       'pre',
       {},
       [
         'code',
         {
+          class: classes.join(' '),
           'data-language': node.attrs.language ?? undefined,
           'data-mode': node.attrs.mode ?? 'code',
         },
-        0, // ⬅️ ТОЛЬКО ТЕКСТ
+        0,
       ],
     ]
   },
 })
+
 

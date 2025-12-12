@@ -284,6 +284,24 @@ defineExpose({
   margin: 0 7px;
 }
 
+.ProseMirror pre code.hljs  {
+  background: hsla(0, 0%, 78%, .2);
+  border: 1px solid #c4c4c4;
+  overflow-x: auto;
+  border-radius: 5px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 15px;
+  color: #353535;
+  direction: ltr;
+  font-style: normal;
+  min-width: 100%;
+  padding: 1em;
+  tab-size: 4;
+  text-align: left;
+  white-space: pre-wrap;
+
+}
+
 .ProseMirror table {
   max-width: 100%;
   margin: 0px auto;
