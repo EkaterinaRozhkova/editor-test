@@ -25,7 +25,9 @@ export const BlockExtension = Extension.create({
           ({ chain }) => {
             const rows: BlocksRow[] = options?.rows ?? []
 
-            const contentLines = ['[flex]']
+            const contentLines = [
+              `[flex column='true']`
+            ]
 
             rows.forEach((row, index) => {
               const isFinal = index === rows.length - 1
