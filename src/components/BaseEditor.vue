@@ -36,6 +36,7 @@ import Code from '@tiptap/extension-code'
 import { ImageSnippet } from "@/extensions/snippets/ImageSnippet.ts";
 import "highlight.js/styles/atom-one-light.css"
 import { all, createLowlight } from 'lowlight'
+import { CodeBlock } from "@/extensions/snippets/CodeBlock.ts";
 
 // create a lowlight instance
 const lowlight = createLowlight(all)
@@ -106,7 +107,8 @@ const editor = useEditor({
         alwaysPreserveAspectRatio: true,
       }
     }),
-    Color
+    Color,
+    CodeBlock
   ],
   content: '',
   editable: true,
