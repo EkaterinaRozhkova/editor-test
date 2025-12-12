@@ -29,7 +29,7 @@ import LZString from 'lz-string'
 import { useDebounceFn } from '@vueuse/core'
 
 import EditorMenuBar from '@/components/EditorMenuBar.vue'
-
+import Highlight from '@tiptap/extension-highlight'
 import { CustomOrderedList } from '@/extensions/CustomOrderedList'
 import { FlexExtension } from '@/extensions/FlexExtension.ts'
 import { HeaderExtension } from '@/extensions/HeaderExtension.ts'
@@ -39,7 +39,6 @@ import { SectionExtension } from '@/extensions/SectionExtension.ts'
 import { ImageExtension } from '@/extensions/ImageExtension.ts'
 import { AudioExtension } from '@/extensions/AudioExtension.ts'
 import { CodeBlockExtension } from '@/extensions/CodeBlockExtension.ts'
-
 import { exportHtmlWithHighlight } from '@/utils/exportHtmlWithHighlight'
 import 'highlight.js/styles/atom-one-light.css'
 
@@ -52,6 +51,7 @@ const editor = useEditor({
       orderedList: false,
       codeBlock: false,
     }),
+    Highlight,
 
     CustomOrderedList,
 

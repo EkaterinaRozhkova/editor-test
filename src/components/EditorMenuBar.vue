@@ -109,8 +109,8 @@
         </div>
       </div>
       <ui-button
-        @click="editor.chain().focus().toggleCodeBlock().run()"
-        :class="{ 'is-active': editor.isActive('codeBlock') }"
+        @click="editor.chain().focus().toggleHighlight().run()"
+        :class="{ 'is-active': editor.isActive('highlight') }"
         title="Выделение цветом"
       >
         <SvgIcon name="highlight" />
