@@ -437,7 +437,7 @@
               />
             </div>
             <p class="file-hint">Допустимый формат: MP3, OPUS</p>
-            <UiBlueButton @click="insertAudioWithData">
+            <UiBlueButton @click="insertAudioWithData" :disabled="!uploadedAudioPath">
               Вставить
             </UiBlueButton>
           </div>
@@ -881,16 +881,10 @@ const insertAudioWithData = () => {
   if (!props.editor) return
 
   props.editor.chain().focus().insertAudioBlock({
-    src: 'https://onlineschool-1.hb.bizmrg.com/7be2cd72-a92f-4846-b017-33ca21cca697.opus',
-    text: 'fghfjgh',
-    textPosition: 'left'
+    src: uploadedAudioPath.value,
+    text: audioText.value,
+    textPosition: audioTextPosition.value
   }).run()
-
-  // props.editor.chain().focus().insertAudioSnippet({
-  //   src: uploadedAudioPath.value,
-  //   text: audioText.value,
-  //   textPosition: audioTextPosition.value
-  // }).run()
 
   // Сбрасываем форму
   audioText.value = ''
