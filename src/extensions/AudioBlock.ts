@@ -39,7 +39,6 @@ export const AudioBlock = Node.create({
   parseHTML() {
     return [
       {
-        // Парсим оба варианта: audio-block и raw-html-embed
         tag: 'div.raw-html-embed',
         getAttrs: (element) => {
           const el = element as HTMLElement
@@ -51,7 +50,6 @@ export const AudioBlock = Node.create({
           const src = audio.getAttribute('src') || ''
           const text = span?.textContent || ''
 
-          // Определяем позицию текста по порядку элементов
           let textPosition: 'left' | 'right' = 'right'
           if (span && audio) {
             const spanIndex = Array.from(el.children).indexOf(span)
@@ -61,23 +59,6 @@ export const AudioBlock = Node.create({
 
           return { src, text, textPosition }
         }
-      },
-      {
-        // Также поддерживаем div.audio-block для обратной совместимости
-        tag: 'div.audio-block',
-        getAttrs: (element) => {
-          const el = element as HTMLElement
-          const audio = el.querySelector('audio')
-          const span = el.querySelector('span')
-
-          if (!audio) return false
-
-          return {
-            src: audio.getAttribute('src') || '',
-            text: span?.textContent || '',
-            textPosition: el.classList.contains('text-left') ? 'left' : 'right'
-          }
-        }
       }
     ]
   },
@@ -85,34 +66,26 @@ export const AudioBlock = Node.create({
   renderHTML({ node }) {
     const { src, text, textPosition } = node.attrs
 
-    const audioHTML = `<audio class="audio" controls="" controlslist="nodownload" src="${src}"></audio>`
-    const textHTML = text ? `<span>${text}</span>` : ''
+    const audioAttrs = {
+      class: 'audio',
+      controls: '',
+      controlslist: 'nodownload',
+      src: src
+    }
 
-    const content = textPosition === 'left'
-      ? textHTML + audioHTML
-      : audioHTML + textHTML
+    const children = []
 
-    return ['div', { class: 'raw-html-embed' }, ['div', { innerHTML: content }]]
-  },
-
-  addNodeView() {
-    return ({ node }) => {
-      const { src, text, textPosition } = node.attrs
-
-      const dom = document.createElement('div')
-      dom.className = 'raw-html-embed'
-
-      const audioHTML = `<audio class="audio" controls="" controlslist="nodownload" src="${src}"></audio>`
-      const textHTML = text ? `<span>${text}</span>` : ''
-
-      dom.innerHTML = textPosition === 'left'
-        ? textHTML + audioHTML
-        : audioHTML + textHTML
-
-      return {
-        dom,
+    if (textPosition === 'left' && text) {
+      children.push(['span', {}, text])
+      children.push(['audio', audioAttrs])
+    } else {
+      children.push(['audio', audioAttrs])
+      if (text) {
+        children.push(['span', {}, text])
       }
     }
+
+    return ['div', { class: 'raw-html-embed' }, ...children]
   },
 
   addCommands() {
