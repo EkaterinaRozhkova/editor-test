@@ -99,7 +99,6 @@ const currentFile = ref(null)
 const sendContentUpdate = useDebounceFn(() => {
   if (isContentInitialized.value && editor.value) {
     const html = editor.value.getHTML();
-    console.log(html, 'html')
     const compressed = LZString.compressToEncodedURIComponent(html);
 
     window.parent.postMessage({
