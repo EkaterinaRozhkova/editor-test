@@ -26,8 +26,8 @@ import { CustomOrderedList } from "@/extensions/CustomOrderedList.ts";
 import { CenterSnippet } from "../extensions/snippets/CenterSnippet.ts";
 import { BlockSnippet } from "../extensions/snippets/BlockSnippet.ts";
 import { SectionSnippet } from "@/extensions/snippets/SectionSnippet.ts";
-import { AudioSnippet } from "@/extensions/snippets/AudioSnippet.ts";
-import { AudioShortcode } from "@/extensions/AudioShortcode.ts";
+import { AudioBlock } from "@/extensions/AudioBlock.ts";
+
 
 
 const editor = useEditor({
@@ -76,8 +76,7 @@ const editor = useEditor({
     CenterSnippet,
     BlockSnippet,
     SectionSnippet,
-    // AudioSnippet,
-    AudioShortcode,
+    AudioBlock,
     TextStyle,
     Color
   ],
@@ -93,12 +92,14 @@ const editor = useEditor({
   },
 });
 
+
 const isContentInitialized = ref(false);
 const currentFile = ref(null)
 
 const sendContentUpdate = useDebounceFn(() => {
   if (isContentInitialized.value && editor.value) {
     const html = editor.value.getHTML();
+    console.log(html, 'html')
     const compressed = LZString.compressToEncodedURIComponent(html);
 
     window.parent.postMessage({

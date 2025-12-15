@@ -880,8 +880,8 @@ const handleAudioFileSelect = (event: Event) => {
 const insertAudioWithData = () => {
   if (!props.editor) return
 
-  props.editor.chain().focus().setAudioShortcode({
-    path: 'https://onlineschool-1.hb.bizmrg.com/7be2cd72-a92f-4846-b017-33ca21cca697.opus',
+  props.editor.chain().focus().insertAudioBlock({
+    src: 'https://onlineschool-1.hb.bizmrg.com/7be2cd72-a92f-4846-b017-33ca21cca697.opus',
     text: 'fghfjgh',
     textPosition: 'left'
   }).run()
