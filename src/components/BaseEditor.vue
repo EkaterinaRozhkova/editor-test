@@ -199,6 +199,12 @@ defineExpose({
   -ms-user-select: text;
 }
 
+.ProseMirror audio {
+  flex-shrink: 0;
+  max-height: 32px;
+  margin: 0 7px;
+}
+
 .ProseMirror table {
   max-width: 100%;
   margin: 0px auto;
