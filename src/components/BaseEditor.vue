@@ -13,7 +13,6 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import { Mathematics } from '@tiptap/extension-mathematics'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import TextAlign from '@tiptap/extension-text-align'
@@ -57,12 +56,6 @@ const editor = useEditor({
     }),
 
     CodeBlockExtension,
-
-    Mathematics.configure({
-      katexOptions: {
-        throwOnError: true,
-      },
-    }),
 
     HorizontalRule.configure({
       HTMLAttributes: {
