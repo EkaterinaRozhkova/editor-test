@@ -203,16 +203,7 @@ const handleMessage = (event: MessageEvent) => {
     editor.value
       .chain()
       .focus()
-      .insertContent({
-        type: 'text',
-        marks: [{
-          type: 'mathInline', // или 'mathDisplay' для блочной формулы
-          attrs: {
-            latex: event.data.data.latex // LaTeX формула
-          }
-        }],
-        text: event.data.data.latex
-      })
+      .insertContent(event.data.data.mathml)
       .run()
   }
 
