@@ -4,6 +4,7 @@
       :editor="editor"
       @add-audio="addAudio"
       @add-image="addImage"
+      @add-formule="addFormula"
     />
     <EditorContent :editor="editor" class="editor-content" />
   </div>
@@ -168,6 +169,11 @@ const addImage = () => {
   window.parent.postMessage({ type: 'add-image', data: '' }, '*')
 }
 
+const addFormula = () => {
+  window.parent.postMessage({ type: 'add-formula', data: '' }, '*')
+}
+
+
 const handleMessage = (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
     try {
@@ -268,14 +274,15 @@ defineExpose({
   margin: 0 7px;
 }
 
-.ProseMirror pre code.hljs  {
-  background: hsla(0, 0%, 78%, .2);
-  border: 1px solid #c4c4c4;
+.ProseMirror pre code {
+  display: block;
+  background: var(--code-block-bg);
+  border: 1px solid var(--code-block-border);
   overflow-x: auto;
   border-radius: 5px;
   font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 15px;
-  color: #353535;
+  color: var(--code-block-color);
   direction: ltr;
   font-style: normal;
   min-width: 100%;
@@ -283,7 +290,6 @@ defineExpose({
   tab-size: 4;
   text-align: left;
   white-space: pre-wrap;
-
 }
 
 .ProseMirror table {
@@ -319,15 +325,16 @@ defineExpose({
 }
 
 .ProseMirror .inline-code {
-  background: hsla(0, 0%, 78%, .2);
-  border: 1px solid #c4c4c4;
-  border-radius: 5px;
+  background: var(--code-block-bg);
+  border: 1px solid var(--code-block-border);
   font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 15px;
-  color: #353535;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--code-block-color);
   direction: ltr;
   font-style: normal;
-  padding: 3px 4px;
+  padding: .2em .4em;
+  border-radius: 3px;
 }
 
 /* Стили для списков */

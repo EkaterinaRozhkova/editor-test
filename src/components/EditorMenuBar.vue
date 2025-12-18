@@ -26,6 +26,13 @@
       </div>
     </div>
 
+      <ui-button
+        @click="handleFormulaSelect"
+        title="Добавить формулу"
+      >
+        <SvgIcon name="math" />
+      </ui-button>
+
     <div class="divider"></div>
 
     <!-- Форматирование текста -->
@@ -194,6 +201,11 @@
       </ui-button>
     </div>
     <!-- История -->
+   <ui-button
+        @click="editor.chain().focus().unsetAllMarks().run()"
+      >
+        Очистить
+     </ui-button>
     <div class="button-group">
       <ui-button
         @click="editor.chain().focus().undo().run()"
@@ -472,7 +484,7 @@ const props = defineProps<{
   editor: Editor | null
 }>()
 
-const emit = defineEmits(['add-audio', 'add-image'])
+const emit = defineEmits(['add-audio', 'add-image', 'add-formula'])
 
 
 // Данные для дропдаунов
@@ -852,6 +864,10 @@ const insertRowsWithData = () => {
 
 const handleAudioSelect = () => {
   emit('add-audio')
+}
+
+const handleFormulaSelect = () => {
+  emit('add-formule')
 }
 
 const handleImageSelect = () => {
