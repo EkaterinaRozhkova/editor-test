@@ -4,7 +4,7 @@
       :editor="editor"
       @add-audio="addAudio"
       @add-image="addImage"
-      @add-formule="addFormula"
+      @add-formula="addFormula"
     />
     <EditorContent :editor="editor" class="editor-content" />
   </div>

@@ -867,7 +867,7 @@ const handleAudioSelect = () => {
 }
 
 const handleFormulaSelect = () => {
-  emit('add-formule')
+  emit('add-formula')
 }
 
 const handleImageSelect = () => {
