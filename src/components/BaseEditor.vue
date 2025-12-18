@@ -199,6 +199,23 @@ const handleMessage = (event: MessageEvent) => {
       .run()
   }
 
+  if(event.data.type === 'formula-uploaded' && editor.value) {
+    editor.value
+      .chain()
+      .focus()
+      .insertContent({
+        type: 'text',
+        marks: [{
+          type: 'mathInline', // или 'mathDisplay' для блочной формулы
+          attrs: {
+            latex: event.data.data.latex // LaTeX формула
+          }
+        }],
+        text: event.data.data.latex
+      })
+      .run()
+  }
+
   if (event.data.type === 'image-uploaded' && editor.value) {
     editor.value
       .chain()
