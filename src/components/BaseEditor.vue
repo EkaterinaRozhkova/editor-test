@@ -160,6 +160,7 @@ const editor = useEditor({
 const isContentInitialized = ref(false)
 
 const sendContentUpdate = useDebounceFn(() => {
+  console.log(isContentInitialized.value, editor.value)
   if (!isContentInitialized.value || !editor.value) return
 
   const rawHtml = editor.value.getHTML()
