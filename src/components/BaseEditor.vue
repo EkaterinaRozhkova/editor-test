@@ -2,6 +2,8 @@
   <div class="base-editor" v-if="editor">
     <EditorMenuBar
       :editor="editor"
+      :mode="isMini ? 'mini' : 'base'"
+      class="editor-menu"
       @add-audio="addAudio"
       @add-image="addImage"
       @add-formula="addFormula"
@@ -11,9 +13,10 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
+import { Mathematics } from '@tiptap/extension-mathematics'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import TextAlign from '@tiptap/extension-text-align'
@@ -39,6 +42,11 @@ import { AudioExtension } from '@/extensions/AudioExtension.ts'
 import { CodeBlockExtension } from '@/extensions/CodeBlockExtension.ts'
 import { exportHtmlWithHighlight } from '@/utils/exportHtmlWithHighlight'
 import 'highlight.js/styles/atom-one-light.css'
+import { MathliveExtension } from '@/extensions/MathliveExtension'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const isMini = computed(() => route?.query?.mode === 'mini' || false)
 
 const lowlight = createLowlight(all)
 
@@ -57,6 +65,12 @@ const editor = useEditor({
     }),
 
     CodeBlockExtension,
+
+    Mathematics.configure({
+      katexOptions: {
+        throwOnError: true,
+      },
+    }),
 
     HorizontalRule.configure({
       HTMLAttributes: {
@@ -124,6 +138,8 @@ const editor = useEditor({
         alwaysPreserveAspectRatio: true,
       },
     }),
+
+    MathliveExtension
   ],
 
   content: '',
@@ -142,7 +158,6 @@ const editor = useEditor({
 })
 
 const isContentInitialized = ref(false)
-
 
 const sendContentUpdate = useDebounceFn(() => {
   if (!isContentInitialized.value || !editor.value) return
@@ -173,7 +188,6 @@ const addFormula = () => {
   window.parent.postMessage({ type: 'add-formula', data: '' }, '*')
 }
 
-
 const handleMessage = (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
     try {
@@ -199,19 +213,19 @@ const handleMessage = (event: MessageEvent) => {
       .run()
   }
 
-  if(event.data.type === 'formula-uploaded' && editor.value) {
-    editor.value
-      .chain()
-      .focus()
-      .insertContent(event.data.data.mathml)
-      .run()
-  }
-
   if (event.data.type === 'image-uploaded' && editor.value) {
     editor.value
       .chain()
       .focus()
       .insertImageExtension(event.data.data)
+      .run()
+  }
+
+  if (event.data.type === 'formula-added' && editor.value) {
+    editor.value
+      .chain()
+      .focus()
+      .insertFormula(event.data.data)
       .run()
   }
 }
@@ -225,6 +239,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('message', handleMessage)
   editor.value?.destroy()
 })
+
 
 defineExpose({
   getHTML: () => {
@@ -247,11 +262,20 @@ defineExpose({
 
 <style>
 .base-editor {
-  width: 641px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  max-height: 100vh;
 
   :focus {
     outline: none;
   }
+}
+
+.editor-menu {
+  border-radius: 8px;
 }
 
 .editor-content {
@@ -259,8 +283,11 @@ defineExpose({
   overflow: auto;
   font-size: 17px;
   line-height: 22px;
-  height: 386px;
+  flex-grow: 1;
   background-color: var(--editor-content);
+  border-bottom: 1px solid var(--menu-border);
+  border-left: 1px solid var(--menu-border);
+  border-right: 1px solid var(--menu-border);
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-bg) var(--scrollbar-color);
 }

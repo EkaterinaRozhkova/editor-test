@@ -24,16 +24,12 @@
           </ui-button>
         </div>
       </div>
+      <ui-button title="Вставить формулу" @click="handleFormulaSelect">
+        <SvgIcon name="formula" />
+      </ui-button>
     </div>
 
-      <ui-button
-        @click="handleFormulaSelect"
-        title="Добавить формулу"
-      >
-        <SvgIcon name="math" />
-      </ui-button>
-
-    <div class="divider"></div>
+    <div class="divider" v-if="isBase" />
 
     <!-- Форматирование текста -->
     <div class="button-group">
@@ -59,12 +55,14 @@
         <SvgIcon name="underline" />
       </ui-button>
       <ui-button
+        v-if="isBase"
         @click="editor.chain().focus().toggleStrike().run()"
         :class="{ 'is-active': editor.isActive('strike') }"
         title="Зачеркнутый текст"
       >
         <SvgIcon name="strike" />
       </ui-button>
+      <template v-if="isBase">
       <ui-button
         @click="editor.chain().focus().toggleCode().run()"
         :class="{ 'is-active': editor.isActive('code') }"
@@ -92,7 +90,6 @@
       >
         <SvgIcon name="horizontal-rule" />
       </ui-button>
-
 
        <div ref="colorDropdownRef" class="dropdown" :class="{ 'is-open': isColorDropdownOpen }">
         <ui-button
@@ -122,8 +119,11 @@
       >
         <SvgIcon name="highlight" />
       </ui-button>
+      </template>
+
     </div>
 
+    <template v-if="isBase">
     <div class="divider"></div>
 
     <!-- Дропдаун для выравнивания -->
@@ -149,6 +149,11 @@
           </ui-button>
         </div>
       </div>
+    </div>
+    </template>
+
+    <!-- Списки -->
+    <div class="button-group">
       <ui-button
         @click="editor.chain().focus().toggleBulletList().run()"
         :class="{ 'is-active': editor.isActive('bulletList') }"
@@ -190,6 +195,7 @@
         <SvgIcon name="link" />
       </ui-button>
     </div>
+    <template v-if="isBase">
     <!-- Блоки -->
     <div class="button-group">
       <ui-button
@@ -200,6 +206,7 @@
         <SvgIcon name="blockquote" />
       </ui-button>
     </div>
+
     <!-- История -->
    <ui-button
         @click="editor.chain().focus().unsetAllMarks().run()"
@@ -446,9 +453,10 @@
         <SvgIcon name="code-block" />
       </ui-button>
       </div>
+    </template>
     </div>
 <!--     отдельное меню для таблиц -->
-    <div v-else class="menu-bar menu-bar-table">
+    <div v-if="tableMode && isBase" class="menu-bar menu-bar-table">
       <ui-button @click="tableMode = false">Назад</ui-button>
       <ui-button @click="editor.chain().focus().insertTable({ rows: 2, cols: 2 }).run()">
           Вставить таблицу
@@ -481,13 +489,14 @@ import UiTextarea from "@/components/ui/UiTextarea.vue";
 import SvgIcon from '@/components/ui/SvgIcon.vue'
 
 const props = defineProps<{
-  editor: Editor | null
+  editor: Editor | null,
+  mode: 'base' | 'mini' | 'tests'
 }>()
 
 const emit = defineEmits(['add-audio', 'add-image', 'add-formula'])
 
+const isBase = computed(() => props.mode === 'base')
 
-// Данные для дропдаунов
 const blockTypes = [
   {
     type: 'paragraph',
@@ -861,17 +870,16 @@ const insertRowsWithData = () => {
   isFlexRowsDropdownOpen.value = false
 }
 
-
 const handleAudioSelect = () => {
   emit('add-audio')
 }
 
-const handleFormulaSelect = () => {
-  emit('add-formula')
-}
-
 const handleImageSelect = () => {
   emit('add-image')
+}
+
+const handleFormulaSelect = () => {
+  emit('add-formula')
 }
 
 onClickOutside(blockTypeDropdownRef, () => {
@@ -897,7 +905,6 @@ onClickOutside(orderedListDropdownRef, () => {
   flex-wrap: wrap;
   gap: 4px;
   padding: 8px;
-  border-radius: 8px;
   background: var(--menu-bg);
   border: 1px solid var(--menu-border);
   align-items: center;
