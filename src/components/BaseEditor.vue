@@ -167,6 +167,8 @@ const sendContentUpdate = useDebounceFn(() => {
   const compressed =
     LZString.compressToEncodedURIComponent(highlightedHtml)
 
+  console.log('send', highlightedHtml)
+
   window.parent.postMessage(
     {
       type: 'content-update',
