@@ -78,11 +78,14 @@ const updateNodeCaption = (state: any, dispatch: any, imgSrc: string, caption: s
 }
 
 const updateAllCaptionSpans = (imgSrc: string, caption: string | null) => {
+  console.log('updateAllCaptionSpans')
   document.querySelectorAll('img').forEach((img) => {
     if (img.getAttribute('src') !== imgSrc) return
 
     const parentDiv = findParentWithPosition(img as HTMLElement)
+    console.log(parentDiv, imgSrc, caption)
     if (!parentDiv) return
+    console.log('text')
 
     const span = parentDiv.querySelector('.image-description') as HTMLSpanElement
     console.log('snan', span)
