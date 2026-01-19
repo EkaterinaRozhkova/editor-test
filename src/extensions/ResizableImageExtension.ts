@@ -52,7 +52,6 @@ export const CustomResizableImage = ImageResize.extend({
             alt: img.getAttribute('alt'),
             title: img.getAttribute('title'),
             width: img.getAttribute('width'),
-            height: img.getAttribute('height'),
             loading: 'lazy',
             wrapperStyle: (element as HTMLElement).getAttribute('style'),
             containerStyle: (element as HTMLElement).getAttribute('style'),
@@ -83,9 +82,12 @@ export const CustomResizableImage = ImageResize.extend({
       return ['img', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { ...cleanImageAttrs, style: imgStyle })];
     }
 
+    // Очищаем HTMLAttributes от стилей контейнера
+    const { style: _containerStyleFromHTML, ...cleanHTMLAttributes } = HTMLAttributes;
+
     const imgAttrs = mergeAttributes(
       this.options.HTMLAttributes,
-      HTMLAttributes,
+      cleanHTMLAttributes,
       { ...cleanImageAttrs, style: imgStyle },
       { loading: 'lazy' }
     );
