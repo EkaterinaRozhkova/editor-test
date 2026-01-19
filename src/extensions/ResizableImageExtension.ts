@@ -128,6 +128,6 @@ export const CustomResizableImage = ImageResize.extend({
       .replace(/padding(-left|-right|-top|-bottom)?:\s*[^;]+;?/gi, '')
       .trim();
 
-    return ['div', { style: `${cleanWrapperStyle}; padding: 0;` }, ...content];
+    return ['div', { style: cleanWrapperStyle }, ...content];
   },
 });
