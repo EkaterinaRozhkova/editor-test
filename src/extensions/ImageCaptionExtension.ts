@@ -82,11 +82,7 @@ const updateAllCaptionSpans = (imgSrc: string, caption: string | null) => {
     const parentDiv = findParentWithPosition(img as HTMLElement)
     if (!parentDiv) return
 
-    console.log(parentDiv)
-
     const span = parentDiv.querySelector('.image-description') as HTMLSpanElement
-
-    console.log(span)
 
     if (caption) {
       if (span) {
@@ -154,6 +150,7 @@ export const ImageCaptionExtension = Extension.create({
             if (!parentDiv || parentDiv.querySelector('.image-description')) return false
 
             const span = document.createElement('span')
+            console.log(span, 'span')
             span.className = 'image-description'
             span.textContent = ''
             applyDescriptionStyles(span, imgElement, wrapperDiv)
@@ -203,6 +200,7 @@ export const ImageCaptionExtension = Extension.create({
               boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
               zIndex: '10000',
               padding: '4px 0',
+              minWidth: '200px',
               [imgFloat === 'right' ? 'right' : 'left']:
                 imgFloat === 'right' ? `${window.innerWidth - e.clientX}px` : `${e.clientX}px`,
               [imgFloat === 'right' ? 'left' : 'right']: '0'
@@ -309,6 +307,7 @@ export const ImageCaptionExtension = Extension.create({
                   if (!parentDiv) return
 
                   const existingSpan = parentDiv.querySelector('.image-description') as HTMLSpanElement
+                  console.log(existingSpan, 'dexistingSpan')
                   if (existingSpan) {
                     if (existingSpan.textContent !== caption) {
                       existingSpan.textContent = caption
@@ -320,6 +319,7 @@ export const ImageCaptionExtension = Extension.create({
                   const span = document.createElement('span')
                   span.className = 'image-description'
                   span.textContent = caption
+                  console.log(span, 'span2')
                   applyDescriptionStyles(span, img as HTMLImageElement, wrapperDiv)
                   img.parentNode?.insertBefore(span, img.nextSibling)
                 })

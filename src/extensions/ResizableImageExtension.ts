@@ -87,8 +87,6 @@ export const CustomResizableImage = ImageResize.extend({
       { loading: 'lazy' }
     );
 
-    console.log(imgAttrs, 'imgAttrs')
-
     const content: (string | Record<string, unknown> | (string | Record<string, unknown>)[])[] = [['img', imgAttrs]];
 
     // Добавляем ширину к wrapper div если есть caption
