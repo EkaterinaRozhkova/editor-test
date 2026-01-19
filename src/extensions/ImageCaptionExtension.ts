@@ -29,6 +29,7 @@ const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageEle
         color: '#7D7D7D',
         textAlign: 'center',
         width: `${descriptionWidth}px`,
+        maxWidth: '100%',
         boxSizing: 'border-box',
         overflowWrap: 'break-word'
       })
@@ -43,6 +44,7 @@ const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageEle
       color: '#7D7D7D',
       textAlign: 'center',
       boxSizing: 'border-box',
+      maxWidth: '100%',
       overflowWrap: 'break-word'
     })
   }

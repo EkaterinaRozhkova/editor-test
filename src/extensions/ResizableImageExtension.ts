@@ -129,7 +129,7 @@ export const CustomResizableImage = ImageResize.extend({
 
       content.push(['span', {
         class: 'image-description',
-        style: `display: block; font-size: 11px; line-height: 18px; font-weight: 400; color: #7D7D7D; text-align: center; width: ${descriptionWidth}; box-sizing: border-box; overflow-wrap: break-word;`
+        style: `display: block; font-size: 11px; line-height: 18px; font-weight: 400; color: #7D7D7D; text-align: center; width: ${descriptionWidth}; maxWidth: 100%, box-sizing: border-box; overflow-wrap: break-word;`
       }, caption]);
 
     }
