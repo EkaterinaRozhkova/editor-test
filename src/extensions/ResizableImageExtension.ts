@@ -6,7 +6,7 @@ const findCaptionText = (element: HTMLElement): string | null => {
   return captionSpan?.textContent || null;
 };
 
-export const пше = ImageResize.extend({
+export const CustomResizableImage = ImageResize.extend({
   addAttributes() {
     return {
       ...this.parent?.(),
