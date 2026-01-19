@@ -189,7 +189,6 @@ const sendContentUpdate = useDebounceFn(() => {
 }, 500)
 
 const handleAdd = (type: 'audio' | 'image' | 'formula' | 'inline-image') => {
-  console.log(type)
   window.parent.postMessage({ type: `add-${type}`, data: '' }, '*')
 }
 
@@ -424,6 +423,7 @@ defineExpose({
 .ProseMirror img {
   border-radius: 10px;
   padding: 0 !important;
+  max-width: 100%;
 }
 
 .ProseMirror audio {

@@ -112,23 +112,10 @@ export const CustomResizableImage = ImageResize.extend({
         }
       }
 
-      // Вычисляем padding из wrapperStyle
-      let paddingAdjustment = 0;
-      const paddingLeftMatch = wrapperStyle.match(/padding-left:\s*(\d+)px/i);
-      const paddingRightMatch = wrapperStyle.match(/padding-right:\s*(\d+)px/i);
-      if (paddingLeftMatch) {
-        paddingAdjustment += parseInt(paddingLeftMatch[1], 10);
-      }
-      if (paddingRightMatch) {
-        paddingAdjustment += parseInt(paddingRightMatch[1], 10);
-      }
 
-      // Ширина для span с учетом padding
-      const descriptionWidth = numericWidth > 0 && paddingAdjustment > 0
+      const descriptionWidth = numericWidth > 0
         ? `${numericWidth}px`
         : widthValue;
-
-      console.log('ResizableImage renderHTML:', { width, widthValue, descriptionWidth, paddingAdjustment, wrapperStyle, caption });
 
       content.push(['span', {
         class: 'image-description',
