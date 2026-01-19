@@ -4,9 +4,7 @@
       :editor="editor"
       :mode="isMini ? 'mini' : 'base'"
       class="editor-menu"
-      @add-audio="addAudio"
-      @add-image="addImage"
-      @add-formula="addFormula"
+      @add="handleAdd"
     />
     <EditorContent :editor="editor" class="editor-content" />
   </div>
@@ -23,7 +21,6 @@ import TextAlign from '@tiptap/extension-text-align'
 import { TextStyle, Color } from '@tiptap/extension-text-style'
 import { TableKit } from '@tiptap/extension-table'
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
-import Image from '@tiptap/extension-image'
 import Code from '@tiptap/extension-code'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { all, createLowlight } from 'lowlight'
@@ -37,13 +34,15 @@ import { HeaderExtension } from '@/extensions/HeaderExtension.ts'
 import { CenterExtension } from '@/extensions/CenterExtension.ts'
 import { BlockExtension } from '@/extensions/BlockExtension.ts'
 import { SectionExtension } from '@/extensions/SectionExtension.ts'
-import { ImageExtension } from '@/extensions/ImageExtension.ts'
+import { ImageCustomExtension } from '@/extensions/ImageCustomExtension.ts'
 import { AudioExtension } from '@/extensions/AudioExtension.ts'
 import { CodeBlockExtension } from '@/extensions/CodeBlockExtension.ts'
+import { ImageCaptionExtension } from '@/extensions/ImageCaptionExtension.ts'
 import { exportHtmlWithHighlight } from '@/utils/exportHtmlWithHighlight'
 import 'highlight.js/styles/atom-one-light.css'
-import { MathliveExtension } from '@/extensions/MathliveExtension'
 import { useRoute } from 'vue-router'
+import { MathliveExtension } from "@/extensions/MathliveExtension.ts";
+import { CustomResizableImage } from "@/extensions/ResizableImageExtension.ts";
 
 const route = useRoute()
 const isMini = computed(() => route?.query?.mode === 'mini' || false)
@@ -69,6 +68,13 @@ const editor = useEditor({
     Mathematics.configure({
       katexOptions: {
         throwOnError: true,
+      },
+    }),
+
+    CustomResizableImage.configure({
+      inline: true,
+      HTMLAttributes: {
+        loading: 'lazy',
       },
     }),
 
@@ -124,22 +130,28 @@ const editor = useEditor({
     BlockExtension,
     SectionExtension,
     AudioExtension,
-    ImageExtension,
-
+    ImageCustomExtension,
+    ImageCaptionExtension,
     TextStyle,
     Color,
-
-    Image.configure({
-      resize: {
-        enabled: true,
-        directions: ['top', 'bottom', 'left', 'right'],
-        minWidth: 50,
-        minHeight: 50,
-        alwaysPreserveAspectRatio: true,
-      },
+    CustomResizableImage.configure({
+      inline: true
     }),
 
-    MathliveExtension
+    MathliveExtension.configure({
+      onEditFormula(id, latex) {
+        window.parent.postMessage(
+					{
+						type: 'edit-formula',
+						data: {
+							id,
+							latex,
+						},
+					},
+					'*'
+				)
+      },
+    })
   ],
 
   content: '',
@@ -160,15 +172,12 @@ const editor = useEditor({
 const isContentInitialized = ref(false)
 
 const sendContentUpdate = useDebounceFn(() => {
-  console.log(isContentInitialized.value, editor.value)
   if (!isContentInitialized.value || !editor.value) return
 
   const rawHtml = editor.value.getHTML()
   const highlightedHtml = exportHtmlWithHighlight(rawHtml)
   const compressed =
     LZString.compressToEncodedURIComponent(highlightedHtml)
-
-  console.log('send', highlightedHtml)
 
   window.parent.postMessage(
     {
@@ -179,16 +188,9 @@ const sendContentUpdate = useDebounceFn(() => {
   )
 }, 500)
 
-const addAudio = () => {
-  window.parent.postMessage({ type: 'add-audio', data: '' }, '*')
-}
-
-const addImage = () => {
-  window.parent.postMessage({ type: 'add-image', data: '' }, '*')
-}
-
-const addFormula = () => {
-  window.parent.postMessage({ type: 'add-formula', data: '' }, '*')
+const handleAdd = (type: 'audio' | 'image' | 'formula' | 'inline-image') => {
+  console.log(type)
+  window.parent.postMessage({ type: `add-${type}`, data: '' }, '*')
 }
 
 const handleMessage = (event: MessageEvent) => {
@@ -229,6 +231,27 @@ const handleMessage = (event: MessageEvent) => {
       .chain()
       .focus()
       .insertFormula(event.data.data)
+      .run()
+  }
+
+  if (event.data.type === 'formula-updated' && editor.value) {
+    editor.value
+      .chain()
+      .focus()
+      .updateFormula(event.data.data.id,  event.data.data.value)
+      .run()
+  }
+
+  if (event.data.type === 'inline-image-uploaded' && editor.value) {
+    const { src, alt } = event.data.data
+    editor.value
+      .chain()
+      .focus()
+      .setImage({
+        src,
+        alt,
+        width: 250
+      })
       .run()
   }
 }
@@ -275,6 +298,92 @@ defineExpose({
   :focus {
     outline: none;
   }
+}
+
+
+[data-resize-handle] {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 2px;
+  z-index: 10;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  /* Corner handles */
+  &[data-resize-handle='top-left'],
+  &[data-resize-handle='top-right'],
+  &[data-resize-handle='bottom-left'],
+  &[data-resize-handle='bottom-right'] {
+    width: 8px;
+    height: 8px;
+  }
+
+  &[data-resize-handle='top-left'] {
+    top: -4px;
+    left: -4px;
+    cursor: nwse-resize;
+  }
+
+  &[data-resize-handle='top-right'] {
+    top: -4px;
+    right: -4px;
+    cursor: nesw-resize;
+  }
+
+  &[data-resize-handle='bottom-left'] {
+    bottom: -4px;
+    left: -4px;
+    cursor: nesw-resize;
+  }
+
+  &[data-resize-handle='bottom-right'] {
+    bottom: -4px;
+    right: -4px;
+    cursor: nwse-resize;
+  }
+
+  /* Edge handles */
+  &[data-resize-handle='top'],
+  &[data-resize-handle='bottom'] {
+    height: 6px;
+    left: 8px;
+    right: 8px;
+  }
+
+  &[data-resize-handle='top'] {
+    top: -3px;
+    cursor: ns-resize;
+  }
+
+  &[data-resize-handle='bottom'] {
+    bottom: -3px;
+    cursor: ns-resize;
+  }
+
+  &[data-resize-handle='left'],
+  &[data-resize-handle='right'] {
+    width: 6px;
+    top: 8px;
+    bottom: 8px;
+  }
+
+  &[data-resize-handle='left'] {
+    left: -3px;
+    cursor: ew-resize;
+  }
+
+  &[data-resize-handle='right'] {
+    right: -3px;
+    cursor: ew-resize;
+  }
+}
+
+[data-resize-state='true'] [data-resize-wrapper] {
+  outline: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 0.125rem;
 }
 
 .editor-menu {

@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+      tier: backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 10%
+      maxUnavailable: 60%
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+        tier: backend
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.name }}
+      nodeSelector:
+        yandex.cloud/preemptible: "false"
+        k8s-node-target: "worker"
+      containers:
+      - image: {{ .Values.image.repo }}:{{ .Values.image.tag }}
+        imagePullPolicy: Always
+        name: {{ .Values.name }}
+        env:
+          - name: MY_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: MY_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: MY_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: MY_POD_SERVICE_ACCOUNT
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.serviceAccountName
+        ports:
+        - containerPort: 3000
+          name: api-port
+        resources:
+          requests:
+            memory: "1000Mi"
+            cpu: "2000m"
+          limits:
+            memory: "1000Mi"
+            cpu: "2000m"
+        # startupProbe:
+        #   failureThreshold: 10
+        #   httpGet:
+        #     path: /api/v1/health
+        #     port: 3000
+        #     scheme: HTTP
+        #   periodSeconds: 15
+        #   successThreshold: 1
+        #   timeoutSeconds: 3
+        # readinessProbe:
+        #   failureThreshold: 2
+        #   periodSeconds: 3
+        #   successThreshold: 1
+        #   httpGet:
+        #     path: /api/v1/health
+        #     port: 3000
+        #     scheme: HTTP
+        #   timeoutSeconds: 2
+        # livenessProbe:
+        #   failureThreshold: 2
+        #   httpGet:
+        #     path: /api/v1/health
+        #     port: 3000
+        #     scheme: HTTP
+        #   initialDelaySeconds: 15
+        #   periodSeconds: 5
+        #   successThreshold: 1
+        #   timeoutSeconds: 20

@@ -1,6 +1,6 @@
 <template>
   <div v-if="editor">
-    <div v-if="!tableMode" class="menu-bar">
+    <div v-if="!tableMode && !shortcodeMode" class="menu-bar">
     <!-- Дропдаун для типа блока -->
     <div class="button-group">
       <div ref="blockTypeDropdownRef" class="dropdown" :class="{ 'is-open': isBlockTypeDropdownOpen }">
@@ -24,7 +24,7 @@
           </ui-button>
         </div>
       </div>
-      <ui-button title="Вставить формулу" @click="handleFormulaSelect">
+      <ui-button title="Вставить формулу" @click="handleAdd('formula')">
         <SvgIcon name="formula" />
       </ui-button>
     </div>
@@ -125,7 +125,6 @@
 
     <template v-if="isBase">
     <div class="divider"></div>
-
     <!-- Дропдаун для выравнивания -->
     <div class="button-group">
       <div ref="alignmentDropdownRef" class="dropdown" :class="{ 'is-open': isAlignmentDropdownOpen }">
@@ -151,7 +150,6 @@
       </div>
     </div>
     </template>
-
     <!-- Списки -->
     <div class="button-group">
       <ui-button
@@ -196,7 +194,13 @@
       </ui-button>
     </div>
     <template v-if="isBase">
-    <!-- Блоки -->
+      <ui-button
+        @click="shortcodeMode = true"
+        :class="{ 'is-active': shortcodeMode }"
+        title="Маркированный список"
+      >
+      Шорткоды
+      </ui-button>
     <div class="button-group">
       <ui-button
         @click="editor.chain().focus().toggleBlockquote().run()"
@@ -210,8 +214,9 @@
     <!-- История -->
    <ui-button
         @click="editor.chain().focus().unsetAllMarks().run()"
+        title="Очистить форматирование"
       >
-        Очистить
+       <SvgIcon name="clean" />
      </ui-button>
     <div class="button-group">
       <ui-button
@@ -239,7 +244,23 @@
         <SvgIcon name="hard-break" />
       </ui-button>
       <div class="divider" />
-
+      <ui-button
+        @click="tableMode = true"
+        title="Вставить таблицу"
+      >
+        <SvgIcon name="table" />
+      </ui-button>
+      <ui-button
+        @click="handleAdd('inline-image')"
+        title="Вставить картинку в текст"
+      >
+        <SvgIcon name="inline-img" />
+      </ui-button>
+      </div>
+    </template>
+    </div>
+    <div v-if="shortcodeMode && isBase" class="menu-bar menu-bar-table">
+      <ui-button @click="shortcodeMode = false">Назад</ui-button>
       <!-- Кастомный заголовок -->
       <UiDropdown
         v-model:isOpen="isHeaderExtensionDropdownOpen"
@@ -395,7 +416,7 @@
         v-model:isOpen="isSectionDropdownOpen"
         title="Секции"
         :buttonClass="{ 'is-active': editor.isActive('sectionExtension') }"
-        menuClass="rows-form-dropdown"
+        menuClass="section-form-dropdown"
         :menu-width="420"
         @toggle="toggleSectionDropdown"
       >
@@ -403,7 +424,7 @@
           <SvgIcon name="section" />
         </template>
         <template #menu-content>
-          <div class="form">
+          <div class="form section-form">
             <div class="form-header">
               <label class="form-label">Выберите иконку:</label>
               <select v-model="iconSelected" class="rows-count-select">
@@ -426,34 +447,19 @@
       </UiDropdown>
 
       <ui-button
-        @click="tableMode = true"
-        title="Вставить таблицу"
-      >
-        <SvgIcon name="table" />
-      </ui-button>
-
-      <ui-button
-        @click="handleAudioSelect"
+        @click="handleAdd('audio')"
         title="Вставить Аудио"
       >
         <SvgIcon name="audio" />
       </ui-button>
 
       <ui-button
-        @click="handleImageSelect"
+        @click="handleAdd('image')"
         title="Вставить Картинку"
       >
         <SvgIcon name="image" />
       </ui-button>
-      <ui-button
-        @click="editor.chain().focus().toggleCodeBlock().run()"
-        :disabled="editor.isActive('codeBlock')"
-        title="Вставить блок кода"
-      >
-        <SvgIcon name="code-block" />
-      </ui-button>
-      </div>
-    </template>
+
     </div>
 <!--     отдельное меню для таблиц -->
     <div v-if="tableMode && isBase" class="menu-bar menu-bar-table">
@@ -493,7 +499,7 @@ const props = defineProps<{
   mode: 'base' | 'mini' | 'tests'
 }>()
 
-const emit = defineEmits(['add-audio', 'add-image', 'add-formula'])
+const emit = defineEmits(['add'])
 
 const isBase = computed(() => props.mode === 'base')
 
@@ -578,6 +584,7 @@ const isSectionDropdownOpen = ref(false)
 const currentListType = ref<'1' | 'A' | 'a' | 'I' | 'i'>('1')
 
 const tableMode = ref(false)
+const shortcodeMode = ref(false)
 
 // Данные для extension форм
 const headerText = ref('')
@@ -870,16 +877,8 @@ const insertRowsWithData = () => {
   isFlexRowsDropdownOpen.value = false
 }
 
-const handleAudioSelect = () => {
-  emit('add-audio')
-}
-
-const handleImageSelect = () => {
-  emit('add-image')
-}
-
-const handleFormulaSelect = () => {
-  emit('add-formula')
+const handleAdd = (type: 'audio' | 'image' | 'formula' | 'inline-image') => {
+  emit('add', type)
 }
 
 onClickOutside(blockTypeDropdownRef, () => {
@@ -1129,8 +1128,9 @@ input {
 </style>
 
 <style>
-.header-form-dropdown {
-  left: 0 !important;
-  transform: translateX(0) !important;
+
+.section-form-dropdown {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
 }
 </style>
