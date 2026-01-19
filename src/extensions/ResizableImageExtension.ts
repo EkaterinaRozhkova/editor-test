@@ -29,10 +29,11 @@ export const CustomResizableImage = ImageResize.extend({
         default: null,
         parseHTML: element => element.getAttribute('style'),
         renderHTML: attributes => {
+          console.log(attributes)
           if (!attributes.style) {
-            return {};
+            return {...attributes};
           }
-          return { style: attributes.style };
+          return { style: attributes.style, attributes };
         },
       },
     };
