@@ -66,17 +66,14 @@ export const CustomResizableImage = ImageResize.extend({
   renderHTML({ node, HTMLAttributes }) {
     const { caption, wrapperStyle, containerStyle: _containerStyle, ...imageAttrs } = node.attrs;
 
-    // Добавляем border-radius к существующим стилям изображения
-    const existingStyle = imageAttrs.style || '';
-    let imgStyle = existingStyle;
-    if (!/border-radius\s*:/i.test(existingStyle)) {
-      imgStyle = existingStyle ? `${existingStyle}; border-radius: 10px;` : 'border-radius: 10px;';
-    }
-
-    // Удаляем wrapperStyle и containerStyle из imageAttrs чтобы они не попали в img тег
+    // Удаляем wrapperStyle, containerStyle и style из imageAttrs
     const cleanImageAttrs = { ...imageAttrs };
     delete cleanImageAttrs.wrapperStyle;
     delete cleanImageAttrs.containerStyle;
+    delete cleanImageAttrs.style;
+
+    // Только border-radius для изображения
+    const imgStyle = 'border-radius: 10px;';
 
     if (!wrapperStyle) {
       return ['img', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { ...cleanImageAttrs, style: imgStyle })];
