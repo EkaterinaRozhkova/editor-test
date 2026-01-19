@@ -51,6 +51,8 @@ export const CustomResizableImage = ImageResize.extend({
             src: img.getAttribute('src'),
             alt: img.getAttribute('alt'),
             title: img.getAttribute('title'),
+            width: img.getAttribute('width'),
+            height: img.getAttribute('height'),
             loading: 'lazy',
             wrapperStyle: (element as HTMLElement).getAttribute('style'),
             containerStyle: (element as HTMLElement).getAttribute('style'),
