@@ -18,15 +18,6 @@ const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageEle
     if (imgWidth > 0) {
       wrapperDiv.style.width = `${imgWidth}px`
 
-      // Вычисляем padding из стилей wrapper
-      const wrapperStyles = window.getComputedStyle(wrapperDiv)
-      const paddingLeft = parseFloat(wrapperStyles.paddingLeft) || 0
-      const paddingRight = parseFloat(wrapperStyles.paddingRight) || 0
-      const paddingAdjustment = paddingLeft + paddingRight
-
-      // Устанавливаем ширину span с учетом padding
-      const descriptionWidth = paddingAdjustment > 0 ? imgWidth - paddingAdjustment : imgWidth
-
       Object.assign(span.style, {
         display: 'block',
         fontSize: '11px',
@@ -34,7 +25,7 @@ const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageEle
         fontWeight: '400',
         color: '#7D7D7D',
         textAlign: 'center',
-        width: `${descriptionWidth}px`,
+        maxWidth: `100%`,
         boxSizing: 'border-box',
         overflowWrap: 'break-word'
       })
@@ -48,7 +39,7 @@ const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageEle
       fontWeight: '400',
       color: '#7D7D7D',
       textAlign: 'center',
-      width: '100%',
+      maxWidth: `100%`,
       boxSizing: 'border-box',
       overflowWrap: 'break-word'
     })
@@ -209,8 +200,7 @@ export const ImageCaptionExtension = Extension.create({
               boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
               zIndex: '10000',
               padding: '4px 0',
-              [imgFloat === 'right' ? 'right' : 'left']:
-                imgFloat === 'right' ? `${window.innerWidth - e.clientX}px` : `${e.clientX}px`
+              ...(imgFloat === 'right' ? { right: '0' } : { left: '0' })
             })
 
             const createMenuItem = (text: string, color?: string, onClick?: (e: MouseEvent) => void) => {
