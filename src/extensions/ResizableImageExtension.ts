@@ -124,8 +124,10 @@ export const CustomResizableImage = ImageResize.extend({
 
     }
 
-    console.log(wrapperStyle)
+    const cleanWrapperStyle = wrapperStyle
+      .replace(/padding(-left|-right|-top|-bottom)?:\s*[^;]+;?/gi, '')
+      .trim();
 
-    return ['div', { style: wrapperStyle }, ...content];
+    return ['div', { style: `${cleanWrapperStyle}; padding: 0;` }, ...content];
   },
 });
