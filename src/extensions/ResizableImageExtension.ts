@@ -54,7 +54,6 @@ export const CustomResizableImage = ImageResize.extend({
             loading: 'lazy',
             style: cleanImgStyle, // Только border-radius, без стилей контейнера
             wrapperStyle: (element as HTMLElement).getAttribute('style'),
-            containerStyle: (element as HTMLElement).getAttribute('style'),
             caption: findCaptionText(element as HTMLElement),
           };
         },
