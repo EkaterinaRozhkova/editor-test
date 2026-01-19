@@ -11,11 +11,15 @@ declare module '@tiptap/core' {
 
 const imageCaptions = new Map<string, string>()
 
-const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageElement, wrapperDiv?: HTMLElement) => {
+const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageElement) => {
   // Применяем ширину к wrapper div
-  if (wrapperDiv && imgElement) {
+  if (imgElement) {
     const imgWidth = imgElement.clientWidth || imgElement.width
     if (imgWidth > 0) {
+
+
+      // Устанавливаем ширину span с учетом padding
+      const descriptionWidth = imgWidth
 
       Object.assign(span.style, {
         display: 'block',
@@ -24,7 +28,7 @@ const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageEle
         fontWeight: '400',
         color: '#7D7D7D',
         textAlign: 'center',
-        maxWidth: `${imgWidth}px`,
+        width: `${descriptionWidth}px`,
         boxSizing: 'border-box',
         overflowWrap: 'break-word'
       })
@@ -38,7 +42,6 @@ const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageEle
       fontWeight: '400',
       color: '#7D7D7D',
       textAlign: 'center',
-      maxWidth: `100%`,
       boxSizing: 'border-box',
       overflowWrap: 'break-word'
     })
@@ -78,7 +81,6 @@ const updateAllCaptionSpans = (imgSrc: string, caption: string | null) => {
   document.querySelectorAll('img').forEach((img) => {
     if (img.getAttribute('src') !== imgSrc) return
 
-    const wrapperDiv = img.parentElement as HTMLElement
     const parentDiv = findParentWithPosition(img as HTMLElement)
     if (!parentDiv) return
 
@@ -87,12 +89,12 @@ const updateAllCaptionSpans = (imgSrc: string, caption: string | null) => {
     if (caption) {
       if (span) {
         span.textContent = caption
-        applyDescriptionStyles(span, img as HTMLImageElement, wrapperDiv)
+        applyDescriptionStyles(span, img as HTMLImageElement)
       } else {
         const newSpan = document.createElement('span')
         newSpan.className = 'image-description'
         newSpan.textContent = caption
-        applyDescriptionStyles(newSpan, img as HTMLImageElement, wrapperDiv)
+        applyDescriptionStyles(newSpan, img as HTMLImageElement)
         img.parentNode?.insertBefore(newSpan, img.nextSibling)
       }
     } else if (span) {
@@ -145,15 +147,13 @@ export const ImageCaptionExtension = Extension.create({
 
             if (!imgElement) return false
 
-            const wrapperDiv = imgElement.parentElement as HTMLElement
             const parentDiv = findParentWithPosition(imgElement)
             if (!parentDiv || parentDiv.querySelector('.image-description')) return false
 
             const span = document.createElement('span')
-            console.log(span, 'span')
             span.className = 'image-description'
             span.textContent = ''
-            applyDescriptionStyles(span, imgElement, wrapperDiv)
+            applyDescriptionStyles(span, imgElement)
             imgElement.parentNode?.insertBefore(span, imgElement.nextSibling)
 
             return true
@@ -199,11 +199,10 @@ export const ImageCaptionExtension = Extension.create({
               borderRadius: '4px',
               boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
               zIndex: '10000',
+              width: 'max-content',
               padding: '4px 0',
-              minWidth: '200px',
               [imgFloat === 'right' ? 'right' : 'left']:
-                imgFloat === 'right' ? `${window.innerWidth - e.clientX}px` : `${e.clientX}px`,
-              [imgFloat === 'right' ? 'left' : 'right']: '0'
+                imgFloat === 'right' ? `${window.innerWidth - e.clientX}px` : `${e.clientX}px`
             })
 
             const createMenuItem = (text: string, color?: string, onClick?: (e: MouseEvent) => void) => {
@@ -302,25 +301,22 @@ export const ImageCaptionExtension = Extension.create({
                   const caption = imageCaptions.get(imgSrc)
                   if (!caption) return
 
-                  const wrapperDiv = img.parentElement as HTMLElement
                   const parentDiv = findParentWithPosition(img as HTMLElement)
                   if (!parentDiv) return
 
                   const existingSpan = parentDiv.querySelector('.image-description') as HTMLSpanElement
-                  console.log(existingSpan, 'dexistingSpan')
                   if (existingSpan) {
                     if (existingSpan.textContent !== caption) {
                       existingSpan.textContent = caption
                     }
-                    applyDescriptionStyles(existingSpan, img as HTMLImageElement, wrapperDiv)
+                    applyDescriptionStyles(existingSpan, img as HTMLImageElement)
                     return
                   }
 
                   const span = document.createElement('span')
                   span.className = 'image-description'
                   span.textContent = caption
-                  console.log(span, 'span2')
-                  applyDescriptionStyles(span, img as HTMLImageElement, wrapperDiv)
+                  applyDescriptionStyles(span, img as HTMLImageElement)
                   img.parentNode?.insertBefore(span, img.nextSibling)
                 })
               }, 10)
