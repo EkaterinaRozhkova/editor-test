@@ -6,7 +6,7 @@ const findCaptionText = (element: HTMLElement): string | null => {
   return captionSpan?.textContent || null;
 };
 
-export const CustomResizableImage = ImageResize.extend({
+export const пше = ImageResize.extend({
   addAttributes() {
     return {
       ...this.parent?.(),
@@ -28,13 +28,7 @@ export const CustomResizableImage = ImageResize.extend({
       style: {
         default: null,
         parseHTML: element => element.getAttribute('style'),
-        renderHTML: attributes => {
-          console.log(attributes)
-          if (!attributes.style) {
-            return {...attributes};
-          }
-          return { style: attributes.style, attributes };
-        },
+        renderHTML: () => ({}), // Стили обрабатываются в renderHTML() метода
       },
     };
   },
@@ -47,12 +41,18 @@ export const CustomResizableImage = ImageResize.extend({
           const img = (element as HTMLElement).querySelector('img');
           if (!img) return false;
 
+          // Берем только border-radius из inline стилей img (если есть)
+          const imgStyle = img.getAttribute('style');
+          const borderRadiusMatch = imgStyle?.match(/border-radius:\s*[^;]+/);
+          const cleanImgStyle = borderRadiusMatch ? borderRadiusMatch[0] : null;
+
           return {
             src: img.getAttribute('src'),
             alt: img.getAttribute('alt'),
             title: img.getAttribute('title'),
             width: img.getAttribute('width'),
             loading: 'lazy',
+            style: cleanImgStyle, // Только border-radius, без стилей контейнера
             wrapperStyle: (element as HTMLElement).getAttribute('style'),
             containerStyle: (element as HTMLElement).getAttribute('style'),
             caption: findCaptionText(element as HTMLElement),
@@ -64,7 +64,7 @@ export const CustomResizableImage = ImageResize.extend({
   },
 
   renderHTML({ node, HTMLAttributes }) {
-    const { caption, wrapperStyle, containerStyle, ...imageAttrs } = node.attrs;
+    const { caption, wrapperStyle, containerStyle: _containerStyle, ...imageAttrs } = node.attrs;
 
     // Добавляем border-radius к существующим стилям изображения
     const existingStyle = imageAttrs.style || '';
@@ -82,8 +82,9 @@ export const CustomResizableImage = ImageResize.extend({
       return ['img', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { ...cleanImageAttrs, style: imgStyle })];
     }
 
-    // Очищаем HTMLAttributes от стилей контейнера
-    const { style: _containerStyleFromHTML, ...cleanHTMLAttributes } = HTMLAttributes;
+    // Удаляем style из HTMLAttributes чтобы стили контейнера не попали в img
+    const cleanHTMLAttributes = { ...HTMLAttributes };
+    delete cleanHTMLAttributes.style;
 
     const imgAttrs = mergeAttributes(
       this.options.HTMLAttributes,
