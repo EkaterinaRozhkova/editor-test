@@ -193,6 +193,11 @@ const handleAdd = (type: 'audio' | 'image' | 'formula' | 'inline-image') => {
   window.parent.postMessage({ type: `add-${type}`, data: '' }, '*')
 }
 
+const cleanEmptyParagraphs = (html: string): string => {
+  // Удаляем только совсем пустые параграфы: <p></p> и <p> </p>
+  return html.replace(/<p>\s*<\/p>/gi, '')
+}
+
 const handleMessage = (event: MessageEvent) => {
   if (event.data.type === 'init-content' && editor.value) {
     try {
@@ -200,7 +205,8 @@ const handleMessage = (event: MessageEvent) => {
         event.data.data,
       )
 
-      editor.value.commands.setContent(html ?? '')
+      const cleanedHtml = cleanEmptyParagraphs(html ?? '')
+      editor.value.commands.setContent(cleanedHtml)
 
       setTimeout(() => {
         isContentInitialized.value = true
@@ -417,6 +423,7 @@ defineExpose({
 
 .ProseMirror img {
   border-radius: 10px;
+  padding: 0 !important;
 }
 
 .ProseMirror audio {
