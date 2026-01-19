@@ -124,6 +124,8 @@ export const CustomResizableImage = ImageResize.extend({
 
     }
 
+    console.log(wrapperStyle)
+
     return ['div', { style: wrapperStyle }, ...content];
   },
 });
