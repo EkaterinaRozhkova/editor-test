@@ -16,7 +16,6 @@ const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageEle
   if (wrapperDiv && imgElement) {
     const imgWidth = imgElement.clientWidth || imgElement.width
     if (imgWidth > 0) {
-      wrapperDiv.style.width = `${imgWidth}px`
 
       Object.assign(span.style, {
         display: 'block',
@@ -25,7 +24,7 @@ const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageEle
         fontWeight: '400',
         color: '#7D7D7D',
         textAlign: 'center',
-        maxWidth: `100%`,
+        maxWidth: `${imgWidth}px`,
         boxSizing: 'border-box',
         overflowWrap: 'break-word'
       })
@@ -83,7 +82,11 @@ const updateAllCaptionSpans = (imgSrc: string, caption: string | null) => {
     const parentDiv = findParentWithPosition(img as HTMLElement)
     if (!parentDiv) return
 
+    console.log(parentDiv)
+
     const span = parentDiv.querySelector('.image-description') as HTMLSpanElement
+
+    console.log(span)
 
     if (caption) {
       if (span) {
