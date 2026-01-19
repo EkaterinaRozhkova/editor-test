@@ -50,10 +50,14 @@ const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageEle
 
 const findParentWithPosition = (element: HTMLElement): HTMLElement | null => {
   let parent = element.parentElement
-  while (parent && !parent.style.position) {
+  while (parent) {
+    const display = window.getComputedStyle(parent).display
+    if (display === 'inline-block' || parent.style.position) {
+      return parent
+    }
     parent = parent.parentElement
   }
-  return parent
+  return element.parentElement
 }
 
 const updateNodeCaption = (state: any, dispatch: any, imgSrc: string, caption: string | null) => {
