@@ -87,34 +87,18 @@ export const CustomResizableImage = ImageResize.extend({
       { loading: 'lazy' }
     );
 
+    console.log(imgAttrs, 'imgAttrs')
+
     const content: (string | Record<string, unknown> | (string | Record<string, unknown>)[])[] = [['img', imgAttrs]];
 
     // Добавляем ширину к wrapper div если есть caption
     const finalWrapperStyle = wrapperStyle;
     if (caption) {
-      const width = node.attrs.width || imageAttrs.width;
-      console.log(width, 'width')
-
-
-
-
       content.push(['span', {
         class: 'image-description',
         style: `display: block; font-size: 11px; line-height: 18px; font-weight: 400; color: #7D7D7D; text-align: center; maxWidth: ${imageAttrs!.width + 'px'}; box-sizing: border-box; overflow-wrap: break-word;`
       }, caption]);
 
-      // Обязательно добавляем ширину к wrapper div
-      // if (widthValue) {
-      //   // Убираем существующий width если есть
-      //   let cleanedStyle = wrapperStyle.replace(/width\s*:\s*[^;]+;?/gi, '').trim();
-      //   // Убираем trailing точку с запятой если есть
-      //   if (cleanedStyle.endsWith(';')) {
-      //     cleanedStyle = cleanedStyle.slice(0, -1);
-      //   }
-      //   // Добавляем width
-      //   finalWrapperStyle = `${cleanedStyle}; width: ${widthValue};`;
-      //   console.log('Final wrapper style:', finalWrapperStyle);
-      // }
     }
 
     return ['div', { style: finalWrapperStyle }, ...content];
