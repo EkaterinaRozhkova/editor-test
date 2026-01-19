@@ -200,7 +200,9 @@ export const ImageCaptionExtension = Extension.create({
               boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
               zIndex: '10000',
               padding: '4px 0',
-              ...(imgFloat === 'right' ? { right: '0' } : { left: '0' })
+              [imgFloat === 'right' ? 'right' : 'left']:
+                imgFloat === 'right' ? `${window.innerWidth - e.clientX}px` : `${e.clientX}px`,
+              [imgFloat === 'right' ? 'left' : 'right']: '0'
             })
 
             const createMenuItem = (text: string, color?: string, onClick?: (e: MouseEvent) => void) => {

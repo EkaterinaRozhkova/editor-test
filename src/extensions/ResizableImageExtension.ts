@@ -7,15 +7,6 @@ const findCaptionText = (element: HTMLElement): string | null => {
 };
 
 export const CustomResizableImage = ImageResize.extend({
-  addOptions() {
-    const parentOptions = this.parent?.();
-    return {
-      ...parentOptions,
-      HTMLAttributes: {
-        class: 'custom-resizable-image',
-      },
-    } as any;
-  },
   addAttributes() {
     return {
       ...this.parent?.(),
@@ -59,7 +50,7 @@ export const CustomResizableImage = ImageResize.extend({
             src: img.getAttribute('src'),
             alt: img.getAttribute('alt'),
             title: img.getAttribute('title'),
-            width: img.getAttribute('width'),
+            // width: img.getAttribute('width'),
             loading: 'lazy',
             wrapperStyle: (element as HTMLElement).getAttribute('style'),
             containerStyle: (element as HTMLElement).getAttribute('style'),

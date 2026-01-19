@@ -415,6 +415,10 @@ defineExpose({
   -ms-user-select: text;
 }
 
+.ProseMirror img {
+  border-radius: 10px;
+}
+
 .ProseMirror audio {
   flex-shrink: 0;
   max-height: 32px;
