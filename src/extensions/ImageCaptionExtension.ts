@@ -16,8 +16,6 @@ const applyDescriptionStyles = (span: HTMLSpanElement, imgElement?: HTMLImageEle
   if (imgElement) {
     const imgWidth = imgElement.clientWidth || imgElement.width
     if (imgWidth > 0) {
-
-
       // Устанавливаем ширину span с учетом padding
       const descriptionWidth = imgWidth
 
@@ -87,6 +85,7 @@ const updateAllCaptionSpans = (imgSrc: string, caption: string | null) => {
     if (!parentDiv) return
 
     const span = parentDiv.querySelector('.image-description') as HTMLSpanElement
+    console.log('snan', span)
 
     if (caption) {
       if (span) {
@@ -190,12 +189,12 @@ export const ImageCaptionExtension = Extension.create({
 
             contextMenu?.remove()
 
-            const imgFloat = window.getComputedStyle(targetImg).float
             contextMenu = document.createElement('div')
 
             Object.assign(contextMenu.style, {
               position: 'fixed',
               top: `${e.clientY}px`,
+              left: `${e.clientX}px`,
               background: 'white',
               border: '1px solid #ccc',
               borderRadius: '4px',
@@ -203,8 +202,8 @@ export const ImageCaptionExtension = Extension.create({
               zIndex: '10000',
               width: 'max-content',
               padding: '4px 0',
-              [imgFloat === 'right' ? 'right' : 'left']:
-                imgFloat === 'right' ? `${window.innerWidth - e.clientX}px` : `${e.clientX}px`
+              maxWidth: '250px',
+              transform: 'translate(-50%, 0)'
             })
 
             const createMenuItem = (text: string, color?: string, onClick?: (e: MouseEvent) => void) => {
@@ -261,9 +260,7 @@ export const ImageCaptionExtension = Extension.create({
                   imageCaptions.delete(imgSrc)
                   updateNodeCaption(editorView.state, editorView.dispatch, imgSrc, null)
 
-
                   updateAllCaptionSpans(imgSrc, null)
-
 
                   contextMenu?.remove()
                   contextMenu = null
